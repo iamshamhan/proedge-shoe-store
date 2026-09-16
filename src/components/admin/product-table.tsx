@@ -1,0 +1,232 @@
+'use client';
+
+import Link from 'next/link';
+import { useCallback, useState } from 'react';
+import {
+  Edit,
+  Trash2,
+  ToggleLeft,
+  ToggleRight,
+  Loader2,
+  Package,
+  Plus,
+  X,
+} from 'lucide-react';
+import { toggleProductActive, deleteProduct } from '@/app/admin/actions';
+import { ConfirmDialog } from './confirm-dialog';
+import { formatLKR } from '@/data/products';
+
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  is_active: boolean;
+  featured: boolean;
+  is_new_arrival: boolean;
+  is_on_sale: boolean;
+  categories: { slug: string; name: string } | { slug: string; name: string }[] | null;
+  product_images: { url: string; sort_order: number }[];
+  product_variants: { id: string; stock: number }[];
+};
+
+export function ProductTable({ products: initial }: { products: Product[] }) {
+  const [products, setProducts] = useState(initial);
+  const [toggling, setToggling] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [targetDelete, setTargetDelete] = useState<Product | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const handleToggle = useCallback(
+    async (product: Product) => {
+      setActionError(null);
+      setToggling(product.id);
+      const result = await toggleProductActive(product.id, !product.is_active);
+      setToggling(null);
+      if ('error' in result) {
+        setActionError(result.error);
+        return;
+      }
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, is_active: !p.is_active } : p)),
+      );
+    },
+    [],
+  );
+
+  const handleDelete = useCallback(async () => {
+    if (!targetDelete) return;
+    setActionError(null);
+    setDeleting(true);
+    const result = await deleteProduct(targetDelete.id);
+    setDeleting(false);
+    if ('error' in result) {
+      setActionError(result.error);
+      return;
+    }
+    setProducts((prev) => prev.filter((p) => p.id !== targetDelete.id));
+    setTargetDelete(null);
+  }, [targetDelete]);
+
+  if (products.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-16 text-center">
+        <Package className="mx-auto mb-4 h-12 w-12 text-zinc-300" />
+        <p className="text-sm font-bold text-zinc-500">No products yet.</p>
+        <Link
+          href="/admin/products/new"
+          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-amber-600 hover:text-zinc-950"
+        >
+          <Plus className="h-4 w-4" />
+          Create your first product
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
+        {actionError && (
+          <div
+            role="alert"
+            className="flex items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            <span>{actionError}</span>
+            <button
+              type="button"
+              onClick={() => setActionError(null)}
+              aria-label="Dismiss error"
+              className="rounded p-1 text-red-500 transition-colors hover:bg-red-100"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-zinc-200 bg-zinc-50 text-xs font-bold uppercase tracking-wider text-zinc-500">
+              <th className="px-4 py-3">Product</th>
+              <th className="hidden px-4 py-3 md:table-cell">Category</th>
+              <th className="hidden px-4 py-3 sm:table-cell">Price</th>
+              <th className="hidden px-4 py-3 sm:table-cell">Stock</th>
+              <th className="hidden px-4 py-3 lg:table-cell">Status</th>
+              <th className="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100">
+            {products.map((product) => {
+              const img = [...product.product_images].sort((a, b) => a.sort_order - b.sort_order)[0];
+              const totalStock = product.product_variants.reduce((s, v) => s + v.stock, 0);
+              const categoryName = Array.isArray(product.categories)
+                ? product.categories[0]?.name
+                : product.categories?.name;
+
+              return (
+                <tr key={product.id} className="transition-colors hover:bg-zinc-50/50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {img ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={img.url}
+                          alt={product.name}
+                          className="h-10 w-10 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 text-zinc-400">
+                          <Package className="h-5 w-5" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-bold text-zinc-900">{product.name}</p>
+                        <p className="text-xs text-zinc-400">/{product.slug}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="hidden px-4 py-3 md:table-cell">
+                    <span className="rounded-lg bg-zinc-100 px-2 py-1 text-xs font-bold text-zinc-600">
+                      {categoryName ?? '—'}
+                    </span>
+                  </td>
+                  <td className="hidden px-4 py-3 font-bold text-zinc-900 sm:table-cell">
+                    {formatLKR(product.price)}
+                  </td>
+                  <td className="hidden px-4 py-3 sm:table-cell">
+                    <span className={`font-bold ${totalStock === 0 ? 'text-red-500' : 'text-zinc-900'}`}>
+                      {totalStock}
+                    </span>
+                  </td>
+                  <td className="hidden gap-1 px-4 py-3 lg:table-cell">
+                    <div className="flex flex-wrap gap-1">
+                      {product.featured && (
+                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                          Featured
+                        </span>
+                      )}
+                      {product.is_new_arrival && (
+                        <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-bold text-green-700">
+                          New
+                        </span>
+                      )}
+                      {product.is_on_sale && (
+                        <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700">
+                          Sale
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleToggle(product)}
+                        disabled={toggling === product.id}
+                        title={product.is_active ? 'Deactivate' : 'Activate'}
+                        className="rounded-lg p-2 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+                      >
+                        {toggling === product.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
+                        ) : product.is_active ? (
+                          <ToggleRight className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <ToggleLeft className="h-5 w-5 text-zinc-300" />
+                        )}
+                      </button>
+                      <Link
+                        href={`/admin/products/${product.id}`}
+                        className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+                        title="Edit"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setTargetDelete(product)}
+                        className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <ConfirmDialog
+        open={!!targetDelete}
+        title="Delete product"
+        message={`Are you sure you want to delete "${targetDelete?.name}"? This will permanently remove the product, its images, and all variants. This action cannot be undone.`}
+        confirmLabel="Delete"
+        destructive
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setTargetDelete(null)}
+      />
+    </>
+  );
+}
