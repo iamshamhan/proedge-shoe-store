@@ -32,24 +32,24 @@ export function HeroSection() {
 
             {/* Subtitle */}
             <p className="text-zinc-400 text-base sm:text-xl font-normal max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Discover high-performance and daily lifestyle footwear engineered with peak comfort, durable soles, and bold modern street aesthetic.
+              Discover elite multi-sport footwear, performance apparel, balls, and equipment engineered for peak performance across Football, Rugby, Basketball, and Running.
             </p>
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
               <Link
-                href="/men"
+                href="/shop"
                 className="w-full sm:w-auto px-8 py-4 bg-amber-500 text-zinc-950 font-black text-sm uppercase tracking-wider rounded-xl hover:bg-amber-400 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 group"
               >
-                <span>SHOP MEN</span>
+                <span>EXPLORE ALL GEAR</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               
               <Link
-                href="/women"
+                href="/sale"
                 className="w-full sm:w-auto px-8 py-4 bg-zinc-900 text-white border border-zinc-700 font-extrabold text-sm uppercase tracking-wider rounded-xl hover:bg-zinc-800 hover:border-zinc-500 transition-all flex items-center justify-center gap-2"
               >
-                <span>SHOP WOMEN</span>
+                <span>VIEW SALE COLLECTION</span>
               </Link>
             </div>
 
