@@ -59,20 +59,20 @@ export function AdminLoginForm() {
   );
 
   const inputClass =
-    'w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20';
+    'w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20';
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
+        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 shadow-sm">
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-900 text-amber-500">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-900 dark:bg-zinc-800 text-amber-500">
               <ShieldCheck className="h-7 w-7" />
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-zinc-900">
+            <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
               Admin Sign In
             </h1>
-            <p className="mt-2 text-sm text-zinc-500">
+            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
               Authorized PROEDGE staff only.
             </p>
           </div>
@@ -81,7 +81,7 @@ export function AdminLoginForm() {
             <div>
               <label
                 htmlFor="admin-email"
-                className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-600"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-300"
               >
                 Email
               </label>
@@ -102,7 +102,7 @@ export function AdminLoginForm() {
             <div>
               <label
                 htmlFor="admin-password"
-                className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-600"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-300"
               >
                 Password
               </label>
@@ -124,7 +124,7 @@ export function AdminLoginForm() {
                   type="button"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-zinc-400 transition-colors hover:text-zinc-600"
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -139,7 +139,7 @@ export function AdminLoginForm() {
             {error ? (
               <div
                 role="alert"
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                className="rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm text-red-700 dark:text-red-300"
               >
                 {error}
               </div>
@@ -148,7 +148,7 @@ export function AdminLoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 px-6 py-3.5 text-sm font-black uppercase tracking-wider text-white transition-all hover:bg-amber-600 hover:text-zinc-950 focus:ring-2 focus:ring-amber-500/40 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 dark:bg-amber-500 px-6 py-3.5 text-sm font-black uppercase tracking-wider text-white dark:text-zinc-950 transition-all hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 focus:ring-2 focus:ring-amber-500/40 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? (
                 <>

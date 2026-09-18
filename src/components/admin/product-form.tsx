@@ -1,14 +1,19 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useState, useMemo, type FormEvent } from 'react';
 import { ArrowLeft, Check, Loader2, Save } from 'lucide-react';
 import { createProduct, updateProduct } from '@/app/admin/actions';
 import { ImageManager } from './image-manager';
 import { VariantManager } from './variant-manager';
 import Link from 'next/link';
 
-type Category = { id: string; slug: string; name: string };
+type Category = {
+  id: string;
+  slug: string;
+  name: string;
+  parent_id?: string | null;
+};
 
 type ProductFormProps = {
   categories: Category[];
@@ -25,7 +30,14 @@ type ProductFormProps = {
     is_on_sale: boolean;
     is_active: boolean;
     product_images: { id: string; url: string; alt_text: string | null; sort_order: number }[];
-    product_variants: { id: string; colour: string; size: number; stock: number }[];
+    product_variants: {
+      id: string;
+      colour: string;
+      size: number | string;
+      stock: number;
+      size_system?: string;
+      size_value?: string;
+    }[];
   };
 };
 
@@ -119,31 +131,63 @@ export function ProductForm({ categories, product }: ProductFormProps) {
   };
 
   const inputClass =
-    'w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20';
-  const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500';
+    'w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20';
+  const groupedCategories = useMemo(() => {
+    const parents = categories.filter(
+      (c) => !c.parent_id && !['men', 'women', 'sports', 'casual'].includes(c.slug),
+    );
+
+    const groups: { name: string; children: Category[] }[] = [];
+
+    for (const parent of parents) {
+      const children = categories.filter((c) => c.parent_id === parent.id);
+      if (children.length > 0) {
+        groups.push({
+          name: parent.name,
+          children,
+        });
+      }
+    }
+
+    // Capture any remaining categories (e.g. legacy or unlinked)
+    const handledIds = new Set(groups.flatMap((g) => g.children.map((c) => c.id)));
+    const parentIds = new Set(parents.map((p) => p.id));
+    const remaining = categories.filter((c) => !handledIds.has(c.id) && !parentIds.has(c.id));
+
+    if (remaining.length > 0) {
+      groups.push({
+        name: 'Other Categories',
+        children: remaining,
+      });
+    }
+
+    return groups;
+  }, [categories]);
+
+  const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400';
 
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-center gap-4">
         <Link
           href="/admin/products"
-          className="rounded-xl border border-zinc-200 bg-white p-2.5 text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+          className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-2.5 text-zinc-500 dark:text-zinc-400 transition-colors hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-zinc-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-xl font-black text-zinc-900">
+          <h1 className="text-xl font-black text-zinc-900 dark:text-white">
             {isEdit ? 'Edit Product' : 'New Product'}
           </h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-400 dark:text-zinc-500">
             {isEdit ? `/${product.slug}` : 'Create a product, then add images and variants.'}
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6">
-          <h2 className="mb-4 text-sm font-black uppercase tracking-wider text-zinc-900">
+        <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+          <h2 className="mb-4 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
             Basic Info
           </h2>
           <div className="space-y-4">
@@ -198,18 +242,22 @@ export function ProductForm({ categories, product }: ProductFormProps) {
                 className={inputClass}
               >
                 <option value="">Select a category…</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
+                {groupedCategories.map((group) => (
+                  <optgroup key={group.name} label={group.name}>
+                    {group.children.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6">
-          <h2 className="mb-4 text-sm font-black uppercase tracking-wider text-zinc-900">
+        <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+          <h2 className="mb-4 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
             Pricing
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -243,52 +291,52 @@ export function ProductForm({ categories, product }: ProductFormProps) {
             </div>
           </div>
           {isOnSale && !compareAtPrice && (
-            <p className="mt-3 text-xs text-amber-600">
+            <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
               Set a compare-at price to show the original price next to the discounted one.
             </p>
           )}
         </section>
 
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6">
-          <h2 className="mb-4 text-sm font-black uppercase tracking-wider text-zinc-900">
+        <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+          <h2 className="mb-4 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
             Status &amp; Flags
           </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 px-4 py-3 transition-colors hover:border-amber-500">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 px-4 py-3 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
               <input
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
                 className="h-4 w-4 accent-amber-500"
               />
-              <span className="text-sm font-bold text-zinc-700">Active</span>
+              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200">Active</span>
             </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 px-4 py-3 transition-colors hover:border-amber-500">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 px-4 py-3 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
               <input
                 type="checkbox"
                 checked={featured}
                 onChange={(e) => setFeatured(e.target.checked)}
                 className="h-4 w-4 accent-amber-500"
               />
-              <span className="text-sm font-bold text-zinc-700">Featured</span>
+              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200">Featured</span>
             </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 px-4 py-3 transition-colors hover:border-amber-500">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 px-4 py-3 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
               <input
                 type="checkbox"
                 checked={isNewArrival}
                 onChange={(e) => setIsNewArrival(e.target.checked)}
                 className="h-4 w-4 accent-amber-500"
               />
-              <span className="text-sm font-bold text-zinc-700">New Arrival</span>
+              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200">New Arrival</span>
             </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 px-4 py-3 transition-colors hover:border-amber-500">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 px-4 py-3 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
               <input
                 type="checkbox"
                 checked={isOnSale}
                 onChange={(e) => setIsOnSale(e.target.checked)}
                 className="h-4 w-4 accent-amber-500"
               />
-              <span className="text-sm font-bold text-zinc-700">On Sale</span>
+              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200">On Sale</span>
             </label>
           </div>
         </section>
@@ -301,7 +349,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
         )}
 
         {error && (
-          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
+          <p className="rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 px-4 py-2.5 text-sm text-red-700 dark:text-red-300">
             {error}
           </p>
         )}
@@ -311,7 +359,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
             <Link
               href={`/${product.slug}`}
               target="_blank"
-              className="rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-sm font-bold text-zinc-700 transition-colors hover:bg-zinc-50"
+              className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-5 py-2.5 text-sm font-bold text-zinc-700 dark:text-zinc-300 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-700"
             >
               View in store
             </Link>
@@ -319,7 +367,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-6 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-amber-600 hover:text-zinc-950 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 dark:bg-amber-500 px-6 py-2.5 text-xs font-black uppercase tracking-wider text-white dark:text-zinc-950 transition-colors hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />

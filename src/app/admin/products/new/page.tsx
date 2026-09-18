@@ -15,7 +15,7 @@ export default async function NewProductPage() {
   const supabase = await getSupabaseServer();
   const { data: categories } = await supabase
     .from('categories')
-    .select('id, slug, name')
+    .select('id, slug, name, parent_id')
     .order('sort_order');
 
   return <ProductForm categories={categories ?? []} />;

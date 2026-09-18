@@ -24,10 +24,10 @@ export function ColorSelector({
   return (
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold uppercase tracking-wider text-zinc-900">
+        <label className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white">
           Colour Way
         </label>
-        <span className="text-xs text-zinc-500 font-semibold">{selectedColor}</span>
+        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold">{selectedColor}</span>
       </div>
 
       <div className="flex flex-wrap gap-2.5">
@@ -38,13 +38,13 @@ export function ColorSelector({
               key={color}
               type="button"
               onClick={() => onSelectColor(color)}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl border-2 transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 ${
+              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl border-2 transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 isSelected
-                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
-                  : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-400'
+                  ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 border-zinc-900 dark:border-amber-500 shadow-xs'
+                  : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
               }`}
             >
-              {isSelected && <Check className="w-3.5 h-3.5 text-amber-400" />}
+              {isSelected && <Check className="w-3.5 h-3.5 text-amber-400 dark:text-zinc-950" />}
               <span>{color}</span>
             </button>
           );

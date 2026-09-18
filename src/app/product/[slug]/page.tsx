@@ -83,44 +83,44 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   }
 
   return (
-    <div className="py-8 sm:py-12 bg-zinc-50 min-h-screen">
+    <div className="py-8 sm:py-12 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="mb-8">
-          <ol className="flex items-center space-x-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider overflow-x-auto py-1">
+          <ol className="flex items-center space-x-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider overflow-x-auto py-1">
             <li>
-              <Link href="/" className="hover:text-zinc-900 transition-colors">
+              <Link href="/" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
                 Home
               </Link>
             </li>
             <li>
-              <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+              <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600" />
             </li>
             <li>
-              <Link href="/shop" className="hover:text-zinc-900 transition-colors">
+              <Link href="/shop" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
                 Shop
               </Link>
             </li>
             <li>
-              <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+              <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600" />
             </li>
             <li>
-              <Link href={`/${product.category}`} className="hover:text-zinc-900 transition-colors capitalize">
+              <Link href={`/${product.category}`} className="hover:text-zinc-900 dark:hover:text-white transition-colors capitalize">
                 {product.category}
               </Link>
             </li>
             <li>
-              <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+              <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600" />
             </li>
-            <li className="text-zinc-900 font-bold truncate max-w-[150px] sm:max-w-xs">
+            <li className="text-zinc-900 dark:text-zinc-200 font-bold truncate max-w-[150px] sm:max-w-xs">
               {product.name}
             </li>
           </ol>
         </nav>
 
         {/* Product Detail Main Grid Layout */}
-        <div className="bg-white rounded-3xl border border-zinc-200 p-6 sm:p-10 shadow-xs mb-16">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-10 shadow-xs mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             
             {/* Gallery Column (Desktop: 7 cols, Mobile: Top) */}
@@ -137,7 +137,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         </div>
 
         {/* Related Products Section */}
-        <div className="pt-8 border-t border-zinc-200">
+        <div className="pt-8 border-t border-zinc-200 dark:border-zinc-800">
           <SectionHeading
             eyebrow="You Might Also Like"
             title="Related Footwear"

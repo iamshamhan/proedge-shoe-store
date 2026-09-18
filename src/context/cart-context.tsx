@@ -3,16 +3,27 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface CartItem {
-  id: string; // unique identifier: `${productId}-${size}-${color}`
+  id: string; // unique identifier: `${productId}-${sizeSystem}-${size}-${color}`
   productId: string;
   variantId?: string;
   name: string;
   slug: string;
   image: string;
   price: number;
-  size: number;
+  size: number | string;
+  sizeSystem?: string;
   color: string;
   quantity: number;
+}
+
+export function generateCartItemId(item: {
+  productId: string;
+  sizeSystem?: string;
+  size: number | string;
+  color: string;
+}): string {
+  const sys = item.sizeSystem || 'EU';
+  return `${item.productId}-${sys}-${item.size}-${item.color}`;
 }
 
 interface CartContextType {
@@ -42,7 +53,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       try {
         const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (saved) {
-          setItems(JSON.parse(saved) as CartItem[]);
+          const rawItems = JSON.parse(saved) as CartItem[];
+          if (Array.isArray(rawItems)) {
+            const normalizedItems = rawItems.map((item) => ({
+              ...item,
+              sizeSystem: item.sizeSystem || 'EU',
+              id: generateCartItemId(item),
+            }));
+            setItems(normalizedItems);
+          }
         }
       } catch (err) {
         console.error('Failed to parse cart from localStorage:', err);
@@ -65,7 +84,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items, isLoaded]);
 
   const addItem = (newItem: Omit<CartItem, 'id'>) => {
-    const id = `${newItem.productId}-${newItem.size}-${newItem.color}`;
+    const id = generateCartItemId(newItem);
     
     setItems((prevItems) => {
       const existingIndex = prevItems.findIndex((item) => item.id === id);
@@ -80,8 +99,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return [...prevItems, { ...newItem, id }];
       }
     });
-
-    setIsCartDrawerOpen(true);
   };
 
   const removeItem = (id: string) => {

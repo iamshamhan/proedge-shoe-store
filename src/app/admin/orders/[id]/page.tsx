@@ -31,7 +31,9 @@ type OrderDetail = {
     id: string;
     product_name: string;
     colour: string;
-    size: number;
+    size: number | string;
+    size_system?: string | null;
+    size_value?: string | null;
     quantity: number;
     unit_price: number;
   }[];
@@ -61,7 +63,7 @@ export default async function AdminOrderDetailPage({
   const { data } = await supabase
     .from('orders')
     .select(
-      'id, order_number, customer_name, phone, email, address, city, postal_code, delivery_fee, subtotal, total, notes, status, created_at, order_items(id, product_name, colour, size, quantity, unit_price)',
+      'id, order_number, customer_name, phone, email, address, city, postal_code, delivery_fee, subtotal, total, notes, status, created_at, order_items(id, product_name, colour, size, size_system, size_value, quantity, unit_price)',
     )
     .eq('id', id)
     .single();
@@ -77,13 +79,13 @@ export default async function AdminOrderDetailPage({
       <div className="mb-6 flex items-center gap-4">
         <Link
           href="/admin/orders"
-          className="rounded-xl border border-zinc-200 bg-white p-2.5 text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+          className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-2.5 text-zinc-500 dark:text-zinc-400 transition-colors hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-zinc-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex-1">
-          <h1 className="text-xl font-black text-zinc-900">Order #{order.order_number}</h1>
-          <p className="text-sm text-zinc-400">Placed {formatDate(order.created_at)}</p>
+          <h1 className="text-xl font-black text-zinc-900 dark:text-white">Order #{order.order_number}</h1>
+          <p className="text-sm text-zinc-400 dark:text-zinc-500">Placed {formatDate(order.created_at)}</p>
         </div>
         <span
           className={`inline-block rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-wide ${statusClass}`}
@@ -95,43 +97,43 @@ export default async function AdminOrderDetailPage({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Customer + delivery details */}
         <div className="space-y-6 lg:col-span-1">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <h2 className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900">
+          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+            <h2 className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
               <User className="h-4 w-4 text-amber-500" />
               Customer
             </h2>
             <dl className="space-y-3 text-sm">
               <div>
-                <dt className="text-xs font-bold uppercase tracking-wider text-zinc-400">Name</dt>
-                <dd className="mt-0.5 font-bold text-zinc-900">{order.customer_name}</dd>
+                <dt className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Name</dt>
+                <dd className="mt-0.5 font-bold text-zinc-900 dark:text-white">{order.customer_name}</dd>
               </div>
               <div>
-                <dt className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <dt className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                   <Phone className="h-3 w-3" /> Phone
                 </dt>
-                <dd className="mt-0.5 font-bold text-zinc-900">{order.phone}</dd>
+                <dd className="mt-0.5 font-bold text-zinc-900 dark:text-white">{order.phone}</dd>
               </div>
               {order.email && (
                 <div>
-                  <dt className="text-xs font-bold uppercase tracking-wider text-zinc-400">Email</dt>
-                  <dd className="mt-0.5 text-zinc-700">{order.email}</dd>
+                  <dt className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Email</dt>
+                  <dd className="mt-0.5 text-zinc-700 dark:text-zinc-300">{order.email}</dd>
                 </div>
               )}
             </dl>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <h2 className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900">
+          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+            <h2 className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
               <MapPin className="h-4 w-4 text-amber-500" />
               Delivery
             </h2>
-            <p className="text-sm leading-relaxed text-zinc-700">{order.address}</p>
-            <p className="mt-1 text-sm font-bold text-zinc-900">
+            <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">{order.address}</p>
+            <p className="mt-1 text-sm font-bold text-zinc-900 dark:text-white">
               {order.city}
               {order.postal_code ? `, ${order.postal_code}` : ''}
             </p>
             {order.notes && (
-              <p className="mt-4 flex items-start gap-1.5 rounded-xl bg-zinc-50 px-3 py-2.5 text-xs text-zinc-600">
+              <p className="mt-4 flex items-start gap-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 px-3 py-2.5 text-xs text-zinc-600 dark:text-zinc-300">
                 <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
                 {order.notes}
               </p>
@@ -143,14 +145,14 @@ export default async function AdminOrderDetailPage({
 
         {/* Items + totals */}
         <div className="space-y-6 lg:col-span-2">
-          <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-            <h2 className="flex items-center gap-2 border-b border-zinc-200 px-6 py-4 text-sm font-black uppercase tracking-wider text-zinc-900">
+          <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <h2 className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 px-6 py-4 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
               <Package className="h-4 w-4 text-amber-500" />
               Items ({order.order_items.length})
             </h2>
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                <tr className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/60 text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                   <th className="px-6 py-2.5">Product</th>
                   <th className="px-4 py-2.5">Colour / Size</th>
                   <th className="px-4 py-2.5">Qty</th>
@@ -158,18 +160,18 @@ export default async function AdminOrderDetailPage({
                   <th className="px-6 py-2.5 text-right">Line Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100">
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {order.order_items.map((item) => (
                   <tr key={item.id}>
-                    <td className="px-6 py-3 font-bold text-zinc-900">{item.product_name}</td>
-                    <td className="px-4 py-3 text-zinc-600">
-                      {item.colour} / EU {item.size}
+                    <td className="px-6 py-3 font-bold text-zinc-900 dark:text-white">{item.product_name}</td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
+                      {item.colour} / {item.size_system && item.size_system !== 'Custom' ? `${item.size_system} ${item.size_value || item.size}` : (item.size_value || item.size)}
                     </td>
-                    <td className="px-4 py-3 text-zinc-600">{item.quantity}</td>
-                    <td className="px-4 py-3 text-right text-zinc-600">
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{item.quantity}</td>
+                    <td className="px-4 py-3 text-right text-zinc-600 dark:text-zinc-300">
                       {formatLKR(item.unit_price)}
                     </td>
-                    <td className="px-6 py-3 text-right font-bold text-zinc-900">
+                    <td className="px-6 py-3 text-right font-bold text-zinc-900 dark:text-white">
                       {formatLKR(item.unit_price * item.quantity)}
                     </td>
                   </tr>
@@ -177,27 +179,27 @@ export default async function AdminOrderDetailPage({
               </tbody>
             </table>
 
-            <div className="space-y-2 border-t border-zinc-200 bg-zinc-50 px-6 py-5 text-sm">
+            <div className="space-y-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 px-6 py-5 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-zinc-500">Subtotal</span>
-                <span className="font-bold text-zinc-900">{formatLKR(order.subtotal)}</span>
+                <span className="text-zinc-500 dark:text-zinc-400">Subtotal</span>
+                <span className="font-bold text-zinc-900 dark:text-white">{formatLKR(order.subtotal)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-zinc-500">Delivery Fee</span>
-                <span className="font-bold text-zinc-900">
+                <span className="text-zinc-500 dark:text-zinc-400">Delivery Fee</span>
+                <span className="font-bold text-zinc-900 dark:text-white">
                   {order.delivery_fee === 0 ? 'FREE' : formatLKR(order.delivery_fee)}
                 </span>
               </div>
-              <div className="flex items-center justify-between border-t border-zinc-200 pt-2">
-                <span className="text-sm font-black uppercase tracking-wider text-zinc-700">
+              <div className="flex items-center justify-between border-t border-zinc-200 dark:border-zinc-800 pt-2">
+                <span className="text-sm font-black uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                   Total
                 </span>
-                <span className="text-xl font-black text-zinc-900">{formatLKR(order.total)}</span>
+                <span className="text-xl font-black text-zinc-900 dark:text-white">{formatLKR(order.total)}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-xs text-amber-900">
+          <div className="flex items-center gap-2 rounded-2xl border border-amber-200 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-950/40 px-5 py-4 text-xs text-amber-900 dark:text-amber-300">
             <ClipboardList className="h-4 w-4 shrink-0" />
             <span>
               Totals were calculated server-side at the time of order placement from the

@@ -7,9 +7,20 @@ export const STORE_CONFIG = {
   currencySymbol: 'Rs.',
 };
 
-export function getDeliveryFee(subtotal: number): number {
-  if (subtotal >= STORE_CONFIG.freeDeliveryThreshold) {
+export function getDeliveryFee(
+  subtotal: number,
+  settings?: {
+    freeDeliveryEnabled?: boolean;
+    freeDeliveryThreshold?: number;
+    defaultDeliveryFee?: number;
+  },
+): number {
+  const isEnabled = settings?.freeDeliveryEnabled ?? true;
+  const threshold = settings?.freeDeliveryThreshold ?? STORE_CONFIG.freeDeliveryThreshold;
+  const defaultFee = settings?.defaultDeliveryFee ?? STORE_CONFIG.defaultDeliveryFee;
+
+  if (isEnabled && subtotal >= threshold) {
     return 0;
   }
-  return STORE_CONFIG.defaultDeliveryFee;
+  return defaultFee;
 }
