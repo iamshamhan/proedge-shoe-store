@@ -28,6 +28,7 @@ export interface GenerateWhatsAppOrderParams {
   deliveryFee: number;
   total: number;
   orderNumber?: string;
+  storePhone?: string; // dynamically fetched from store settings
 }
 
 export function generateWhatsAppOrderMessage({
@@ -38,7 +39,7 @@ export function generateWhatsAppOrderMessage({
   total,
   orderNumber,
 }: GenerateWhatsAppOrderParams): string {
-  let message = `*NEW ${STORE_CONFIG.name.toUpperCase()} ORDER*\n`;
+  let message = `*NEW PROEDGE ORDER*\n`;
   if (orderNumber) {
     message += `*Order No:* ${orderNumber}\n`;
   }
@@ -81,6 +82,14 @@ export function generateWhatsAppOrderMessage({
 export function generateWhatsAppOrderLink(params: GenerateWhatsAppOrderParams): string {
   const text = generateWhatsAppOrderMessage(params);
   const encodedText = encodeURIComponent(text);
-  const cleanPhone = STORE_CONFIG.whatsappNumber.replace(/[^0-9]/g, '');
+  // Default to a fallback number if storePhone is missing or invalid
+  const rawPhone = params.storePhone || '+94112345678';
+  let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+  
+  // if no country code is found and it's a Sri Lankan local format (e.g. 077), prefix +94
+  if (cleanPhone.length === 10 && cleanPhone.startsWith('0')) {
+    cleanPhone = '94' + cleanPhone.substring(1);
+  }
+  
   return `https://wa.me/${cleanPhone}?text=${encodedText}`;
 }

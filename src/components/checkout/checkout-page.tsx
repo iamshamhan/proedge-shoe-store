@@ -142,6 +142,7 @@ export function CheckoutPage() {
     // Build the WhatsApp message ONLY from server-validated order data.
     const url = generateWhatsAppOrderLink({
       orderNumber: order.order_number,
+      storePhone: settings.contactPhone,
       customer: {
         fullName: order.customer.fullName,
         phone: order.customer.phone,
