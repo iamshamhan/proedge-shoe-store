@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Sliders } from 'lucide-react';
 import { getAuthUser } from '@/lib/auth/admin';
 import { getStoreSettings } from '@/lib/settings';
+import { getAllProducts } from '@/lib/supabase/products';
 import { SettingsForm } from './settings-form';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,10 @@ export default async function AdminSettingsPage() {
   const user = await getAuthUser();
   if (!user?.isAdmin) redirect('/admin/login');
 
-  const settings = await getStoreSettings();
+  const [settings, products] = await Promise.all([
+    getStoreSettings(),
+    getAllProducts(),
+  ]);
 
   return (
     <div className="max-w-4xl">
@@ -27,12 +31,12 @@ export default async function AdminSettingsPage() {
         <div>
           <h1 className="text-xl font-black text-zinc-900 dark:text-white">Store Settings</h1>
           <p className="text-sm text-zinc-400 dark:text-zinc-500">
-            Configure free delivery threshold, islandwide shipping fee, and announcements
+            Configure free delivery threshold, hero spotlight product, and announcements
           </p>
         </div>
       </div>
 
-      <SettingsForm initialSettings={settings} />
+      <SettingsForm initialSettings={settings} products={products} />
     </div>
   );
 }

@@ -257,6 +257,7 @@ export type UpdateSettingsInput = {
   free_delivery_threshold: number;
   default_delivery_fee: number;
   banner_tagline?: string;
+  hero_product_slug?: string;
 };
 
 export async function updateStoreSettings(
@@ -276,16 +277,27 @@ export async function updateStoreSettings(
   }
 
   const supabase = await getSupabaseServer();
-  const { error } = await supabase
-    .from('store_settings')
-    .upsert({
-      id: 'default',
-      free_delivery_enabled: Boolean(input.free_delivery_enabled),
-      free_delivery_threshold: Math.round(input.free_delivery_threshold),
-      default_delivery_fee: Math.round(input.default_delivery_fee),
-      banner_tagline: input.banner_tagline?.trim() || 'Built for Your Next Step',
-      updated_at: new Date().toISOString(),
-    });
+  const upsertPayload: Record<string, unknown> = {
+    id: 'default',
+    free_delivery_enabled: Boolean(input.free_delivery_enabled),
+    free_delivery_threshold: Math.round(input.free_delivery_threshold),
+    default_delivery_fee: Math.round(input.default_delivery_fee),
+    banner_tagline: input.banner_tagline?.trim() || 'Built for Your Next Step',
+    updated_at: new Date().toISOString(),
+  };
+
+  if (input.hero_product_slug !== undefined) {
+    upsertPayload.hero_product_slug = input.hero_product_slug.trim() || null;
+  }
+
+  let { error } = await supabase.from('store_settings').upsert(upsertPayload);
+
+  // If hero_product_slug column does not exist yet in Supabase, retry without it so settings still save
+  if (error && (error.code === '42703' || error.message?.includes('hero_product_slug'))) {
+    delete upsertPayload.hero_product_slug;
+    const retry = await supabase.from('store_settings').upsert(upsertPayload);
+    error = retry.error;
+  }
 
   if (error) {
     if (error.code === '42P01') {

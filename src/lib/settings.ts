@@ -5,6 +5,7 @@ export interface StoreSettings {
   freeDeliveryThreshold: number;
   defaultDeliveryFee: number;
   bannerTagline: string;
+  heroProductSlug?: string;
 }
 
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
@@ -12,6 +13,7 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   freeDeliveryThreshold: 30000,
   defaultDeliveryFee: 500,
   bannerTagline: 'Built for Your Next Step',
+  heroProductSlug: 'proedge-runner-x1',
 };
 
 type DbSettingsRow = {
@@ -20,6 +22,7 @@ type DbSettingsRow = {
   free_delivery_threshold: number;
   default_delivery_fee: number;
   banner_tagline: string | null;
+  hero_product_slug?: string | null;
 };
 
 /**
@@ -48,7 +51,7 @@ export async function getStoreSettings(): Promise<StoreSettings> {
     });
     const { data, error } = await supabase
       .from('store_settings')
-      .select('id, free_delivery_enabled, free_delivery_threshold, default_delivery_fee, banner_tagline')
+      .select('*')
       .eq('id', 'default')
       .maybeSingle();
 
@@ -68,6 +71,7 @@ export async function getStoreSettings(): Promise<StoreSettings> {
           ? row.default_delivery_fee
           : DEFAULT_STORE_SETTINGS.defaultDeliveryFee,
       bannerTagline: row.banner_tagline?.trim() || DEFAULT_STORE_SETTINGS.bannerTagline,
+      heroProductSlug: row.hero_product_slug?.trim() || DEFAULT_STORE_SETTINGS.heroProductSlug,
     };
   } catch (err) {
     console.error('Error fetching store settings:', err);

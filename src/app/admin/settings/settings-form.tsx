@@ -7,17 +7,24 @@ import {
   AlertCircle,
   Save,
   Eye,
+  Sparkles,
+  ExternalLink,
 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 import type { StoreSettings } from '@/lib/settings';
+import type { Product } from '@/types/product';
+import { formatLKR } from '@/data/products';
 import { updateStoreSettings } from '../actions';
 
 interface SettingsFormProps {
   initialSettings: StoreSettings;
+  products?: Product[];
 }
 
 const PRESET_THRESHOLDS = [15000, 20000, 25000, 30000, 40000, 50000];
 
-export function SettingsForm({ initialSettings }: SettingsFormProps) {
+export function SettingsForm({ initialSettings, products = [] }: SettingsFormProps) {
   const [isPending, startTransition] = useTransition();
   const [freeDeliveryEnabled, setFreeDeliveryEnabled] = useState(
     initialSettings.freeDeliveryEnabled,
@@ -30,6 +37,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   );
   const [bannerTagline, setBannerTagline] = useState<string>(
     initialSettings.bannerTagline || 'Built for Your Next Step',
+  );
+  const [heroProductSlug, setHeroProductSlug] = useState<string>(
+    initialSettings.heroProductSlug || 'proedge-runner-x1',
   );
 
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -44,6 +54,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         free_delivery_threshold: Number(freeDeliveryThreshold) || 0,
         default_delivery_fee: Number(defaultDeliveryFee) || 0,
         banner_tagline: bannerTagline.trim(),
+        hero_product_slug: heroProductSlug,
       });
 
       if ('success' in res && res.success) {
@@ -244,6 +255,141 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-amber-500"
               />
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Homepage Hero Spotlight Product */}
+      <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 sm:p-8 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-6 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">
+                Homepage Hero Spotlight Product
+              </h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                Choose the shoe or sports item featured on the main homepage hero banner.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-7 space-y-4">
+            <div>
+              <label
+                htmlFor="heroProduct"
+                className="text-xs font-black uppercase tracking-wider text-zinc-800 dark:text-zinc-200 block mb-1.5"
+              >
+                Select Featured Product
+              </label>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3 leading-relaxed">
+                This item appears prominently in the top hero section next to the headline. Shoppers can click it directly to view details and make a purchase.
+              </p>
+              <select
+                id="heroProduct"
+                value={heroProductSlug}
+                onChange={(e) => setHeroProductSlug(e.target.value)}
+                className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-amber-500"
+              >
+                <option value="proedge-runner-x1">
+                  Default (PROEDGE Runner X1)
+                </option>
+                {products.map((prod) => (
+                  <option key={prod.id} value={prod.slug}>
+                    {prod.name} — Rs. {prod.price.toLocaleString()} ({prod.sport || prod.category})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {(() => {
+              const selectedProduct = products.find((p) => p.slug === heroProductSlug);
+              if (!selectedProduct) return null;
+              return (
+                <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 p-4 space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-zinc-500 dark:text-zinc-400">Sport / Category:</span>
+                    <span className="font-bold text-zinc-900 dark:text-zinc-200 uppercase">
+                      {selectedProduct.sport || selectedProduct.category}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-zinc-500 dark:text-zinc-400">Current Price:</span>
+                    <span className="font-bold text-amber-600 dark:text-amber-400">
+                      {formatLKR(selectedProduct.price)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-zinc-500 dark:text-zinc-400">Slug:</span>
+                    <code className="font-mono text-zinc-700 dark:text-zinc-300">{selectedProduct.slug}</code>
+                  </div>
+                  <div className="pt-2 border-t border-zinc-200 dark:border-zinc-700 flex justify-end">
+                    <Link
+                      href={`/product/${selectedProduct.slug}`}
+                      target="_blank"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
+                    >
+                      <span>View Product Page</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Hero Spotlight Preview */}
+          <div className="lg:col-span-5">
+            <div className="text-xs font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2 flex items-center gap-1.5">
+              <Eye className="w-3.5 h-3.5 text-amber-500" />
+              <span>Hero Card Live Preview</span>
+            </div>
+            {(() => {
+              const selectedProduct = products.find((p) => p.slug === heroProductSlug);
+              const previewImage =
+                selectedProduct?.images?.[0] ||
+                'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop';
+              const previewName =
+                selectedProduct?.name ||
+                (heroProductSlug === 'proedge-runner-x1' ? 'PROEDGE Runner X1' : heroProductSlug);
+              const previewPrice = selectedProduct?.price ? formatLKR(selectedProduct.price) : 'Rs. 24,500';
+              const previewBadge = selectedProduct?.sport
+                ? `${selectedProduct.sport} Spotlight`
+                : selectedProduct?.category
+                  ? `${selectedProduct.category.toUpperCase()}`
+                  : 'Featured Model';
+
+              return (
+                <div className="relative w-full aspect-4/5 max-w-xs mx-auto rounded-2xl bg-gradient-to-b from-zinc-800 to-zinc-950 p-2.5 border border-zinc-800 shadow-xl overflow-hidden">
+                  <div className="relative w-full h-full rounded-xl overflow-hidden">
+                    <Image
+                      src={previewImage}
+                      alt={previewName}
+                      fill
+                      sizes="320px"
+                      className="object-cover object-center"
+                    />
+                    <div className="absolute bottom-2.5 left-2.5 right-2.5 bg-zinc-950/90 backdrop-blur-md p-3 rounded-lg border border-zinc-800 flex items-center justify-between">
+                      <div className="min-w-0 pr-2">
+                        <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest block truncate">
+                          {previewBadge}
+                        </span>
+                        <h4 className="font-bold text-xs text-white uppercase truncate">
+                          {previewName}
+                        </h4>
+                      </div>
+                      <span className="shrink-0 text-xs font-black px-2 py-0.5 bg-amber-500 text-zinc-950 rounded">
+                        {previewPrice}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

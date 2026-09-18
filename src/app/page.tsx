@@ -7,11 +7,14 @@ import { NewArrivalsSection } from '@/components/home/new-arrivals-section';
 import { SaleBanner } from '@/components/home/sale-banner';
 import { WhyChooseUs } from '@/components/home/why-choose-us';
 import { NewsletterSection } from '@/components/home/newsletter-section';
+import { getHeroProduct } from '@/lib/supabase/products';
 
-export default function Home() {
+export default async function Home() {
+  const heroProduct = await getHeroProduct();
+
   return (
     <>
-      <HeroSection />
+      <HeroSection heroProduct={heroProduct} />
       <CategorySection />
       <FeaturedSection />
       <NewArrivalsSection />
@@ -21,3 +24,4 @@ export default function Home() {
     </>
   );
 }
+

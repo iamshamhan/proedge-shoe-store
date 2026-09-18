@@ -2,8 +2,26 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import type { Product } from '@/types/product';
+import { formatLKR } from '@/data/products';
 
-export function HeroSection() {
+interface HeroSectionProps {
+  heroProduct?: Product | null;
+}
+
+export function HeroSection({ heroProduct }: HeroSectionProps) {
+  const productName = heroProduct?.name ?? 'PROEDGE Runner X1';
+  const productImage =
+    heroProduct?.images?.[0] ||
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop';
+  const productPrice = heroProduct?.price ? formatLKR(heroProduct.price) : 'Rs. 24,500';
+  const productBadge = heroProduct?.sport
+    ? `${heroProduct.sport} Spotlight`
+    : heroProduct?.category
+      ? `${heroProduct.category.toUpperCase()}`
+      : 'Featured Model';
+  const productHref = heroProduct ? `/product/${heroProduct.slug}` : '/shop';
+
   return (
     <section className="relative bg-zinc-950 text-white overflow-hidden py-16 sm:py-24 lg:py-32">
       {/* Subtle Background Glow Effect */}
@@ -71,13 +89,16 @@ export function HeroSection() {
 
           </div>
 
-          {/* Right Column: Hero Sneaker Visual */}
+          {/* Right Column: Hero Sneaker Visual Spotlight */}
           <div className="lg:col-span-5 relative flex justify-center">
-            <div className="relative w-full max-w-md aspect-4/5 rounded-3xl bg-gradient-to-b from-zinc-800 to-zinc-900 p-3 border border-zinc-800 shadow-2xl overflow-hidden group">
+            <Link
+              href={productHref}
+              className="relative w-full max-w-md aspect-4/5 rounded-3xl bg-gradient-to-b from-zinc-800 to-zinc-900 p-3 border border-zinc-800 shadow-2xl overflow-hidden group block hover:border-amber-500/50 hover:shadow-amber-500/10 transition-all duration-300"
+            >
               <div className="relative w-full h-full rounded-2xl overflow-hidden">
                 <Image
-                  src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop"
-                  alt="PROEDGE Hero Sneaker"
+                  src={productImage}
+                  alt={productName}
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 40vw"
@@ -85,21 +106,21 @@ export function HeroSection() {
                 />
                 
                 {/* Floating Badge */}
-                <div className="absolute bottom-4 left-4 right-4 bg-zinc-950/80 backdrop-blur-md p-4 rounded-xl border border-zinc-800 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest block">
-                      Featured Model
+                <div className="absolute bottom-4 left-4 right-4 bg-zinc-950/85 backdrop-blur-md p-4 rounded-xl border border-zinc-800/80 flex items-center justify-between transition-all group-hover:border-amber-500/40">
+                  <div className="min-w-0 pr-2">
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest block truncate">
+                      {productBadge}
                     </span>
-                    <h3 className="font-extrabold text-sm text-white uppercase">
-                      PROEDGE Runner X1
+                    <h3 className="font-extrabold text-sm text-white uppercase truncate">
+                      {productName}
                     </h3>
                   </div>
-                  <span className="text-sm font-black text-white px-2.5 py-1 bg-amber-500 text-zinc-950 rounded-md">
-                    Rs. 24,500
+                  <span className="shrink-0 text-sm font-black px-2.5 py-1 bg-amber-500 text-zinc-950 rounded-md">
+                    {productPrice}
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
 
         </div>

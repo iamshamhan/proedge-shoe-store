@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Product, ProductCategory, ProductVariant, SizeSystem, CategoryItem } from '@/types/product';
 import { MOCK_PRODUCTS } from '@/data/products';
+import { getStoreSettings } from '@/lib/settings';
 
 // ---------------------------------------------------------------------------
 // Client factory — returns null when env vars are not yet filled
@@ -360,4 +361,24 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   const db = await fetchProductBySlug(slug);
   if (db) return db;
   return MOCK_PRODUCTS.find((p) => p.slug === slug) ?? null;
+}
+
+export async function getHeroProduct(): Promise<Product | null> {
+  try {
+    const settings = await getStoreSettings();
+    if (settings.heroProductSlug) {
+      const product = await getProductBySlug(settings.heroProductSlug);
+      if (product) return product;
+    }
+
+    // Fallback 1: first featured product
+    const featured = await getFeaturedProducts();
+    if (featured && featured.length > 0) return featured[0];
+
+    // Fallback 2: runner-x1 or first product in mock catalog
+    return (await getProductBySlug('proedge-runner-x1')) ?? MOCK_PRODUCTS[0] ?? null;
+  } catch (err) {
+    console.error('Error in getHeroProduct:', err);
+    return MOCK_PRODUCTS.find((p) => p.slug === 'proedge-runner-x1') ?? MOCK_PRODUCTS[0] ?? null;
+  }
 }
