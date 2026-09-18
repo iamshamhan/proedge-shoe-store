@@ -1,4 +1,4 @@
-import { STORE_CONFIG } from '@/lib/config';
+
 import { formatLKR } from '@/data/products';
 
 export interface CustomerOrderDetails {
