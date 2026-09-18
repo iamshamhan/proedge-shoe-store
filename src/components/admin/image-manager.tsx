@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useCallback, useState, useRef } from 'react';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
@@ -19,6 +20,7 @@ type ImageManagerProps = {
 };
 
 export function ImageManager({ productId, images: initialImages }: ImageManagerProps) {
+  const router = useRouter();
   const [images, setImages] = useState(initialImages);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,13 +60,14 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
           ...prev,
           { id: result.id, url: publicUrl, alt_text: file.name, sort_order: sortOrder },
         ]);
+        router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to upload image.');
       } finally {
         setUploading(false);
       }
     },
-    [productId, images],
+    [productId, images, router],
   );
 
   const handleDelete = useCallback(async () => {
@@ -78,7 +81,8 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
     }
     setImages((prev) => prev.filter((img) => img.id !== targetDelete.id));
     setTargetDelete(null);
-  }, [targetDelete]);
+    router.refresh();
+  }, [targetDelete, router]);
 
   return (
     <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">

@@ -255,7 +255,25 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <ColorSelector
           colors={availableColors}
           selectedColor={selectedColor}
-          onSelectColor={setSelectedColor}
+          onSelectColor={(newColor) => {
+            setSelectedColor(newColor);
+            setValidationError(false);
+            if (variants.length > 0 && selectedSize) {
+              const sStr = String(selectedSize);
+              const existsInNewColor = variants.some(
+                (v) =>
+                  v.colour === newColor &&
+                  (v.sizeValue === sStr || String(v.size) === sStr) &&
+                  v.stock > 0,
+              );
+              if (!existsInNewColor) {
+                const firstAvailable = variants.find((v) => v.colour === newColor && v.stock > 0);
+                if (firstAvailable) {
+                  setSelectedSize(firstAvailable.sizeValue || firstAvailable.size);
+                }
+              }
+            }
+          }}
         />
       )}
 

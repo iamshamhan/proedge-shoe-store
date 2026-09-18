@@ -132,7 +132,7 @@ function mapProduct(row: DbProductRow): Product {
     images: images.length > 0 ? images : [MOCK_PRODUCTS[0].images[0]],
     sizes: uniqueSizes,
     sizeSystem,
-    colors: uniqueColors,
+    colors: uniqueColors.length > 0 ? uniqueColors : ['Standard'],
     stock: totalStock,
     featured: row.featured,
     newArrival: row.is_new_arrival,
@@ -172,7 +172,11 @@ type FetchOptions = {
 };
 
 async function executeProductQuery(sb: SupabaseClient, querySelect: string, opts: FetchOptions) {
-  let q = sb.from('products').select(querySelect).eq('is_active', true);
+  let q = sb
+    .from('products')
+    .select(querySelect)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
 
   if (opts.categorySlug) {
     const matchingSlugs = getCategorySlugsForQuery(opts.categorySlug);

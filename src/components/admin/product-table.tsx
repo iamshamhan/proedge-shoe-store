@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import {
   Edit,
@@ -11,6 +12,7 @@ import {
   Package,
   Plus,
   X,
+  ExternalLink,
 } from 'lucide-react';
 import { toggleProductActive, deleteProduct } from '@/app/admin/actions';
 import { ConfirmDialog } from './confirm-dialog';
@@ -31,6 +33,7 @@ type Product = {
 };
 
 export function ProductTable({ products: initial }: { products: Product[] }) {
+  const router = useRouter();
   const [products, setProducts] = useState(initial);
   const [toggling, setToggling] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -50,8 +53,9 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
       setProducts((prev) =>
         prev.map((p) => (p.id === product.id ? { ...p, is_active: !p.is_active } : p)),
       );
+      router.refresh();
     },
-    [],
+    [router],
   );
 
   const handleDelete = useCallback(async () => {
@@ -66,7 +70,8 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
     }
     setProducts((prev) => prev.filter((p) => p.id !== targetDelete.id));
     setTargetDelete(null);
-  }, [targetDelete]);
+    router.refresh();
+  }, [targetDelete, router]);
 
   if (products.length === 0) {
     return (
@@ -193,6 +198,15 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
                           <ToggleLeft className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
                         )}
                       </button>
+                      <Link
+                        href={`/product/${product.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-lg p-2 text-zinc-400 dark:text-zinc-500 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-amber-600 dark:hover:text-amber-400"
+                        title="View on store"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
                       <Link
                         href={`/admin/products/${product.id}`}
                         className="rounded-lg p-2 text-zinc-400 dark:text-zinc-500 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white"

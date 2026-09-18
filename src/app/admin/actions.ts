@@ -17,6 +17,31 @@ export async function signOut() {
 }
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+async function revalidateProductPaths(slug?: string | null, productId?: string | null) {
+  try {
+    revalidatePath('/', 'page');
+    revalidatePath('/shop', 'page');
+    revalidatePath('/men', 'page');
+    revalidatePath('/women', 'page');
+    revalidatePath('/sports', 'page');
+    revalidatePath('/sale', 'page');
+    revalidatePath('/admin/products', 'page');
+    revalidatePath('/admin/settings', 'page');
+    if (slug) {
+      revalidatePath(`/product/${slug}`, 'page');
+    }
+    if (productId) {
+      revalidatePath(`/admin/products/${productId}`, 'page');
+    }
+  } catch (err) {
+    console.warn('revalidatePath warning:', err);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Product CRUD
 // ---------------------------------------------------------------------------
 
@@ -64,6 +89,8 @@ export async function createProduct(
     return { error: error.message };
   }
 
+  await revalidateProductPaths(data.slug.trim(), product.id);
+
   return { id: product.id };
 }
 
@@ -77,6 +104,14 @@ export async function updateProduct(
   if (!data.price || data.price <= 0) return { error: 'Price must be greater than zero.' };
 
   const supabase = await getSupabaseServer();
+
+  // Get current slug to invalidate previous URL if slug changed
+  const { data: currentProduct } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('id', id)
+    .single();
+
   const { error } = await supabase
     .from('products')
     .update({
@@ -98,6 +133,11 @@ export async function updateProduct(
     return { error: error.message };
   }
 
+  await revalidateProductPaths(data.slug.trim(), id);
+  if (currentProduct?.slug && currentProduct.slug !== data.slug.trim()) {
+    await revalidateProductPaths(currentProduct.slug, id);
+  }
+
   return { success: true };
 }
 
@@ -105,8 +145,15 @@ export async function deleteProduct(
   id: string,
 ): Promise<{ success: true } | { error: string }> {
   const supabase = await getSupabaseServer();
+
+  // Fetch product slug before deleting to invalidate cache
+  const { data: prod } = await supabase.from('products').select('slug').eq('id', id).single();
+
   const { error } = await supabase.from('products').delete().eq('id', id);
   if (error) return { error: error.message };
+
+  await revalidateProductPaths(prod?.slug, id);
+
   return { success: true };
 }
 
@@ -115,8 +162,14 @@ export async function toggleProductActive(
   isActive: boolean,
 ): Promise<{ success: true } | { error: string }> {
   const supabase = await getSupabaseServer();
+
+  const { data: prod } = await supabase.from('products').select('slug').eq('id', id).single();
+
   const { error } = await supabase.from('products').update({ is_active: isActive }).eq('id', id);
   if (error) return { error: error.message };
+
+  await revalidateProductPaths(prod?.slug, id);
+
   return { success: true };
 }
 
@@ -138,6 +191,10 @@ export async function addProductImage(
     .single();
 
   if (error) return { error: error.message };
+
+  const { data: prod } = await supabase.from('products').select('slug').eq('id', productId).single();
+  await revalidateProductPaths(prod?.slug, productId);
+
   return { id: data.id };
 }
 
@@ -147,6 +204,12 @@ export async function removeProductImage(
 ): Promise<{ success: true } | { error: string }> {
   const supabase = await getSupabaseServer();
 
+  const { data: img } = await supabase
+    .from('product_images')
+    .select('product_id')
+    .eq('id', imageId)
+    .single();
+
   const storagePath = imageUrl.split('/product-images/')[1];
   if (storagePath) {
     await supabase.storage.from('product-images').remove([storagePath]);
@@ -154,6 +217,12 @@ export async function removeProductImage(
 
   const { error } = await supabase.from('product_images').delete().eq('id', imageId);
   if (error) return { error: error.message };
+
+  if (img?.product_id) {
+    const { data: prod } = await supabase.from('products').select('slug').eq('id', img.product_id).single();
+    await revalidateProductPaths(prod?.slug, img.product_id);
+  }
+
   return { success: true };
 }
 
@@ -210,6 +279,10 @@ export async function addProductVariant(
     if (error.code === '23505') return { error: 'A variant with this colour and size already exists.' };
     return { error: error.message };
   }
+
+  const { data: prod } = await supabase.from('products').select('slug').eq('id', productId).single();
+  await revalidateProductPaths(prod?.slug, productId);
+
   return { id: data!.id };
 }
 
@@ -217,8 +290,21 @@ export async function removeProductVariant(
   variantId: string,
 ): Promise<{ success: true } | { error: string }> {
   const supabase = await getSupabaseServer();
+
+  const { data: v } = await supabase
+    .from('product_variants')
+    .select('product_id')
+    .eq('id', variantId)
+    .single();
+
   const { error } = await supabase.from('product_variants').delete().eq('id', variantId);
   if (error) return { error: error.message };
+
+  if (v?.product_id) {
+    const { data: prod } = await supabase.from('products').select('slug').eq('id', v.product_id).single();
+    await revalidateProductPaths(prod?.slug, v.product_id);
+  }
+
   return { success: true };
 }
 
@@ -228,8 +314,21 @@ export async function updateVariantStock(
 ): Promise<{ success: true } | { error: string }> {
   if (stock < 0) return { error: 'Stock cannot be negative.' };
   const supabase = await getSupabaseServer();
+
+  const { data: v } = await supabase
+    .from('product_variants')
+    .select('product_id')
+    .eq('id', variantId)
+    .single();
+
   const { error } = await supabase.from('product_variants').update({ stock }).eq('id', variantId);
   if (error) return { error: error.message };
+
+  if (v?.product_id) {
+    const { data: prod } = await supabase.from('products').select('slug').eq('id', v.product_id).single();
+    await revalidateProductPaths(prod?.slug, v.product_id);
+  }
+
   return { success: true };
 }
 

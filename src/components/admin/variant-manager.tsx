@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import {
@@ -24,6 +25,7 @@ type VariantManagerProps = {
 };
 
 export function VariantManager({ productId, variants: initialVariants }: VariantManagerProps) {
+  const router = useRouter();
   const [variants, setVariants] = useState(initialVariants);
   const [colour, setColour] = useState('');
   const [sizeSystem, setSizeSystem] = useState('EU');
@@ -78,8 +80,9 @@ export function VariantManager({ productId, variants: initialVariants }: Variant
       setColour('');
       setSize('');
       setStock('0');
+      router.refresh();
     },
-    [colour, size, sizeSystem, stock, productId],
+    [colour, size, sizeSystem, stock, productId, router],
   );
 
   const handleStockSave = useCallback(
@@ -92,8 +95,9 @@ export function VariantManager({ productId, variants: initialVariants }: Variant
         return;
       }
       setVariants((prev) => prev.map((v) => (v.id === variant.id ? { ...v, stock: nextStock } : v)));
+      router.refresh();
     },
-    [],
+    [router],
   );
 
   const handleDelete = useCallback(async () => {
@@ -107,7 +111,8 @@ export function VariantManager({ productId, variants: initialVariants }: Variant
     }
     setVariants((prev) => prev.filter((v) => v.id !== targetDelete.id));
     setTargetDelete(null);
-  }, [targetDelete]);
+    router.refresh();
+  }, [targetDelete, router]);
 
   const inputClass =
     'w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20';

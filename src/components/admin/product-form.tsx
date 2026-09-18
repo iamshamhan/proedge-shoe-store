@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useMemo, type FormEvent } from 'react';
-import { ArrowLeft, Check, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, Save, ExternalLink } from 'lucide-react';
 import { createProduct, updateProduct } from '@/app/admin/actions';
 import { ImageManager } from './image-manager';
 import { VariantManager } from './variant-manager';
@@ -62,7 +62,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
     product?.compare_at_price ? String(product.compare_at_price) : '',
   );
   const [featured, setFeatured] = useState(product?.featured ?? false);
-  const [isNewArrival, setIsNewArrival] = useState(product?.is_new_arrival ?? false);
+  const [isNewArrival, setIsNewArrival] = useState(product?.is_new_arrival ?? !isEdit);
   const [isOnSale, setIsOnSale] = useState(product?.is_on_sale ?? false);
   const [isActive, setIsActive] = useState(product?.is_active ?? true);
 
@@ -357,11 +357,13 @@ export function ProductForm({ categories, product }: ProductFormProps) {
         <div className="flex items-center justify-end gap-3">
           {isEdit && (
             <Link
-              href={`/${product.slug}`}
+              href={`/product/${product.slug}`}
               target="_blank"
-              className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-5 py-2.5 text-sm font-bold text-zinc-700 dark:text-zinc-300 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-700"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-5 py-2.5 text-sm font-bold text-zinc-700 dark:text-zinc-300 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:text-amber-600 dark:hover:text-amber-400"
             >
-              View in store
+              <span>View in store</span>
+              <ExternalLink className="h-4 w-4" />
             </Link>
           )}
           <button
