@@ -8,9 +8,15 @@ export const metadata: Metadata = {
   title: 'New Product',
 };
 
-export default async function NewProductPage() {
+export default async function NewProductPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; sport?: string }>;
+}) {
   const user = await getAuthUser();
   if (!user?.isAdmin) redirect('/admin/login');
+
+  const { category: queryCategory, sport: querySport } = (await searchParams) || {};
 
   const supabase = await getSupabaseServer();
   const { data: categories } = await supabase
@@ -18,5 +24,28 @@ export default async function NewProductPage() {
     .select('id, slug, name, parent_id')
     .order('sort_order');
 
-  return <ProductForm categories={categories ?? []} />;
+  let defaultCategoryId: string | undefined;
+
+  if (queryCategory) {
+    const match = categories?.find(
+      (c) => c.id === queryCategory || c.slug === queryCategory,
+    );
+    if (match) defaultCategoryId = match.id;
+  }
+
+  if (!defaultCategoryId && querySport) {
+    const parent = categories?.find((c) => c.slug === querySport || c.id === querySport);
+    if (parent) {
+      // Pick first child subcategory of this sport if available, else the parent category
+      const firstChild = categories?.find((c) => c.parent_id === parent.id);
+      defaultCategoryId = firstChild?.id || parent.id;
+    }
+  }
+
+  return (
+    <ProductForm
+      categories={categories ?? []}
+      defaultCategoryId={defaultCategoryId}
+    />
+  );
 }

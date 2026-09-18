@@ -359,6 +359,10 @@ export type UpdateSettingsInput = {
   hero_product_slug?: string;
   sale_enabled?: boolean;
   sale_discount_percent?: number;
+  brand_name?: string;
+  contact_address?: string;
+  contact_phone?: string;
+  contact_email?: string;
 };
 
 export async function updateStoreSettings(
@@ -408,13 +412,40 @@ export async function updateStoreSettings(
     upsertPayload.sale_discount_percent = Math.round(input.sale_discount_percent);
   }
 
+  if (input.brand_name !== undefined) {
+    upsertPayload.brand_name = input.brand_name.trim() || 'PROEDGE';
+  }
+
+  if (input.contact_address !== undefined) {
+    upsertPayload.contact_address = input.contact_address.trim() || null;
+  }
+
+  if (input.contact_phone !== undefined) {
+    upsertPayload.contact_phone = input.contact_phone.trim() || null;
+  }
+
+  if (input.contact_email !== undefined) {
+    upsertPayload.contact_email = input.contact_email.trim() || null;
+  }
+
   let { error } = await supabase.from('store_settings').upsert(upsertPayload);
 
   // If newly added columns do not exist yet in Supabase, retry progressively so settings still save
-  if (error && (error.code === '42703' || error.message?.includes('sale_') || error.message?.includes('hero_product_slug'))) {
+  if (
+    error &&
+    (error.code === '42703' ||
+      error.message?.includes('sale_') ||
+      error.message?.includes('hero_product_slug') ||
+      error.message?.includes('brand_name') ||
+      error.message?.includes('contact_'))
+  ) {
     delete upsertPayload.sale_enabled;
     delete upsertPayload.sale_discount_percent;
     delete upsertPayload.hero_product_slug;
+    delete upsertPayload.brand_name;
+    delete upsertPayload.contact_address;
+    delete upsertPayload.contact_phone;
+    delete upsertPayload.contact_email;
     const retry = await supabase.from('store_settings').upsert(upsertPayload);
     error = retry.error;
   }

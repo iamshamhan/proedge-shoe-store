@@ -15,6 +15,11 @@ import {
   ChevronDown,
   ChevronRight,
   Sparkles,
+  LayoutDashboard,
+  Package,
+  Sliders,
+  LogOut,
+  ExternalLink,
 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useWishlist } from '@/context/wishlist-context';
@@ -22,6 +27,7 @@ import { useStoreSettings } from '@/context/settings-context';
 import { useTheme } from '@/context/theme-context';
 import { PARENT_SPORTS, NavCategory } from '@/data/categories';
 import type { CategoryItem } from '@/types/product';
+import { signOut } from '@/app/admin/actions';
 
 interface HeaderProps {
   categories?: CategoryItem[];
@@ -38,8 +44,25 @@ export function Header({ categories: propCategories }: HeaderProps) {
     bannerTagline,
     saleEnabled,
     saleDiscountPercent,
+    brandName,
   } = useStoreSettings();
   const { theme, toggleTheme } = useTheme();
+
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  const normalizedBrand = (brandName || 'PROEDGE').trim();
+  let logoPrefix = 'PRO';
+  let logoSuffix = 'EDGE';
+  if (normalizedBrand.toUpperCase() === 'PROEDGE') {
+    logoPrefix = 'PRO';
+    logoSuffix = 'EDGE';
+  } else if (normalizedBrand.length > 3) {
+    logoPrefix = normalizedBrand.slice(0, 3).toUpperCase();
+    logoSuffix = normalizedBrand.slice(3).toUpperCase();
+  } else {
+    logoPrefix = normalizedBrand.toUpperCase();
+    logoSuffix = '';
+  }
 
   // Navigation hierarchy: prefer passed categories, fallback to canonical PARENT_SPORTS
   const sports: (NavCategory | CategoryItem)[] =
@@ -159,194 +182,284 @@ export function Header({ categories: propCategories }: HeaderProps) {
             {/* Brand Logo */}
             <div className="flex-shrink-0 flex items-center mr-4">
               <Link
-                href="/"
+                href={isAdminRoute ? '/admin' : '/'}
                 className="group flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500 focus-visible:rounded-sm"
               >
                 <span className="bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-black text-xl sm:text-2xl px-2.5 py-1 tracking-wider uppercase rounded-sm group-hover:bg-amber-600 dark:group-hover:bg-amber-500 dark:group-hover:text-zinc-950 transition-colors">
-                  PRO
+                  {logoPrefix}
                 </span>
-                <span className="font-black text-xl sm:text-2xl tracking-widest text-zinc-900 dark:text-white uppercase">
-                  EDGE
-                </span>
+                {logoSuffix && (
+                  <span className="font-black text-xl sm:text-2xl tracking-widest text-zinc-900 dark:text-white uppercase">
+                    {logoSuffix}
+                  </span>
+                )}
+                {isAdminRoute && (
+                  <span className="ml-1.5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                    Admin
+                  </span>
+                )}
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav
-              className="hidden lg:flex items-center space-x-1 xl:space-x-3"
-              aria-label="Main Navigation"
-            >
-              {/* All Shop Link */}
-              <Link
-                href="/shop"
-                className={`px-2.5 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
-                  pathname === '/shop'
-                    ? 'text-zinc-900 dark:text-amber-400 font-extrabold'
-                    : 'text-zinc-600 dark:text-zinc-300'
-                }`}
+            {/* Navigation: Admin Navigation vs Customer Navigation */}
+            {isAdminRoute ? (
+              <nav
+                className="hidden lg:flex items-center space-x-2 xl:space-x-3"
+                aria-label="Admin Navigation"
               >
-                Shop All
-              </Link>
+                <Link
+                  href="/admin"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase rounded-lg transition-colors ${
+                    pathname === '/admin'
+                      ? 'bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/admin/products"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase rounded-lg transition-colors ${
+                    pathname.startsWith('/admin/products')
+                      ? 'bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Package className="w-4 h-4" />
+                  <span>Products</span>
+                </Link>
+                <Link
+                  href="/admin/settings"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase rounded-lg transition-colors ${
+                    pathname === '/admin/settings'
+                      ? 'bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Sliders className="w-4 h-4" />
+                  <span>Settings</span>
+                </Link>
+              </nav>
+            ) : (
+              <nav
+                className="hidden lg:flex items-center space-x-1 xl:space-x-3"
+                aria-label="Main Navigation"
+              >
+                {/* All Shop Link */}
+                <Link
+                  href="/shop"
+                  className={`px-2.5 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                    pathname === '/shop'
+                      ? 'text-zinc-900 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-600 dark:text-zinc-300'
+                  }`}
+                >
+                  Shop All
+                </Link>
 
-              {/* Primary Sports with Hover/Focus Dropdowns */}
-              {sports.map((sport) => {
-                const hasChildren = sport.children && sport.children.length > 0;
-                const isDropdownActive = activeDropdown === sport.slug;
-                const isCurrentCategory = pathname.includes(sport.slug);
+                {/* Primary Sports with Hover/Focus Dropdowns */}
+                {sports.map((sport) => {
+                  const hasChildren = sport.children && sport.children.length > 0;
+                  const isDropdownActive = activeDropdown === sport.slug;
+                  const isCurrentCategory = pathname.includes(sport.slug);
 
-                return (
-                  <div
-                    key={sport.id}
-                    className="relative group"
-                    onMouseEnter={() => handleMouseEnter(sport.slug)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    <div className="flex items-center">
-                      <Link
-                        href={`/shop?category=${sport.slug}`}
-                        onKeyDown={(e) => handleDropdownKeyDown(e, sport.slug)}
-                        aria-haspopup={hasChildren ? 'true' : undefined}
-                        aria-expanded={hasChildren ? isDropdownActive : undefined}
-                        className={`flex items-center gap-1 px-2.5 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
-                          isDropdownActive || isCurrentCategory
-                            ? 'text-zinc-900 dark:text-amber-400 font-extrabold'
-                            : 'text-zinc-600 dark:text-zinc-300'
-                        }`}
-                      >
-                        <span>{sport.name}</span>
-                        {hasChildren && (
-                          <ChevronDown
-                            className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                              isDropdownActive ? 'rotate-180 text-amber-500' : 'text-zinc-400'
-                            }`}
-                          />
-                        )}
-                      </Link>
-                    </div>
+                  return (
+                    <div
+                      key={sport.id}
+                      className="relative group"
+                      onMouseEnter={() => handleMouseEnter(sport.slug)}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      <div className="flex items-center">
+                        <Link
+                          href={`/shop?category=${sport.slug}`}
+                          onKeyDown={(e) => handleDropdownKeyDown(e, sport.slug)}
+                          aria-haspopup={hasChildren ? 'true' : undefined}
+                          aria-expanded={hasChildren ? isDropdownActive : undefined}
+                          className={`flex items-center gap-1 px-2.5 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                            isDropdownActive || isCurrentCategory
+                              ? 'text-zinc-900 dark:text-amber-400 font-extrabold'
+                              : 'text-zinc-600 dark:text-zinc-300'
+                          }`}
+                        >
+                          <span>{sport.name}</span>
+                          {hasChildren && (
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                                isDropdownActive ? 'rotate-180 text-amber-500' : 'text-zinc-400'
+                              }`}
+                            />
+                          )}
+                        </Link>
+                      </div>
 
-                    {/* Desktop Dropdown Card */}
-                    {hasChildren && isDropdownActive && (
-                      <div
-                        role="menu"
-                        aria-label={`${sport.name} Subcategories`}
-                        className="absolute left-0 top-full pt-2 z-50 w-64 xl:w-72 transition-all animate-in fade-in-50 slide-in-from-top-2 duration-150"
-                      >
-                        <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-3 overflow-hidden">
-                          {/* Dropdown Header link */}
-                          <div className="pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between">
-                            <span className="text-[11px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                              {sport.name} Gear
-                            </span>
-                            <Link
-                              href={`/shop?category=${sport.slug}`}
-                              onClick={() => setActiveDropdown(null)}
-                              className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white flex items-center gap-0.5"
-                            >
-                              <span>View All</span>
-                              <ArrowRight className="w-3 h-3" />
-                            </Link>
-                          </div>
-
-                          {/* Subcategory links */}
-                          <div className="space-y-0.5">
-                            {sport.children!.map((sub) => (
+                      {/* Desktop Dropdown Card */}
+                      {hasChildren && isDropdownActive && (
+                        <div
+                          role="menu"
+                          aria-label={`${sport.name} Subcategories`}
+                          className="absolute left-0 top-full pt-2 z-50 w-64 xl:w-72 transition-all animate-in fade-in-50 slide-in-from-top-2 duration-150"
+                        >
+                          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-3 overflow-hidden">
+                            {/* Dropdown Header link */}
+                            <div className="pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between">
+                              <span className="text-[11px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                {sport.name} Gear
+                              </span>
                               <Link
-                                key={sub.id}
-                                href={`/shop?category=${sub.slug}`}
-                                role="menuitem"
+                                href={`/shop?category=${sport.slug}`}
                                 onClick={() => setActiveDropdown(null)}
-                                className="group/item flex items-center justify-between px-2.5 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-700 dark:hover:text-amber-400 rounded-lg transition-colors"
+                                className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white flex items-center gap-0.5"
                               >
-                                <span>{sub.name}</span>
-                                <ChevronRight className="w-3 h-3 text-zinc-300 dark:text-zinc-600 group-hover/item:text-amber-500 group-hover/item:translate-x-0.5 transition-all" />
+                                <span>View All</span>
+                                <ArrowRight className="w-3 h-3" />
                               </Link>
-                            ))}
+                            </div>
+
+                            {/* Subcategory links */}
+                            <div className="space-y-0.5">
+                              {sport.children!.map((sub) => (
+                                <Link
+                                  key={sub.id}
+                                  href={`/shop?category=${sub.slug}`}
+                                  role="menuitem"
+                                  onClick={() => setActiveDropdown(null)}
+                                  className="group/item flex items-center justify-between px-2.5 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-amber-50 dark:hover:bg-zinc-800 hover:text-amber-700 dark:hover:text-amber-400 rounded-lg transition-colors"
+                                >
+                                  <span>{sub.name}</span>
+                                  <ChevronRight className="w-3 h-3 text-zinc-300 dark:text-zinc-600 group-hover/item:text-amber-500 group-hover/item:translate-x-0.5 transition-all" />
+                                </Link>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                      )}
+                    </div>
+                  );
+                })}
 
-              {/* Sale Link with Badge */}
-              <Link
-                href="/sale"
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
-                  pathname === '/sale'
-                    ? 'text-zinc-900 dark:text-amber-400 font-extrabold'
-                    : 'text-zinc-600 dark:text-zinc-300'
-                }`}
-              >
-                <span>Sale</span>
-                {saleEnabled !== false && (
-                  <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-zinc-950 rounded-full">
-                    {saleDiscountPercent ?? 30}% OFF
-                  </span>
-                )}
-              </Link>
-            </nav>
+                {/* Sale Link with Badge */}
+                <Link
+                  href="/sale"
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                    pathname === '/sale'
+                      ? 'text-zinc-900 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-600 dark:text-zinc-300'
+                  }`}
+                >
+                  <span>Sale</span>
+                  {saleEnabled !== false && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-zinc-950 rounded-full">
+                      {saleDiscountPercent ?? 30}% OFF
+                    </span>
+                  )}
+                </Link>
+              </nav>
+            )}
 
-            {/* Action Buttons (Theme Toggle, Search, Wishlist, Cart) */}
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              {/* Theme Toggle */}
-              <button
-                type="button"
-                onClick={toggleTheme}
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-amber-400 dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
-              >
-                {theme === 'dark' ? (
-                  <Sun className="w-5 h-5 text-amber-400" />
-                ) : (
-                  <Moon className="w-5 h-5 text-zinc-700" />
-                )}
-              </button>
+            {/* Action Buttons */}
+            {isAdminRoute ? (
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                {/* Theme Toggle */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-amber-400 dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-5 h-5 text-amber-400" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-zinc-700" />
+                  )}
+                </button>
 
-              {/* Search Toggle */}
-              <button
-                type="button"
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
-                aria-label="Open search bar"
-                aria-expanded={isSearchOpen}
-                className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
-              >
-                <Search className="w-5 h-5" />
-              </button>
+                {/* View Storefront */}
+                <Link
+                  href="/"
+                  target="_blank"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  title="View customer store"
+                >
+                  <span>Store</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
 
-              {/* Wishlist */}
-              <Link
-                href="/wishlist"
-                aria-label={`Wishlist, ${wishlistIds.length} ${
-                  wishlistIds.length === 1 ? 'item' : 'items'
-                } saved`}
-                className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
-              >
-                <Heart className="w-5 h-5" />
-                {wishlistIds.length > 0 && (
-                  <span className="absolute top-1 right-1 bg-amber-500 text-zinc-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-                    {wishlistIds.length > 9 ? '9+' : wishlistIds.length}
-                  </span>
-                )}
-              </Link>
+                {/* Logout Button */}
+                <form action={signOut}>
+                  <button
+                    type="submit"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors"
+                    title="Sign out of admin"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Logout</span>
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                {/* Theme Toggle */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-amber-400 dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-5 h-5 text-amber-400" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-zinc-700" />
+                  )}
+                </button>
 
-              {/* Cart Link */}
-              <Link
-                href="/cart"
-                aria-label={`Shopping cart, ${totalItemsCount} ${
-                  totalItemsCount === 1 ? 'item' : 'items'
-                }`}
-                className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                {totalItemsCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-amber-500 text-zinc-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
-                    {totalItemsCount > 9 ? '9+' : totalItemsCount}
-                  </span>
-                )}
-              </Link>
-            </div>
+                {/* Search Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  aria-label="Open search bar"
+                  aria-expanded={isSearchOpen}
+                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+
+                {/* Wishlist */}
+                <Link
+                  href="/wishlist"
+                  aria-label={`Wishlist, ${wishlistIds.length} ${
+                    wishlistIds.length === 1 ? 'item' : 'items'
+                  } saved`}
+                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
+                >
+                  <Heart className="w-5 h-5" />
+                  {wishlistIds.length > 0 && (
+                    <span className="absolute top-1 right-1 bg-amber-500 text-zinc-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                      {wishlistIds.length > 9 ? '9+' : wishlistIds.length}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Cart Link */}
+                <Link
+                  href="/cart"
+                  aria-label={`Shopping cart, ${totalItemsCount} ${
+                    totalItemsCount === 1 ? 'item' : 'items'
+                  }`}
+                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                  {totalItemsCount > 0 && (
+                    <span className="absolute top-1 right-1 bg-amber-500 text-zinc-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
+                      {totalItemsCount > 9 ? '9+' : totalItemsCount}
+                    </span>
+                  )}
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 
@@ -392,19 +505,26 @@ export function Header({ categories: propCategories }: HeaderProps) {
 
           {/* Drawer Content */}
           <div className="relative w-full max-w-xs sm:max-w-sm bg-white dark:bg-zinc-900 h-full shadow-2xl flex flex-col z-10 p-5 overflow-y-auto overflow-x-hidden transition-colors">
-            {/* Header: Brand + Close Button */}
+            {/* Drawer Header with Logo & Close Button */}
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
               <Link
-                href="/"
+                href={isAdminRoute ? '/admin' : '/'}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
               >
                 <span className="bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-black text-lg px-2 py-0.5 uppercase rounded-xs">
-                  PRO
+                  {logoPrefix}
                 </span>
-                <span className="font-black text-lg tracking-widest text-zinc-900 dark:text-white uppercase">
-                  EDGE
-                </span>
+                {logoSuffix && (
+                  <span className="font-black text-lg tracking-widest text-zinc-900 dark:text-white uppercase">
+                    {logoSuffix}
+                  </span>
+                )}
+                {isAdminRoute && (
+                  <span className="ml-1 px-1.5 py-0.2 text-[9px] font-black uppercase rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                    Admin
+                  </span>
+                )}
               </Link>
               <button
                 type="button"
@@ -416,160 +536,224 @@ export function Header({ categories: propCategories }: HeaderProps) {
               </button>
             </div>
 
-            {/* Quick Link: Shop All */}
-            <div className="py-3 border-b border-zinc-100 dark:border-zinc-800/80">
-              <Link
-                href="/shop"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-between py-2 text-sm font-extrabold uppercase tracking-wider text-zinc-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-              >
-                <span>Browse All Products</span>
-                <ArrowRight className="w-4 h-4 text-amber-500" />
-              </Link>
-            </div>
-
-            {/* Accordion List for Primary Sports */}
-            <div className="py-3 space-y-1 flex-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 px-1 block mb-1">
-                Shop by Sport & Category
-              </span>
-
-              {sports.map((sport) => {
-                const hasChildren = sport.children && sport.children.length > 0;
-                const isExpanded = !!expandedMobileSports[sport.slug];
-
-                return (
-                  <div
-                    key={sport.id}
-                    className="rounded-xl border border-zinc-100 dark:border-zinc-800/60 overflow-hidden"
+            {isAdminRoute ? (
+              <div className="py-4 space-y-2 flex-1">
+                <Link
+                  href="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                    pathname === '/admin'
+                      ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  <LayoutDashboard className="w-4 h-4 text-amber-500" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/admin/products"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                    pathname.startsWith('/admin/products')
+                      ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  <Package className="w-4 h-4 text-amber-500" />
+                  <span>Products</span>
+                </Link>
+                <Link
+                  href="/admin/settings"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                    pathname === '/admin/settings'
+                      ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  <Sliders className="w-4 h-4 text-amber-500" />
+                  <span>Settings</span>
+                </Link>
+                <Link
+                  href="/"
+                  target="_blank"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-xl text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <ExternalLink className="w-4 h-4 text-zinc-400" />
+                    <span>View Customer Store</span>
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+                </Link>
+                <form action={signOut} className="pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                  <button
+                    type="submit"
+                    className="w-full flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
                   >
-                    {/* Sport Header Button */}
-                    <div className="flex items-center justify-between bg-zinc-50/70 dark:bg-zinc-800/40 px-3 py-2.5">
-                      <Link
-                        href={`/shop?category=${sport.slug}`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white hover:text-amber-500 transition-colors"
-                      >
-                        {sport.name}
-                      </Link>
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <>
+                {/* Quick Link: Shop All */}
+                <div className="py-3 border-b border-zinc-100 dark:border-zinc-800/80">
+                  <Link
+                    href="/shop"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-2 text-sm font-extrabold uppercase tracking-wider text-zinc-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                  >
+                    <span>Browse All Products</span>
+                    <ArrowRight className="w-4 h-4 text-amber-500" />
+                  </Link>
+                </div>
 
-                      {hasChildren && (
-                        <button
-                          type="button"
-                          onClick={() => toggleMobileSport(sport.slug)}
-                          aria-expanded={isExpanded}
-                          aria-controls={`mobile-sub-${sport.slug}`}
-                          aria-label={`Toggle ${sport.name} categories`}
-                          className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
-                        >
-                          <ChevronDown
-                            className={`w-4 h-4 transition-transform duration-200 ${
-                              isExpanded ? 'rotate-180 text-amber-500' : ''
-                            }`}
-                          />
-                        </button>
-                      )}
-                    </div>
+                {/* Accordion List for Primary Sports */}
+                <div className="py-3 space-y-1 flex-1">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 px-1 block mb-1">
+                    Shop by Sport & Category
+                  </span>
 
-                    {/* Expandable Subcategories */}
-                    {hasChildren && isExpanded && (
+                  {sports.map((sport) => {
+                    const hasChildren = sport.children && sport.children.length > 0;
+                    const isExpanded = !!expandedMobileSports[sport.slug];
+
+                    return (
                       <div
-                        id={`mobile-sub-${sport.slug}`}
-                        role="region"
-                        aria-label={`${sport.name} Subcategories`}
-                        className="bg-white dark:bg-zinc-900/60 px-3 py-2 space-y-1 border-t border-zinc-100 dark:border-zinc-800/60"
+                        key={sport.id}
+                        className="rounded-xl border border-zinc-100 dark:border-zinc-800/60 overflow-hidden"
                       >
-                        <Link
-                          href={`/shop?category=${sport.slug}`}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block py-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
-                        >
-                          All {sport.name} &rarr;
-                        </Link>
-                        {sport.children!.map((sub) => (
+                        {/* Sport Header Button */}
+                        <div className="flex items-center justify-between bg-zinc-50/70 dark:bg-zinc-800/40 px-3 py-2.5">
                           <Link
-                            key={sub.id}
-                            href={`/shop?category=${sub.slug}`}
+                            href={`/shop?category=${sport.slug}`}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="block py-1 text-xs text-zinc-600 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                            className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white hover:text-amber-500 transition-colors"
                           >
-                            {sub.name}
+                            {sport.name}
                           </Link>
-                        ))}
+
+                          {hasChildren && (
+                            <button
+                              type="button"
+                              onClick={() => toggleMobileSport(sport.slug)}
+                              aria-expanded={isExpanded}
+                              aria-controls={`mobile-sub-${sport.slug}`}
+                              aria-label={`Toggle ${sport.name} categories`}
+                              className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
+                            >
+                              <ChevronDown
+                                className={`w-4 h-4 transition-transform duration-200 ${
+                                  isExpanded ? 'rotate-180 text-amber-500' : ''
+                                }`}
+                              />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Expandable Subcategories */}
+                        {hasChildren && isExpanded && (
+                          <div
+                            id={`mobile-sub-${sport.slug}`}
+                            role="region"
+                            aria-label={`${sport.name} Subcategories`}
+                            className="bg-white dark:bg-zinc-900/60 px-3 py-2 space-y-1 border-t border-zinc-100 dark:border-zinc-800/60"
+                          >
+                            <Link
+                              href={`/shop?category=${sport.slug}`}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="block py-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
+                            >
+                              All {sport.name} &rarr;
+                            </Link>
+                            {sport.children!.map((sub) => (
+                              <Link
+                                key={sub.id}
+                                href={`/shop?category=${sub.slug}`}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="block py-1 text-xs text-zinc-600 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                              >
+                                {sub.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Sale Link */}
+                  <div className="pt-2">
+                    <Link
+                      href="/sale"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center justify-between p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-amber-500" />
+                        <span>Special Offers & Sale</span>
+                      </span>
+                      {saleEnabled !== false && (
+                        <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-zinc-950 rounded-full">
+                          {saleDiscountPercent ?? 30}% OFF
+                        </span>
+                      )}
+                    </Link>
+                  </div>
+
+                  {/* Legacy Collections Accordion for backward compatibility */}
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsLegacyExpanded(!isLegacyExpanded)}
+                      aria-expanded={isLegacyExpanded}
+                      className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
+                    >
+                      <span>Classic Shoe Collections</span>
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform ${
+                          isLegacyExpanded ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                    {isLegacyExpanded && (
+                      <div className="px-3 py-1 space-y-1 text-xs">
+                        <Link
+                          href="/men"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
+                        >
+                          Men&apos;s Shoes
+                        </Link>
+                        <Link
+                          href="/women"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
+                        >
+                          Women&apos;s Shoes
+                        </Link>
+                        <Link
+                          href="/sports"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
+                        >
+                          Sports & Training
+                        </Link>
+                        <Link
+                          href="/shop?category=casual"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
+                        >
+                          Casual Sneakers
+                        </Link>
                       </div>
                     )}
                   </div>
-                );
-              })}
-
-              {/* Sale Link */}
-              <div className="pt-2">
-                <Link
-                  href="/sale"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    <span>Special Offers & Sale</span>
-                  </span>
-                  {saleEnabled !== false && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-zinc-950 rounded-full">
-                      {saleDiscountPercent ?? 30}% OFF
-                    </span>
-                  )}
-                </Link>
-              </div>
-
-              {/* Legacy Collections Accordion for backward compatibility */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsLegacyExpanded(!isLegacyExpanded)}
-                  aria-expanded={isLegacyExpanded}
-                  className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
-                >
-                  <span>Classic Shoe Collections</span>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform ${
-                      isLegacyExpanded ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                {isLegacyExpanded && (
-                  <div className="px-3 py-1 space-y-1 text-xs">
-                    <Link
-                      href="/men"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
-                    >
-                      Men&apos;s Shoes
-                    </Link>
-                    <Link
-                      href="/women"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
-                    >
-                      Women&apos;s Shoes
-                    </Link>
-                    <Link
-                      href="/sports"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
-                    >
-                      Sports & Training
-                    </Link>
-                    <Link
-                      href="/shop?category=casual"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
-                    >
-                      Casual Sneakers
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
+                </div>
+              </>
+            )}
 
             {/* Mobile Theme Toggle Row */}
             <div className="pt-3 pb-2 border-t border-zinc-200 dark:border-zinc-800">

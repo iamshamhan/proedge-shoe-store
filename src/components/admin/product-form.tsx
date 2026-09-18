@@ -17,6 +17,7 @@ type Category = {
 
 type ProductFormProps = {
   categories: Category[];
+  defaultCategoryId?: string;
   product?: {
     id: string;
     name: string;
@@ -48,7 +49,7 @@ function slugify(value: string) {
     .replace(/(^-|-$)+/g, '');
 }
 
-export function ProductForm({ categories, product }: ProductFormProps) {
+export function ProductForm({ categories, defaultCategoryId, product }: ProductFormProps) {
   const router = useRouter();
   const isEdit = !!product;
 
@@ -56,7 +57,9 @@ export function ProductForm({ categories, product }: ProductFormProps) {
   const [slug, setSlug] = useState(product?.slug ?? '');
   const [slugTouched, setSlugTouched] = useState(isEdit);
   const [description, setDescription] = useState(product?.description ?? '');
-  const [categoryId, setCategoryId] = useState(product?.category_id ?? '');
+  const [categoryId, setCategoryId] = useState(
+    product?.category_id ?? defaultCategoryId ?? '',
+  );
   const [price, setPrice] = useState(product ? String(product.price) : '');
   const [compareAtPrice, setCompareAtPrice] = useState(
     product?.compare_at_price ? String(product.compare_at_price) : '',

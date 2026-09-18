@@ -8,6 +8,10 @@ export interface StoreSettings {
   heroProductSlug?: string;
   saleEnabled?: boolean;
   saleDiscountPercent?: number;
+  brandName?: string;
+  contactAddress?: string;
+  contactPhone?: string;
+  contactEmail?: string;
 }
 
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
@@ -18,6 +22,10 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   heroProductSlug: 'proedge-runner-x1',
   saleEnabled: true,
   saleDiscountPercent: 30,
+  brandName: 'PROEDGE',
+  contactAddress: 'Galle Road, Colombo 03, Sri Lanka',
+  contactPhone: '+94 11 234 5678',
+  contactEmail: 'support@proedge.lk',
 };
 
 type DbSettingsRow = {
@@ -29,6 +37,10 @@ type DbSettingsRow = {
   hero_product_slug?: string | null;
   sale_enabled?: boolean | null;
   sale_discount_percent?: number | null;
+  brand_name?: string | null;
+  contact_address?: string | null;
+  contact_phone?: string | null;
+  contact_email?: string | null;
 };
 
 /**
@@ -83,6 +95,10 @@ export async function getStoreSettings(): Promise<StoreSettings> {
         typeof row.sale_discount_percent === 'number'
           ? row.sale_discount_percent
           : DEFAULT_STORE_SETTINGS.saleDiscountPercent,
+      brandName: row.brand_name?.trim() || DEFAULT_STORE_SETTINGS.brandName,
+      contactAddress: row.contact_address?.trim() || DEFAULT_STORE_SETTINGS.contactAddress,
+      contactPhone: row.contact_phone?.trim() || DEFAULT_STORE_SETTINGS.contactPhone,
+      contactEmail: row.contact_email?.trim() || DEFAULT_STORE_SETTINGS.contactEmail,
     };
   } catch (err) {
     console.error('Error fetching store settings:', err);

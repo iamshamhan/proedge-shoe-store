@@ -42,7 +42,11 @@ async function fetchLatestSettings() {
           data.bannerTagline !== globalSettings.bannerTagline ||
           data.heroProductSlug !== globalSettings.heroProductSlug ||
           data.saleEnabled !== globalSettings.saleEnabled ||
-          data.saleDiscountPercent !== globalSettings.saleDiscountPercent;
+          data.saleDiscountPercent !== globalSettings.saleDiscountPercent ||
+          data.brandName !== globalSettings.brandName ||
+          data.contactAddress !== globalSettings.contactAddress ||
+          data.contactPhone !== globalSettings.contactPhone ||
+          data.contactEmail !== globalSettings.contactEmail;
 
         if (changed) {
           globalSettings = data;
