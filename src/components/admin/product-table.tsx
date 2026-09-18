@@ -70,12 +70,12 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
 
   if (products.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-16 text-center">
-        <Package className="mx-auto mb-4 h-12 w-12 text-zinc-300" />
-        <p className="text-sm font-bold text-zinc-500">No products yet.</p>
+      <div className="rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-6 py-16 text-center">
+        <Package className="mx-auto mb-4 h-12 w-12 text-zinc-300 dark:text-zinc-600" />
+        <p className="text-sm font-bold text-zinc-500 dark:text-zinc-400">No products yet.</p>
         <Link
           href="/admin/products/new"
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-amber-600 hover:text-zinc-950"
+          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-zinc-900 dark:bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white dark:text-zinc-950 transition-colors hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950"
         >
           <Plus className="h-4 w-4" />
           Create your first product
@@ -86,18 +86,18 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
 
   return (
     <>
-      <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         {actionError && (
           <div
             role="alert"
-            className="flex items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="flex items-center justify-between gap-3 border-b border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm text-red-700 dark:text-red-300"
           >
             <span>{actionError}</span>
             <button
               type="button"
               onClick={() => setActionError(null)}
               aria-label="Dismiss error"
-              className="rounded p-1 text-red-500 transition-colors hover:bg-red-100"
+              className="rounded p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -105,7 +105,7 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
         )}
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50 text-xs font-bold uppercase tracking-wider text-zinc-500">
+            <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/60 text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
               <th className="px-4 py-3">Product</th>
               <th className="hidden px-4 py-3 md:table-cell">Category</th>
               <th className="hidden px-4 py-3 sm:table-cell">Price</th>
@@ -114,7 +114,7 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100">
+          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {products.map((product) => {
               const img = [...product.product_images].sort((a, b) => a.sort_order - b.sort_order)[0];
               const totalStock = product.product_variants.reduce((s, v) => s + v.stock, 0);
@@ -123,7 +123,7 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
                 : product.categories?.name;
 
               return (
-                <tr key={product.id} className="transition-colors hover:bg-zinc-50/50">
+                <tr key={product.id} className="transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-800/40">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {img ? (
@@ -134,43 +134,43 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
                           className="h-10 w-10 rounded-lg object-cover"
                         />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 text-zinc-400">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500">
                           <Package className="h-5 w-5" />
                         </div>
                       )}
                       <div>
-                        <p className="font-bold text-zinc-900">{product.name}</p>
-                        <p className="text-xs text-zinc-400">/{product.slug}</p>
+                        <p className="font-bold text-zinc-900 dark:text-white">{product.name}</p>
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500">/{product.slug}</p>
                       </div>
                     </div>
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
-                    <span className="rounded-lg bg-zinc-100 px-2 py-1 text-xs font-bold text-zinc-600">
+                    <span className="rounded-lg bg-zinc-100 dark:bg-zinc-800 px-2 py-1 text-xs font-bold text-zinc-600 dark:text-zinc-300">
                       {categoryName ?? '—'}
                     </span>
                   </td>
-                  <td className="hidden px-4 py-3 font-bold text-zinc-900 sm:table-cell">
+                  <td className="hidden px-4 py-3 font-bold text-zinc-900 dark:text-white sm:table-cell">
                     {formatLKR(product.price)}
                   </td>
                   <td className="hidden px-4 py-3 sm:table-cell">
-                    <span className={`font-bold ${totalStock === 0 ? 'text-red-500' : 'text-zinc-900'}`}>
+                    <span className={`font-bold ${totalStock === 0 ? 'text-red-500' : 'text-zinc-900 dark:text-white'}`}>
                       {totalStock}
                     </span>
                   </td>
                   <td className="hidden gap-1 px-4 py-3 lg:table-cell">
                     <div className="flex flex-wrap gap-1">
                       {product.featured && (
-                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                        <span className="rounded bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
                           Featured
                         </span>
                       )}
                       {product.is_new_arrival && (
-                        <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-bold text-green-700">
+                        <span className="rounded bg-green-100 dark:bg-green-950/60 px-1.5 py-0.5 text-[10px] font-bold text-green-700 dark:text-green-400">
                           New
                         </span>
                       )}
                       {product.is_on_sale && (
-                        <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700">
+                        <span className="rounded bg-red-100 dark:bg-red-950/60 px-1.5 py-0.5 text-[10px] font-bold text-red-700 dark:text-red-400">
                           Sale
                         </span>
                       )}
@@ -183,19 +183,19 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
                         onClick={() => handleToggle(product)}
                         disabled={toggling === product.id}
                         title={product.is_active ? 'Deactivate' : 'Activate'}
-                        className="rounded-lg p-2 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+                        className="rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
                       >
                         {toggling === product.id ? (
                           <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
                         ) : product.is_active ? (
-                          <ToggleRight className="h-5 w-5 text-green-600" />
+                          <ToggleRight className="h-5 w-5 text-green-600 dark:text-green-500" />
                         ) : (
-                          <ToggleLeft className="h-5 w-5 text-zinc-300" />
+                          <ToggleLeft className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
                         )}
                       </button>
                       <Link
                         href={`/admin/products/${product.id}`}
-                        className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+                        className="rounded-lg p-2 text-zinc-400 dark:text-zinc-500 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white"
                         title="Edit"
                       >
                         <Edit className="h-4 w-4" />
@@ -203,7 +203,7 @@ export function ProductTable({ products: initial }: { products: Product[] }) {
                       <button
                         type="button"
                         onClick={() => setTargetDelete(product)}
-                        className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                        className="rounded-lg p-2 text-zinc-400 dark:text-zinc-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-600 dark:hover:text-red-400"
                         title="Delete"
                       >
                         <Trash2 className="h-4 w-4" />

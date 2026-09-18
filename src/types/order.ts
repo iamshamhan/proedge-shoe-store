@@ -3,7 +3,9 @@ export interface ValidatedOrderItem {
   variant_id: string;
   name: string;
   colour: string;
-  size: number;
+  size: number | string;
+  size_system?: string;
+  size_value?: string;
   quantity: number;
   unit_price: number;
   line_total: number;

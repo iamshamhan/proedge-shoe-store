@@ -7,7 +7,7 @@ export async function NewArrivalsSection() {
   const newArrivals = await getNewArrivals();
 
   return (
-    <section className="py-16 sm:py-24 bg-white border-t border-zinc-200">
+    <section className="py-16 sm:py-24 bg-white dark:bg-zinc-900/40 border-t border-zinc-200 dark:border-zinc-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Fresh Drops"

@@ -6,7 +6,9 @@ import type { ValidatedOrder } from '@/types/order';
 export type CheckoutItemInput = {
   productId: string;
   variantId?: string | null;
-  size?: number;
+  size?: number | string;
+  sizeSystem?: string;
+  sizeValue?: string;
   color?: string;
   quantity: number;
 };
@@ -77,17 +79,19 @@ export async function placeOrder(
     return { success: false, error: 'Your cart is empty or contains too many items.' };
   }
 
-  const cleanItems: { productId: string; variantId: string | null; size: number; color: string; quantity: number }[] =
-    items.map((it) => {
-      const qty = Math.trunc(Number(it.quantity));
-      return {
-        productId: String(it.productId ?? ''),
-        variantId: it.variantId ? String(it.variantId) : null,
-        size: Number(it.size),
-        color: String(it.color ?? ''),
-        quantity: Number.isFinite(qty) && qty >= 1 && qty <= MAX_QTY ? qty : 0,
-      };
-    });
+  const cleanItems = items.map((it) => {
+    const qty = Math.trunc(Number(it.quantity));
+    const sizeStr = it.size !== undefined && it.size !== null ? String(it.size) : '';
+    return {
+      productId: String(it.productId ?? ''),
+      variantId: it.variantId ? String(it.variantId) : null,
+      size: sizeStr,
+      sizeSystem: it.sizeSystem ? String(it.sizeSystem) : 'EU',
+      sizeValue: it.sizeValue ? String(it.sizeValue) : sizeStr,
+      color: String(it.color ?? ''),
+      quantity: Number.isFinite(qty) && qty >= 1 && qty <= MAX_QTY ? qty : 0,
+    };
+  });
 
   if (cleanItems.some((it) => !it.productId || it.quantity <= 0)) {
     return { success: false, error: 'Your cart contains an invalid item.' };
@@ -102,6 +106,8 @@ export async function placeOrder(
       : {
           productId: it.productId,
           size: it.size,
+          sizeSystem: it.sizeSystem,
+          sizeValue: it.sizeValue,
           color: it.color,
           quantity: it.quantity,
         },

@@ -1,7 +1,9 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { getSupabaseServer } from '@/lib/supabase/server';
+import { getAuthUser } from '@/lib/auth/admin';
 import { isOrderStatus } from '@/lib/order-status';
 
 // ---------------------------------------------------------------------------
@@ -162,25 +164,53 @@ export async function removeProductImage(
 export async function addProductVariant(
   productId: string,
   colour: string,
-  size: number,
+  size: number | string,
   stock: number,
+  sizeSystem: string = 'EU',
 ): Promise<{ id: string } | { error: string }> {
   if (!colour.trim()) return { error: 'Colour is required.' };
-  if (size < 33 || size > 50) return { error: 'Size must be between 33 and 50.' };
+  const sizeValueStr = String(size).trim();
+  if (!sizeValueStr) return { error: 'Size is required.' };
   if (stock < 0) return { error: 'Stock cannot be negative.' };
 
+  const parsedInt = parseInt(sizeValueStr, 10);
+  const numericSize = !isNaN(parsedInt) ? parsedInt : 0;
+
   const supabase = await getSupabaseServer();
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from('product_variants')
-    .insert({ product_id: productId, colour: colour.trim(), size, stock })
+    .insert({
+      product_id: productId,
+      colour: colour.trim(),
+      size: numericSize,
+      size_system: sizeSystem,
+      size_value: sizeValueStr,
+      stock,
+    })
     .select('id')
     .single();
+
+  if (error && error.message?.includes('size_system')) {
+    // Fallback for pre-migration schema
+    const fallbackRes = await supabase
+      .from('product_variants')
+      .insert({
+        product_id: productId,
+        colour: colour.trim(),
+        size: numericSize || 42,
+        stock,
+      })
+      .select('id')
+      .single();
+    data = fallbackRes.data;
+    error = fallbackRes.error;
+  }
 
   if (error) {
     if (error.code === '23505') return { error: 'A variant with this colour and size already exists.' };
     return { error: error.message };
   }
-  return { id: data.id };
+  return { id: data!.id };
 }
 
 export async function removeProductVariant(
@@ -215,5 +245,61 @@ export async function updateOrderStatus(
   const supabase = await getSupabaseServer();
   const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
   if (error) return { error: error.message };
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// Store Settings
+// ---------------------------------------------------------------------------
+
+export type UpdateSettingsInput = {
+  free_delivery_enabled: boolean;
+  free_delivery_threshold: number;
+  default_delivery_fee: number;
+  banner_tagline?: string;
+};
+
+export async function updateStoreSettings(
+  input: UpdateSettingsInput,
+): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) {
+    return { error: 'Unauthorized: Admin privileges required.' };
+  }
+
+  if (typeof input.free_delivery_threshold !== 'number' || input.free_delivery_threshold < 0) {
+    return { error: 'Free delivery threshold must be a positive number.' };
+  }
+
+  if (typeof input.default_delivery_fee !== 'number' || input.default_delivery_fee < 0) {
+    return { error: 'Default delivery fee must be a positive number.' };
+  }
+
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase
+    .from('store_settings')
+    .upsert({
+      id: 'default',
+      free_delivery_enabled: Boolean(input.free_delivery_enabled),
+      free_delivery_threshold: Math.round(input.free_delivery_threshold),
+      default_delivery_fee: Math.round(input.default_delivery_fee),
+      banner_tagline: input.banner_tagline?.trim() || 'Built for Your Next Step',
+      updated_at: new Date().toISOString(),
+    });
+
+  if (error) {
+    if (error.code === '42P01') {
+      return {
+        error:
+          'Table "store_settings" does not exist in Supabase yet. Please run the SQL file "supabase/add_settings.sql" in your Supabase SQL Editor.',
+      };
+    }
+    return { error: error.message };
+  }
+
+  revalidatePath('/', 'layout');
+  revalidatePath('/cart');
+  revalidatePath('/checkout');
+  revalidatePath('/admin/settings');
   return { success: true };
 }

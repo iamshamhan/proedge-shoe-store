@@ -58,13 +58,13 @@ export function CartDrawer() {
       />
 
       {/* Drawer Container */}
-      <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10">
+      <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 h-full shadow-2xl flex flex-col z-10 transition-colors">
         
         {/* Drawer Header */}
-        <div className="p-6 border-b border-zinc-200 flex items-center justify-between">
+        <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-amber-600" />
-            <h2 className="text-lg font-black uppercase tracking-wider text-zinc-900">
+            <ShoppingBag className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            <h2 className="text-lg font-black uppercase tracking-wider text-zinc-900 dark:text-white">
               Shopping Cart ({totalItemsCount})
             </h2>
           </div>
@@ -73,7 +73,7 @@ export function CartDrawer() {
             autoFocus
             onClick={close}
             aria-label="Close cart drawer"
-            className="p-2 text-zinc-400 hover:text-zinc-900 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-zinc-900"
+            className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <X className="w-5 h-5" />
           </button>
@@ -83,21 +83,21 @@ export function CartDrawer() {
         <div className="flex-1 overflow-y-auto p-6 space-y-2">
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
-              <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400">
+              <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
                 <ShoppingBag className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-extrabold text-base text-zinc-900 uppercase">
+                <h3 className="font-extrabold text-base text-zinc-900 dark:text-white uppercase">
                   Your cart is empty
                 </h3>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   Explore our engineered PROEDGE footwear collection.
                 </p>
               </div>
               <Link
                 href="/shop"
                 onClick={close}
-                className="px-6 py-3 bg-zinc-900 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-amber-600 hover:text-zinc-950 transition-colors focus-visible:ring-2 focus-visible:ring-zinc-900"
+                className="px-6 py-3 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 Shop Now
               </Link>
@@ -109,17 +109,17 @@ export function CartDrawer() {
 
         {/* Drawer Footer (Subtotal & Actions) */}
         {items.length > 0 && (
-          <div className="p-6 border-t border-zinc-200 bg-zinc-50 space-y-4">
+          <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                 Subtotal
               </span>
-              <span className="text-lg font-black text-zinc-900">
+              <span className="text-lg font-black text-zinc-900 dark:text-white">
                 {formatLKR(subtotal)}
               </span>
             </div>
 
-            <p className="text-[11px] text-zinc-400 text-center">
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 text-center">
               Taxes and islandwide delivery calculated at checkout.
             </p>
 
@@ -127,7 +127,7 @@ export function CartDrawer() {
               <Link
                 href="/cart"
                 onClick={close}
-                className="py-3.5 px-4 bg-white border border-zinc-300 text-zinc-900 font-extrabold text-xs uppercase tracking-wider rounded-xl text-center hover:bg-zinc-100 transition-colors focus-visible:ring-2 focus-visible:ring-zinc-900"
+                className="py-3.5 px-4 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-extrabold text-xs uppercase tracking-wider rounded-xl text-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 View Cart
               </Link>
@@ -135,7 +135,7 @@ export function CartDrawer() {
               <Link
                 href="/checkout"
                 onClick={close}
-                className="py-3.5 px-4 bg-zinc-900 text-white font-black text-xs uppercase tracking-wider rounded-xl text-center hover:bg-amber-600 hover:text-zinc-950 transition-all flex items-center justify-center gap-1.5 shadow-md focus-visible:ring-2 focus-visible:ring-zinc-900"
+                className="py-3.5 px-4 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-black text-xs uppercase tracking-wider rounded-xl text-center hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-all flex items-center justify-center gap-1.5 shadow-md focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 <span>Checkout</span>
                 <ArrowRight className="w-4 h-4" />

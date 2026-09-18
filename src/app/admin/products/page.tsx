@@ -26,19 +26,19 @@ export default async function AdminProductsPage() {
     <div>
       <div className="mb-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 dark:bg-zinc-800 text-white">
             <Package className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-zinc-900">Products</h1>
-            <p className="text-sm text-zinc-400">
+            <h1 className="text-xl font-black text-zinc-900 dark:text-white">Products</h1>
+            <p className="text-sm text-zinc-400 dark:text-zinc-500">
               {products?.length ?? 0} product{(products?.length ?? 0) === 1 ? '' : 's'} in catalog
             </p>
           </div>
         </div>
         <Link
           href="/admin/products/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-amber-600 hover:text-zinc-950"
+          className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 dark:bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white dark:text-zinc-950 transition-colors hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950"
         >
           <Plus className="h-4 w-4" />
           New Product

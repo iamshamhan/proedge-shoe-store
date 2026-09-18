@@ -16,8 +16,9 @@ import {
   StickyNote,
 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
+import { useStoreSettings } from '@/context/settings-context';
 import { formatLKR } from '@/data/products';
-import { getDeliveryFee, STORE_CONFIG } from '@/lib/config';
+import { getDeliveryFee } from '@/lib/config';
 import { generateWhatsAppOrderLink } from '@/lib/whatsapp';
 import { placeOrder } from '@/app/checkout/actions';
 import type { ValidatedOrder } from '@/types/order';
@@ -47,10 +48,11 @@ const INITIAL_FORM: CheckoutFormState = {
 type FormErrors = Partial<Record<keyof CheckoutFormState, string>>;
 
 const inputClasses =
-  'w-full px-4 py-3 bg-white border border-zinc-300 rounded-xl text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all';
+  'w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-amber-500 transition-all';
 
 export function CheckoutPage() {
   const { items, subtotal } = useCart();
+  const settings = useStoreSettings();
 
   const [form, setForm] = useState<CheckoutFormState>(INITIAL_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -59,7 +61,7 @@ export function CheckoutPage() {
   const [orderData, setOrderData] = useState<ValidatedOrder | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const deliveryFee = getDeliveryFee(subtotal);
+  const deliveryFee = getDeliveryFee(subtotal, settings);
   const total = subtotal + deliveryFee;
 
   const handleInputChange = (
@@ -123,6 +125,7 @@ export function CheckoutPage() {
         productId: item.productId,
         variantId: item.variantId,
         size: item.size,
+        sizeSystem: item.sizeSystem,
         color: item.color,
         quantity: item.quantity,
       })),
@@ -151,7 +154,8 @@ export function CheckoutPage() {
       },
       items: order.items.map((i) => ({
         name: i.name,
-        size: i.size,
+        size: i.size_value || i.size,
+        sizeSystem: i.size_system,
         color: i.colour,
         quantity: i.quantity,
         price: i.unit_price,
@@ -169,21 +173,21 @@ export function CheckoutPage() {
 
   if (items.length === 0 && !orderUrl) {
     return (
-      <div className="py-16 sm:py-24 bg-zinc-50 min-h-screen">
+      <div className="py-16 sm:py-24 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-white border border-zinc-200 rounded-3xl p-10 sm:p-16 shadow-xs">
-            <div className="w-20 h-20 mx-auto rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400 mb-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-10 sm:p-16 shadow-xs">
+            <div className="w-20 h-20 mx-auto rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-6">
               <ShoppingBag className="w-10 h-10" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-zinc-900">
+            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white">
               Your cart is empty
             </h1>
-            <p className="mt-2 text-zinc-500 text-sm sm:text-base">
+            <p className="mt-2 text-zinc-500 dark:text-zinc-400 text-sm sm:text-base">
               Add footwear to your cart before proceeding to checkout.
             </p>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 mt-8 px-8 py-4 bg-zinc-900 text-white font-black text-xs uppercase tracking-wider rounded-xl hover:bg-amber-600 hover:text-zinc-950 transition-all shadow-md"
+              className="inline-flex items-center gap-2 mt-8 px-8 py-4 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-black text-xs uppercase tracking-wider rounded-xl hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-all shadow-md"
             >
               <span>Shop Now</span>
               <ArrowRight className="w-4 h-4" />
@@ -197,34 +201,34 @@ export function CheckoutPage() {
   // Post-submit confirmation state (all values server-validated)
   if (orderData && orderUrl) {
     return (
-      <div className="py-16 sm:py-24 bg-zinc-50 min-h-screen">
+      <div className="py-16 sm:py-24 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-white border border-zinc-200 rounded-3xl p-10 sm:p-14 shadow-xs">
-            <div className="w-20 h-20 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-10 sm:p-14 shadow-xs">
+            <div className="w-20 h-20 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-zinc-900">
+            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white">
               Order Ready for WhatsApp
             </h1>
-            <p className="mt-3 text-zinc-500 text-sm sm:text-base leading-relaxed">
-              Your order <span className="font-black text-zinc-900">#{orderData.order_number}</span>{' '}
+            <p className="mt-3 text-zinc-500 dark:text-zinc-400 text-sm sm:text-base leading-relaxed">
+              Your order <span className="font-black text-zinc-900 dark:text-white">#{orderData.order_number}</span>{' '}
               was placed successfully and WhatsApp should have opened with a pre-filled
               message. If it did not open, use the button below. Your order is confirmed
-              once you press <span className="font-bold text-zinc-800">Send</span> in WhatsApp.
+              once you press <span className="font-bold text-zinc-800 dark:text-zinc-200">Send</span> in WhatsApp.
             </p>
 
-            <div className="mt-8 rounded-2xl bg-zinc-900 text-white p-6 text-left space-y-3 text-sm">
+            <div className="mt-8 rounded-2xl bg-zinc-900 dark:bg-zinc-950 border dark:border-zinc-800 text-white p-6 text-left space-y-3 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-zinc-400">Order Number</span>
                 <span className="font-black text-amber-400">{orderData.order_number}</span>
               </div>
-              <div className="border-t border-zinc-700 pt-3 space-y-2">
+              <div className="border-t border-zinc-700 dark:border-zinc-800 pt-3 space-y-2">
                 {orderData.items.map((item, idx) => (
                   <div key={idx} className="flex items-start justify-between gap-3">
                     <span className="text-zinc-300">
                       {item.name}
                       <span className="block text-xs text-zinc-500">
-                        EU {item.size} • {item.colour} • Qty {item.quantity}
+                        {item.size_system && item.size_system !== 'Custom' ? `${item.size_system} ${item.size}` : item.size} • {item.colour} • Qty {item.quantity}
                       </span>
                     </span>
                     <span className="font-bold">{formatLKR(item.line_total)}</span>
@@ -241,7 +245,7 @@ export function CheckoutPage() {
                   {orderData.delivery_fee === 0 ? 'FREE' : formatLKR(orderData.delivery_fee)}
                 </span>
               </div>
-              <div className="flex items-center justify-between pt-2 border-t border-zinc-700">
+              <div className="flex items-center justify-between pt-2 border-t border-zinc-700 dark:border-zinc-800">
                 <span className="text-zinc-400">Total</span>
                 <span className="font-black text-amber-400">{formatLKR(orderData.total)}</span>
               </div>
@@ -259,7 +263,7 @@ export function CheckoutPage() {
               </a>
               <Link
                 href="/shop"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white border border-zinc-300 text-zinc-900 font-black text-xs uppercase tracking-wider rounded-xl hover:bg-zinc-100 transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white font-black text-xs uppercase tracking-wider rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all"
               >
                 <span>Continue Shopping</span>
               </Link>
@@ -271,17 +275,17 @@ export function CheckoutPage() {
   }
 
   return (
-    <div className="py-10 sm:py-16 bg-zinc-50 min-h-screen">
+    <div className="py-10 sm:py-16 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
-        <div className="mb-8 border-b border-zinc-200 pb-8">
-          <span className="text-xs font-bold text-amber-600 uppercase tracking-widest block mb-1">
+        <div className="mb-8 border-b border-zinc-200 dark:border-zinc-800 pb-8">
+          <span className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest block mb-1">
             PROEDGE Checkout
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-zinc-900 uppercase tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
             Checkout
           </h1>
-          <p className="mt-2 text-zinc-500 text-sm sm:text-base">
+          <p className="mt-2 text-zinc-500 dark:text-zinc-400 text-sm sm:text-base">
             Enter your delivery details. Your order will be sent to us via WhatsApp.
           </p>
         </div>
@@ -289,16 +293,16 @@ export function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Delivery Details Form */}
           <div className="lg:col-span-7 space-y-6">
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-zinc-200 p-6 sm:p-8 shadow-xs space-y-6" noValidate>
+            <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs space-y-6" noValidate>
               {/* Contact Info */}
               <fieldset className="space-y-4">
-                <legend className="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900 pb-2">
+                <legend className="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white pb-2">
                   <User className="w-4 h-4 text-amber-500" />
                   Contact Details
                 </legend>
 
                 <div>
-                  <label htmlFor="fullName" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                  <label htmlFor="fullName" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
                     Full Name <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -311,17 +315,17 @@ export function CheckoutPage() {
                     className={inputClasses}
                   />
                   {errors.fullName && (
-                    <p className="mt-1.5 text-xs font-bold text-rose-600">{errors.fullName}</p>
+                    <p className="mt-1.5 text-xs font-bold text-rose-600 dark:text-rose-400">{errors.fullName}</p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="phone" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                    <label htmlFor="phone" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
                       Phone Number <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
-                      <Phone className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
+                      <Phone className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400 dark:text-zinc-500" />
                       <input
                         id="phone"
                         name="phone"
@@ -334,13 +338,13 @@ export function CheckoutPage() {
                       />
                     </div>
                     {errors.phone && (
-                      <p className="mt-1.5 text-xs font-bold text-rose-600">{errors.phone}</p>
+                      <p className="mt-1.5 text-xs font-bold text-rose-600 dark:text-rose-400">{errors.phone}</p>
                     )}
                   </div>
 
                   <div>
-                    <label htmlFor="whatsapp" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                      WhatsApp Number <span className="text-zinc-400 font-medium normal-case">(optional)</span>
+                    <label htmlFor="whatsapp" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      WhatsApp Number <span className="text-zinc-400 dark:text-zinc-500 font-medium normal-case">(optional)</span>
                     </label>
                     <input
                       id="whatsapp"
@@ -353,14 +357,14 @@ export function CheckoutPage() {
                       className={inputClasses}
                     />
                     {errors.whatsapp && (
-                      <p className="mt-1.5 text-xs font-bold text-rose-600">{errors.whatsapp}</p>
+                      <p className="mt-1.5 text-xs font-bold text-rose-600 dark:text-rose-400">{errors.whatsapp}</p>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                    Email <span className="text-zinc-400 font-medium normal-case">(optional)</span>
+                  <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    Email <span className="text-zinc-400 dark:text-zinc-500 font-medium normal-case">(optional)</span>
                   </label>
                   <input
                     id="email"
@@ -372,24 +376,24 @@ export function CheckoutPage() {
                     className={inputClasses}
                   />
                   {errors.email && (
-                    <p className="mt-1.5 text-xs font-bold text-rose-600">{errors.email}</p>
+                    <p className="mt-1.5 text-xs font-bold text-rose-600 dark:text-rose-400">{errors.email}</p>
                   )}
                 </div>
               </fieldset>
 
               {/* Delivery Info */}
               <fieldset className="space-y-4 pt-2">
-                <legend className="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900 pb-2">
+                <legend className="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white pb-2">
                   <Truck className="w-4 h-4 text-amber-500" />
                   Delivery Address
                 </legend>
 
                 <div>
-                  <label htmlFor="address" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                  <label htmlFor="address" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
                     Address <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
-                    <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
+                    <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400 dark:text-zinc-500" />
                     <textarea
                       id="address"
                       name="address"
@@ -401,13 +405,13 @@ export function CheckoutPage() {
                     />
                   </div>
                   {errors.address && (
-                    <p className="mt-1.5 text-xs font-bold text-rose-600">{errors.address}</p>
+                    <p className="mt-1.5 text-xs font-bold text-rose-600 dark:text-rose-400">{errors.address}</p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="city" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                    <label htmlFor="city" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
                       City <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -420,13 +424,13 @@ export function CheckoutPage() {
                       className={inputClasses}
                     />
                     {errors.city && (
-                      <p className="mt-1.5 text-xs font-bold text-rose-600">{errors.city}</p>
+                      <p className="mt-1.5 text-xs font-bold text-rose-600 dark:text-rose-400">{errors.city}</p>
                     )}
                   </div>
 
                   <div>
-                    <label htmlFor="postalCode" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                      Postal Code <span className="text-zinc-400 font-medium normal-case">(optional)</span>
+                    <label htmlFor="postalCode" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      Postal Code <span className="text-zinc-400 dark:text-zinc-500 font-medium normal-case">(optional)</span>
                     </label>
                     <input
                       id="postalCode"
@@ -442,11 +446,11 @@ export function CheckoutPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="notes" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                    Order Notes <span className="text-zinc-400 font-medium normal-case">(optional)</span>
+                  <label htmlFor="notes" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    Order Notes <span className="text-zinc-400 dark:text-zinc-500 font-medium normal-case">(optional)</span>
                   </label>
                   <div className="relative">
-                    <StickyNote className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
+                    <StickyNote className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400 dark:text-zinc-500" />
                     <textarea
                       id="notes"
                       name="notes"
@@ -463,7 +467,7 @@ export function CheckoutPage() {
               {submitError && (
                 <div
                   role="alert"
-                  className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700"
+                  className="rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 px-4 py-3 text-sm font-bold text-rose-700 dark:text-rose-300"
                 >
                   {submitError}
                 </div>
@@ -472,7 +476,7 @@ export function CheckoutPage() {
               <div className="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4">
                 <Link
                   href="/cart"
-                  className="inline-flex items-center justify-center gap-2 text-sm font-bold text-zinc-700 hover:text-amber-600 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back to Cart</span>
@@ -492,8 +496,8 @@ export function CheckoutPage() {
 
           {/* Order Summary Column */}
           <div className="lg:col-span-5">
-            <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-xs lg:sticky lg:top-28 space-y-4">
-              <h2 className="text-lg font-black uppercase tracking-wider text-zinc-900 border-b border-zinc-200 pb-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-xs lg:sticky lg:top-28 space-y-4">
+              <h2 className="text-lg font-black uppercase tracking-wider text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800 pb-4">
                 Order Summary ({items.length})
               </h2>
 
@@ -501,7 +505,7 @@ export function CheckoutPage() {
               <div className="space-y-4 max-h-72 overflow-y-auto pr-1">
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center gap-3">
-                    <div className="relative w-14 h-14 rounded-lg bg-zinc-100 border border-zinc-200 overflow-hidden shrink-0">
+                    <div className="relative w-14 h-14 rounded-lg bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 overflow-hidden shrink-0">
                       <Image
                         src={item.image}
                         alt={item.name}
@@ -511,12 +515,12 @@ export function CheckoutPage() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-zinc-900 truncate">{item.name}</p>
-                      <p className="text-xs text-zinc-500">
-                        EU {item.size} • {item.color} • Qty {item.quantity}
+                      <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">{item.name}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {item.sizeSystem && item.sizeSystem !== 'Custom' ? `${item.sizeSystem} ${item.size}` : item.size} • {item.color} • Qty {item.quantity}
                       </p>
                     </div>
-                    <span className="text-sm font-bold text-zinc-900 shrink-0">
+                    <span className="text-sm font-bold text-zinc-900 dark:text-white shrink-0">
                       {formatLKR(item.price * item.quantity)}
                     </span>
                   </div>
@@ -524,37 +528,37 @@ export function CheckoutPage() {
               </div>
 
               {/* Totals */}
-              <div className="pt-4 border-t border-zinc-200 space-y-3 text-sm">
+              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-zinc-500 font-medium">Subtotal</span>
-                  <span className="font-bold text-zinc-900">{formatLKR(subtotal)}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 font-medium">Subtotal</span>
+                  <span className="font-bold text-zinc-900 dark:text-white">{formatLKR(subtotal)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-zinc-500 font-medium">Delivery Fee</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 font-medium">Delivery Fee</span>
                   {deliveryFee === 0 ? (
-                    <span className="font-bold text-emerald-600">FREE</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">FREE</span>
                   ) : (
-                    <span className="font-bold text-zinc-900">{formatLKR(deliveryFee)}</span>
+                    <span className="font-bold text-zinc-900 dark:text-white">{formatLKR(deliveryFee)}</span>
                   )}
                 </div>
               </div>
 
-              {deliveryFee > 0 && (
-                <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-900 font-medium">
-                  Add {formatLKR(STORE_CONFIG.freeDeliveryThreshold - subtotal)} more to unlock
+              {settings.freeDeliveryEnabled && deliveryFee > 0 && (
+                <div className="rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 px-4 py-3 text-xs text-amber-900 dark:text-amber-300 font-medium">
+                  Add {formatLKR(settings.freeDeliveryThreshold - subtotal)} more to unlock
                   free islandwide delivery.
                 </div>
               )}
 
-              <div className="pt-4 border-t border-zinc-200 flex items-center justify-between">
-                <span className="text-sm font-bold uppercase tracking-wider text-zinc-600">
+              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                <span className="text-sm font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                   Total
                 </span>
-                <span className="text-2xl font-black text-zinc-900">{formatLKR(total)}</span>
+                <span className="text-2xl font-black text-zinc-900 dark:text-white">{formatLKR(total)}</span>
               </div>
 
-              <div className="rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-3 text-[11px] text-zinc-500 leading-relaxed">
-                Pay <span className="font-bold text-zinc-800">on delivery</span> when your
+              <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 px-4 py-3 text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                Pay <span className="font-bold text-zinc-800 dark:text-zinc-200">on delivery</span> when your
                 order arrives. No online payment is required for this order.
               </div>
             </div>

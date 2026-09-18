@@ -15,7 +15,7 @@ export default async function WishlistPage() {
   const products = await getAllProducts();
 
   return (
-    <div className="py-10 sm:py-16 bg-zinc-50 min-h-screen">
+    <div className="py-10 sm:py-16 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
       <WishlistContent allProducts={products} />
     </div>
   );

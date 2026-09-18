@@ -81,16 +81,16 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
   }, [targetDelete]);
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+    <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h3 className="text-sm font-black uppercase tracking-wider text-zinc-900">
+        <h3 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
           Images
         </h3>
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-amber-600 hover:text-zinc-950 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 dark:bg-amber-500 px-4 py-2 text-xs font-black uppercase tracking-wider text-white dark:text-zinc-950 transition-colors hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 disabled:opacity-50"
         >
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           {uploading ? 'Uploading…' : 'Add Image'}
@@ -109,13 +109,13 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
       </div>
 
       {error && (
-        <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
+        <p className="mb-4 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 px-4 py-2.5 text-sm text-red-700 dark:text-red-300">
           {error}
         </p>
       )}
 
       {images.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-300 py-8 text-center text-sm text-zinc-400">
+        <p className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 py-8 text-center text-sm text-zinc-400 dark:text-zinc-500">
           No images yet. Add images so shoppers can see this product.
         </p>
       ) : (
@@ -123,7 +123,7 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
           {images.map((img) => (
             <div
               key={img.id}
-              className="group relative aspect-square overflow-hidden rounded-xl border border-zinc-200"
+              className="group relative aspect-square overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800/50"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img.url} alt={img.alt_text ?? ''} className="h-full w-full object-cover" />

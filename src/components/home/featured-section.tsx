@@ -7,7 +7,7 @@ export async function FeaturedSection() {
   const featuredProducts = await getFeaturedProducts();
 
   return (
-    <section className="py-16 sm:py-24 bg-zinc-50 border-t border-zinc-200">
+    <section className="py-16 sm:py-24 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Top Picks"
