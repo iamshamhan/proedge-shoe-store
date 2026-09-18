@@ -43,13 +43,22 @@ export default async function AdminProductsPage() {
           </div>
         </div>
 
-        <Link
-          href="/admin/products/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Product</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/categories/new"
+            className="inline-flex items-center gap-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-900 dark:text-zinc-100 transition-colors hover:bg-zinc-300 dark:hover:bg-zinc-700"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Main Category</span>
+          </Link>
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Product</span>
+          </Link>
+        </div>
       </div>
 
       <ProductTable

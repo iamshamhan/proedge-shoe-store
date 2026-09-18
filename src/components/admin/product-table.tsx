@@ -354,12 +354,12 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                 </div>
 
                 <Link
-                  href={`/admin/products/new?sport=${group.bigCat.slug}`}
+                  href={`/admin/categories/new?parent=${group.bigCat.id}`}
                   className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 hover:text-amber-500 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 hover:border-amber-500 transition-colors"
-                  title={`Add product straight to ${group.bigCat.name}`}
+                  title={`Add subcategory to ${group.bigCat.name}`}
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Add to {group.bigCat.name}</span>
+                  <span>Add Subcategory</span>
                 </Link>
               </div>
 

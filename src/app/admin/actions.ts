@@ -454,3 +454,50 @@ export async function updateStoreSettings(
   revalidatePath('/admin/settings');
   return { success: true };
 }
+
+// ---------------------------------------------------------------------------
+// Categories
+// ---------------------------------------------------------------------------
+
+export async function createCategory(data: {
+  name: string;
+  slug: string;
+  description?: string;
+  parent_id?: string;
+}): Promise<{ success: true; id: string } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: 'Unauthorized.' };
+
+  const supabase = await getSupabaseServer();
+  
+  const query = supabase.from('categories').select('sort_order').order('sort_order', { ascending: false }).limit(1);
+  if (data.parent_id) {
+    query.eq('parent_id', data.parent_id);
+  } else {
+    query.is('parent_id', null);
+  }
+  
+  const { data: maxSort } = await query;
+  const sort_order = (maxSort?.[0]?.sort_order ?? 0) + 10;
+
+  const { data: catData, error } = await supabase
+    .from('categories')
+    .insert({
+      name: data.name,
+      slug: data.slug,
+      description: data.description || null,
+      parent_id: data.parent_id || null,
+      sort_order,
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    if (error.code === '23505') return { error: 'A category with this slug already exists.' };
+    return { error: error.message };
+  }
+
+  revalidatePath('/admin/products');
+  revalidatePath('/shop');
+  return { success: true, id: catData.id };
+}
