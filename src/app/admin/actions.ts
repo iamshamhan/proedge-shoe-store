@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth/admin';
-import { isOrderStatus } from '@/lib/order-status';
+
 
 // ---------------------------------------------------------------------------
 // Auth
@@ -332,20 +332,7 @@ export async function updateVariantStock(
   return { success: true };
 }
 
-// ---------------------------------------------------------------------------
-// Orders
-// ---------------------------------------------------------------------------
 
-export async function updateOrderStatus(
-  orderId: string,
-  status: string,
-): Promise<{ success: true } | { error: string }> {
-  if (!isOrderStatus(status)) return { error: 'Invalid order status.' };
-  const supabase = await getSupabaseServer();
-  const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
-  if (error) return { error: error.message };
-  return { success: true };
-}
 
 // ---------------------------------------------------------------------------
 // Store Settings

@@ -169,7 +169,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-          <p>© {new Date().getFullYear()} {normalizedBrand} Footwear. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {normalizedBrand} Footwear. All rights reserved.</p>
           <div className="flex items-center space-x-6">
             <Link href="/shop" className="hover:text-zinc-400 transition-colors">
               Footwear Catalog
