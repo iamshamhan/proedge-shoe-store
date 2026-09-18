@@ -6,6 +6,8 @@ export interface StoreSettings {
   defaultDeliveryFee: number;
   bannerTagline: string;
   heroProductSlug?: string;
+  saleEnabled?: boolean;
+  saleDiscountPercent?: number;
 }
 
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
@@ -14,6 +16,8 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   defaultDeliveryFee: 500,
   bannerTagline: 'Built for Your Next Step',
   heroProductSlug: 'proedge-runner-x1',
+  saleEnabled: true,
+  saleDiscountPercent: 30,
 };
 
 type DbSettingsRow = {
@@ -23,6 +27,8 @@ type DbSettingsRow = {
   default_delivery_fee: number;
   banner_tagline: string | null;
   hero_product_slug?: string | null;
+  sale_enabled?: boolean | null;
+  sale_discount_percent?: number | null;
 };
 
 /**
@@ -72,6 +78,11 @@ export async function getStoreSettings(): Promise<StoreSettings> {
           : DEFAULT_STORE_SETTINGS.defaultDeliveryFee,
       bannerTagline: row.banner_tagline?.trim() || DEFAULT_STORE_SETTINGS.bannerTagline,
       heroProductSlug: row.hero_product_slug?.trim() || DEFAULT_STORE_SETTINGS.heroProductSlug,
+      saleEnabled: row.sale_enabled ?? DEFAULT_STORE_SETTINGS.saleEnabled,
+      saleDiscountPercent:
+        typeof row.sale_discount_percent === 'number'
+          ? row.sale_discount_percent
+          : DEFAULT_STORE_SETTINGS.saleDiscountPercent,
     };
   } catch (err) {
     console.error('Error fetching store settings:', err);

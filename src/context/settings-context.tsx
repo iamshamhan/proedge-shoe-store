@@ -39,7 +39,10 @@ async function fetchLatestSettings() {
           data.freeDeliveryEnabled !== globalSettings.freeDeliveryEnabled ||
           data.freeDeliveryThreshold !== globalSettings.freeDeliveryThreshold ||
           data.defaultDeliveryFee !== globalSettings.defaultDeliveryFee ||
-          data.bannerTagline !== globalSettings.bannerTagline;
+          data.bannerTagline !== globalSettings.bannerTagline ||
+          data.heroProductSlug !== globalSettings.heroProductSlug ||
+          data.saleEnabled !== globalSettings.saleEnabled ||
+          data.saleDiscountPercent !== globalSettings.saleDiscountPercent;
 
         if (changed) {
           globalSettings = data;

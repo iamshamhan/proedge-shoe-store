@@ -32,7 +32,13 @@ export function Header({ categories: propCategories }: HeaderProps) {
   const router = useRouter();
   const { totalItemsCount } = useCart();
   const { productIds: wishlistIds } = useWishlist();
-  const { freeDeliveryEnabled, freeDeliveryThreshold, bannerTagline } = useStoreSettings();
+  const {
+    freeDeliveryEnabled,
+    freeDeliveryThreshold,
+    bannerTagline,
+    saleEnabled,
+    saleDiscountPercent,
+  } = useStoreSettings();
   const { theme, toggleTheme } = useTheme();
 
   // Navigation hierarchy: prefer passed categories, fallback to canonical PARENT_SPORTS
@@ -273,9 +279,11 @@ export function Header({ categories: propCategories }: HeaderProps) {
                 }`}
               >
                 <span>Sale</span>
-                <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-zinc-950 rounded-full">
-                  30% OFF
-                </span>
+                {saleEnabled !== false && (
+                  <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-zinc-950 rounded-full">
+                    {saleDiscountPercent ?? 30}% OFF
+                  </span>
+                )}
               </Link>
             </nav>
 
@@ -505,9 +513,11 @@ export function Header({ categories: propCategories }: HeaderProps) {
                     <Sparkles className="w-4 h-4 text-amber-500" />
                     <span>Special Offers & Sale</span>
                   </span>
-                  <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-zinc-950 rounded-full">
-                    30% OFF
-                  </span>
+                  {saleEnabled !== false && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-zinc-950 rounded-full">
+                      {saleDiscountPercent ?? 30}% OFF
+                    </span>
+                  )}
                 </Link>
               </div>
 

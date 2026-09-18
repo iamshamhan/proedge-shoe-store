@@ -357,6 +357,8 @@ export type UpdateSettingsInput = {
   default_delivery_fee: number;
   banner_tagline?: string;
   hero_product_slug?: string;
+  sale_enabled?: boolean;
+  sale_discount_percent?: number;
 };
 
 export async function updateStoreSettings(
@@ -375,6 +377,15 @@ export async function updateStoreSettings(
     return { error: 'Default delivery fee must be a positive number.' };
   }
 
+  if (
+    input.sale_discount_percent !== undefined &&
+    (typeof input.sale_discount_percent !== 'number' ||
+      input.sale_discount_percent < 0 ||
+      input.sale_discount_percent > 100)
+  ) {
+    return { error: 'Sale discount percent must be between 0 and 100.' };
+  }
+
   const supabase = await getSupabaseServer();
   const upsertPayload: Record<string, unknown> = {
     id: 'default',
@@ -389,10 +400,20 @@ export async function updateStoreSettings(
     upsertPayload.hero_product_slug = input.hero_product_slug.trim() || null;
   }
 
+  if (input.sale_enabled !== undefined) {
+    upsertPayload.sale_enabled = Boolean(input.sale_enabled);
+  }
+
+  if (input.sale_discount_percent !== undefined) {
+    upsertPayload.sale_discount_percent = Math.round(input.sale_discount_percent);
+  }
+
   let { error } = await supabase.from('store_settings').upsert(upsertPayload);
 
-  // If hero_product_slug column does not exist yet in Supabase, retry without it so settings still save
-  if (error && (error.code === '42703' || error.message?.includes('hero_product_slug'))) {
+  // If newly added columns do not exist yet in Supabase, retry progressively so settings still save
+  if (error && (error.code === '42703' || error.message?.includes('sale_') || error.message?.includes('hero_product_slug'))) {
+    delete upsertPayload.sale_enabled;
+    delete upsertPayload.sale_discount_percent;
     delete upsertPayload.hero_product_slug;
     const retry = await supabase.from('store_settings').upsert(upsertPayload);
     error = retry.error;
@@ -409,6 +430,7 @@ export async function updateStoreSettings(
   }
 
   revalidatePath('/', 'layout');
+  revalidatePath('/sale');
   revalidatePath('/cart');
   revalidatePath('/checkout');
   revalidatePath('/admin/settings');

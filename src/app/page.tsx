@@ -8,9 +8,13 @@ import { SaleBanner } from '@/components/home/sale-banner';
 import { WhyChooseUs } from '@/components/home/why-choose-us';
 import { NewsletterSection } from '@/components/home/newsletter-section';
 import { getHeroProduct } from '@/lib/supabase/products';
+import { getStoreSettings } from '@/lib/settings';
 
 export default async function Home() {
-  const heroProduct = await getHeroProduct();
+  const [heroProduct, settings] = await Promise.all([
+    getHeroProduct(),
+    getStoreSettings(),
+  ]);
 
   return (
     <>
@@ -18,7 +22,9 @@ export default async function Home() {
       <CategorySection />
       <FeaturedSection />
       <NewArrivalsSection />
-      <SaleBanner />
+      {settings.saleEnabled !== false && (
+        <SaleBanner discountPercent={settings.saleDiscountPercent ?? 30} />
+      )}
       <WhyChooseUs />
       <NewsletterSection />
     </>

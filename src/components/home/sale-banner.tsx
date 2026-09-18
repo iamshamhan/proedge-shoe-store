@@ -2,7 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Tag } from 'lucide-react';
 
-export function SaleBanner() {
+interface SaleBannerProps {
+  discountPercent?: number;
+}
+
+export function SaleBanner({ discountPercent = 30 }: SaleBannerProps) {
   return (
     <section className="relative my-12 mx-4 sm:mx-6 lg:mx-8 max-w-7xl lg:mx-auto rounded-3xl bg-zinc-950 text-white overflow-hidden py-16 px-6 sm:px-12 border border-zinc-800 shadow-2xl">
       {/* Background Decorative Pattern */}
@@ -21,7 +25,7 @@ export function SaleBanner() {
           </h2>
 
           <p className="text-zinc-300 text-base sm:text-lg font-medium">
-            Selected high-performance styles up to <span className="text-amber-400 font-bold">30% off</span>. Limited quantities available across Sri Lanka.
+            Selected high-performance styles up to <span className="text-amber-400 font-bold">{discountPercent}% off</span>. Limited quantities available across Sri Lanka.
           </p>
         </div>
 
