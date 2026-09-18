@@ -497,7 +497,6 @@ export async function createCategory(data: {
     return { error: error.message };
   }
 
-  revalidatePath('/admin/products');
-  revalidatePath('/shop');
+  revalidatePath('/', 'layout');
   return { success: true, id: catData.id };
 }

@@ -75,7 +75,6 @@ export function Header({ categories: propCategories }: HeaderProps) {
   // Mobile menu state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedMobileSports, setExpandedMobileSports] = useState<Record<string, boolean>>({});
-  const [isLegacyExpanded, setIsLegacyExpanded] = useState(false);
 
   // Search state
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -703,54 +702,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                     </Link>
                   </div>
 
-                  {/* Legacy Collections Accordion for backward compatibility */}
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsLegacyExpanded(!isLegacyExpanded)}
-                      aria-expanded={isLegacyExpanded}
-                      className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
-                    >
-                      <span>Classic Shoe Collections</span>
-                      <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform ${
-                          isLegacyExpanded ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </button>
-                    {isLegacyExpanded && (
-                      <div className="px-3 py-1 space-y-1 text-xs">
-                        <Link
-                          href="/men"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
-                        >
-                          Men&apos;s Shoes
-                        </Link>
-                        <Link
-                          href="/women"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
-                        >
-                          Women&apos;s Shoes
-                        </Link>
-                        <Link
-                          href="/sports"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
-                        >
-                          Sports & Training
-                        </Link>
-                        <Link
-                          href="/shop?category=casual"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block py-1 text-zinc-600 dark:text-zinc-400 hover:text-amber-500"
-                        >
-                          Casual Sneakers
-                        </Link>
-                      </div>
-                    )}
-                  </div>
+
                 </div>
               </>
             )}

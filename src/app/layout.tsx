@@ -95,7 +95,7 @@ export default async function RootLayout({
               <WishlistProvider>
                 <Header categories={categories} />
                 <main id="main" className="flex-1">{children}</main>
-                <Footer />
+                <Footer categories={categories} />
               </WishlistProvider>
             </CartProvider>
           </SettingsProvider>

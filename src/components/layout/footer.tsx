@@ -6,8 +6,13 @@ import { usePathname } from 'next/navigation';
 import { Phone, Mail, MapPin, MessageSquare, Globe, Share2 } from 'lucide-react';
 import { useStoreSettings } from '@/context/settings-context';
 import { PARENT_SPORTS } from '@/data/categories';
+import type { CategoryItem } from '@/types/product';
 
-export function Footer() {
+type FooterProps = {
+  categories?: CategoryItem[];
+};
+
+export function Footer({ categories: propCategories }: FooterProps) {
   const pathname = usePathname();
   const {
     brandName = 'PROEDGE',
@@ -18,6 +23,9 @@ export function Footer() {
     saleEnabled,
     saleDiscountPercent,
   } = useStoreSettings();
+
+  // Navigation hierarchy: prefer passed categories, fallback to PARENT_SPORTS
+  const sports = propCategories && propCategories.length > 0 ? propCategories : PARENT_SPORTS;
 
   // Admin pages do NOT display the customer footer
   if (pathname.startsWith('/admin')) {
@@ -106,7 +114,7 @@ export function Footer() {
           <div className="lg:col-span-4 space-y-4">
             <h3 className="text-white text-xs font-bold uppercase tracking-wider">Shop Collections</h3>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
-              {PARENT_SPORTS.map((sport) => (
+              {sports.map((sport) => (
                 <li key={sport.id}>
                   <Link
                     href={`/shop?category=${sport.slug}`}
