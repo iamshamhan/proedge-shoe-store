@@ -94,7 +94,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       <Link
         href={`/product/${product.slug}`}
         aria-label={`View ${product.name}`}
-        className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800/60 overflow-hidden block"
+        className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800/60 overflow-hidden block after:absolute after:inset-0 after:z-10"
         style={{ position: 'relative' }}
       >
         <Image
@@ -130,7 +130,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           {/* Product Name */}
           <Link
             href={`/product/${product.slug}`}
-            className="font-bold text-base text-zinc-900 dark:text-white line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors block after:absolute after:inset-0 after:z-0"
+            className="font-bold text-base text-zinc-900 dark:text-white line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors block "
           >
             {product.name}
           </Link>
@@ -195,5 +195,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     </div>
   );
 }
+
 
 
