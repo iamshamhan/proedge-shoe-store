@@ -22,22 +22,22 @@ export function NewsletterSection() {
             <MessageCircle className="w-6 h-6" />
           </div>
 
-          <h2 className="text-2xl sm:text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
-            Need Help With Your Order?
+          <h2 className="text-2xl sm:text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
+            Need help with your order?
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
+          <p className="mt-3 text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
             Got doubts about sizing, bulk orders, or custom team kits? Reach out to us directly on WhatsApp for instant support.
           </p>
 
           <div className="mt-8">
             <button
               onClick={handleWhatsApp}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#25D366] text-white text-sm font-black uppercase tracking-wider rounded-xl hover:bg-[#128C7E] transition-colors shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#25D366]/30"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#25D366] text-white text-sm font-bold rounded-xl hover:bg-[#128C7E] transition-colors shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#25D366]/30 min-h-[44px]"
             >
               <MessageCircle className="w-5 h-5" />
               <span>Chat on WhatsApp</span>
             </button>
-            <p className="mt-3 text-xs font-semibold text-zinc-400 dark:text-zinc-500">
+            <p className="mt-3 text-xs font-medium text-zinc-400 dark:text-zinc-500">
               {whatsappNumber || 'Available 24/7'}
             </p>
           </div>

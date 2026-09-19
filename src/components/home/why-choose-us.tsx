@@ -32,10 +32,10 @@ export function WhyChooseUs() {
           <span className="text-xs font-bold uppercase tracking-widest text-amber-500 block mb-2">
             The PROEDGE Standard
           </span>
-          <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white">
+          <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
             Why Shop With Us
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-zinc-400">
+          <p className="mt-3 text-sm sm:text-base text-zinc-400 leading-relaxed">
             We deliver uncompromising quality and premium service from order placement to your doorstep.
           </p>
         </div>
@@ -48,10 +48,10 @@ export function WhyChooseUs() {
                 key={idx}
                 className="bg-zinc-950 p-6 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all duration-300 flex flex-col items-center text-center group"
               >
-                <div className="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mb-5 group-hover:bg-amber-500 group-hover:text-zinc-950 transition-colors">
+                <div className="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mb-5 motion-safe:group-hover:bg-amber-500 motion-safe:group-hover:text-zinc-950 transition-colors">
                   <Icon className="w-7 h-7" />
                 </div>
-                <h3 className="text-lg font-bold text-white uppercase tracking-wide mb-2">
+                <h3 className="text-base font-bold text-white mb-2">
                   {feature.title}
                 </h3>
                 <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
