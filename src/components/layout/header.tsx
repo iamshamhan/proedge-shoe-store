@@ -625,10 +625,10 @@ export function Header({ categories: propCategories }: HeaderProps) {
                     return (
                       <div
                         key={sport.id}
-                        className="rounded-xl border border-zinc-100 dark:border-zinc-800/60 overflow-hidden"
+                        className="overflow-hidden mb-1"
                       >
                         {/* Sport Header Button */}
-                        <div className="flex items-center justify-between bg-zinc-50/70 dark:bg-zinc-800/40 px-3 py-2.5">
+                        <div className="flex items-center justify-between px-2 py-2">
                           <Link
                             href={`/shop?category=${sport.slug}`}
                             onClick={() => setIsMobileMenuOpen(false)}
@@ -661,7 +661,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                             id={`mobile-sub-${sport.slug}`}
                             role="region"
                             aria-label={`${sport.name} Subcategories`}
-                            className="bg-white dark:bg-zinc-900/60 px-3 py-2 space-y-1 border-t border-zinc-100 dark:border-zinc-800/60"
+                            className="px-4 py-1 space-y-2"
                           >
                             <Link
                               href={`/shop?category=${sport.slug}`}
@@ -747,3 +747,4 @@ export function Header({ categories: propCategories }: HeaderProps) {
     </>
   );
 }
+

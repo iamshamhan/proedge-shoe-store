@@ -98,7 +98,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
                 alt={item.name}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                className="object-cover object-center motion-safe:group-hover:scale-105 transition-transform duration-700 ease-out"
               />
 
               {/* Gradient Overlays */}
@@ -122,7 +122,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
 
                 <div className="pt-2 flex items-center text-xs font-bold text-white uppercase tracking-wider group-hover:text-amber-400 transition-colors">
                   <span>Explore Department</span>
-                  <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1.5 transition-transform" />
+                  <ArrowRight className="w-4 h-4 ml-1.5 motion-safe:group-hover:translate-x-1.5 transition-transform" />
                 </div>
               </div>
             </Link>
@@ -132,5 +132,6 @@ export function CategorySection({ categories }: CategorySectionProps) {
     </section>
   );
 }
+
 
 
