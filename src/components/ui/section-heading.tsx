@@ -32,11 +32,11 @@ export function SectionHeading({
       )}
       <div className="w-full flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight uppercase">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
             {title}
           </h2>
           {subtitle && (
-            <p className="mt-2 text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-2xl">
+            <p className="mt-2 text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-2xl leading-relaxed">
               {subtitle}
             </p>
           )}
@@ -45,10 +45,10 @@ export function SectionHeading({
         {linkText && linkHref && (
           <Link
             href={linkHref}
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold tracking-wider text-zinc-900 dark:text-zinc-200 uppercase hover:text-amber-600 dark:hover:text-amber-400 transition-colors group shrink-0"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wide text-zinc-600 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors group shrink-0"
           >
             <span>{linkText}</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 motion-safe:group-hover:translate-x-1 transition-transform" />
           </Link>
         )}
       </div>

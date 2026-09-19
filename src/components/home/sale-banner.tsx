@@ -32,10 +32,10 @@ export function SaleBanner({ discountPercent = 30 }: SaleBannerProps) {
         <div className="shrink-0">
           <Link
             href="/sale"
-            className="px-8 py-4 bg-amber-500 text-zinc-950 font-black text-sm uppercase tracking-wider rounded-xl hover:bg-amber-400 transition-all inline-flex items-center gap-2 shadow-lg shadow-amber-500/20 group"
+            className="px-8 py-4 bg-amber-500 text-zinc-950 font-black text-sm rounded-xl hover:bg-amber-400 transition-all inline-flex items-center gap-2 shadow-lg shadow-amber-500/20 group min-h-[44px]"
           >
-            <span>SHOP SALE</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <span>Shop Sale</span>
+            <ArrowRight className="w-4 h-4 motion-safe:group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
       </div>
