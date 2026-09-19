@@ -38,7 +38,7 @@ export function ColorSelector({
               key={color}
               type="button"
               onClick={() => onSelectColor(color)}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl border-2 transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+              className={`px-4 py-2 min-h-[44px] text-xs font-bold uppercase tracking-wider rounded-xl border-2 transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 isSelected
                   ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 border-zinc-900 dark:border-amber-500 shadow-xs'
                   : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
@@ -53,3 +53,4 @@ export function ColorSelector({
     </div>
   );
 }
+

@@ -13,8 +13,8 @@ export function ProductGrid({
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <div className="text-center py-16 px-4 bg-white border border-zinc-200 rounded-2xl">
-        <p className="text-zinc-500 font-medium text-base">{emptyMessage}</p>
+      <div className="text-center py-16 px-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm">
+        <p className="text-zinc-500 dark:text-zinc-400 font-medium text-base">{emptyMessage}</p>
       </div>
     );
   }

@@ -57,9 +57,9 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const wishlisted = isWishlisted(product.id);
 
   return (
-    <div className="group relative bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:border-zinc-300 dark:hover:border-zinc-700">
+    <div className="group cursor-pointer relative bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:border-zinc-300 dark:hover:border-zinc-700">
       {/* Badges Overlay */}
-      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
+      <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5 items-start">
         {discountPercent > 0 && (
           <span className="px-2.5 py-1 text-[11px] font-black tracking-wider uppercase bg-amber-500 text-zinc-950 rounded-md shadow-xs">
             -{discountPercent}% OFF
@@ -81,7 +81,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         }}
         aria-pressed={wishlisted}
         aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-        className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 dark:bg-zinc-950/80 backdrop-blur-xs text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-zinc-900 shadow-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
+        className="absolute top-3 right-3 z-20 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer rounded-full bg-white/90 dark:bg-zinc-950/80 backdrop-blur-xs text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-zinc-900 shadow-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
       >
         <Heart
           className={`w-4 h-4 transition-colors ${
@@ -94,7 +94,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       <Link
         href={`/product/${product.slug}`}
         aria-label={`View ${product.name}`}
-        className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800/60 overflow-hidden block"
+        className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800/60 overflow-hidden block after:absolute after:inset-0 after:z-10"
         style={{ position: 'relative' }}
       >
         <Image
@@ -103,7 +103,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           fill
           priority={priority}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className={`object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out ${
+          className={`object-cover object-center motion-safe:group-hover:scale-105 transition-transform duration-500 ease-out ${
             isOutOfStock ? 'opacity-50 saturate-50' : ''
           }`}
         />
@@ -130,7 +130,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           {/* Product Name */}
           <Link
             href={`/product/${product.slug}`}
-            className="font-bold text-base text-zinc-900 dark:text-white line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors block"
+            className="font-bold text-base text-zinc-900 dark:text-white line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors block "
           >
             {product.name}
           </Link>
@@ -154,7 +154,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         </div>
 
         {/* Pricing & Add to Cart */}
-        <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-2">
+        <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-2 relative z-20">
           <div>
             <span className="font-extrabold text-base sm:text-lg text-zinc-900 dark:text-white block">
               {formatLKR(product.price)}
@@ -195,3 +195,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     </div>
   );
 }
+
+
+

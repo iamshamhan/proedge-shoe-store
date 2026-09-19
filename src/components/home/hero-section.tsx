@@ -60,7 +60,7 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
                 className="w-full sm:w-auto px-8 py-4 bg-amber-500 text-zinc-950 font-black text-sm uppercase tracking-wider rounded-xl hover:bg-amber-400 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 group"
               >
                 <span>EXPLORE ALL GEAR</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 motion-safe:group-hover:translate-x-1 transition-transform" />
               </Link>
               
               <Link
@@ -102,7 +102,7 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 40vw"
-                  className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                  className="object-cover object-center motion-safe:group-hover:scale-105 transition-transform duration-700"
                 />
                 
                 {/* Floating Badge */}
@@ -128,3 +128,4 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
     </section>
   );
 }
+

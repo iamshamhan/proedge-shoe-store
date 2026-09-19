@@ -297,13 +297,13 @@ export function CheckoutPage() {
             <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs space-y-6" noValidate>
               {/* Contact Info */}
               <fieldset className="space-y-4">
-                <legend className="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white pb-2">
+                <legend className="flex items-center gap-2 text-lg font-bold text-zinc-900 dark:text-white pb-2">
                   <User className="w-4 h-4 text-amber-500" />
                   Contact Details
                 </legend>
 
                 <div>
-                  <label htmlFor="fullName" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label htmlFor="fullName" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
                     Full Name <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -322,7 +322,7 @@ export function CheckoutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="phone" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    <label htmlFor="phone" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
                       Phone Number <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
@@ -344,7 +344,7 @@ export function CheckoutPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="whatsapp" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    <label htmlFor="whatsapp" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
                       WhatsApp Number <span className="text-zinc-400 dark:text-zinc-500 font-medium normal-case">(optional)</span>
                     </label>
                     <input
@@ -364,7 +364,7 @@ export function CheckoutPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label htmlFor="email" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
                     Email <span className="text-zinc-400 dark:text-zinc-500 font-medium normal-case">(optional)</span>
                   </label>
                   <input
@@ -384,13 +384,13 @@ export function CheckoutPage() {
 
               {/* Delivery Info */}
               <fieldset className="space-y-4 pt-2">
-                <legend className="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white pb-2">
+                <legend className="flex items-center gap-2 text-lg font-bold text-zinc-900 dark:text-white pb-2">
                   <Truck className="w-4 h-4 text-amber-500" />
                   Delivery Address
                 </legend>
 
                 <div>
-                  <label htmlFor="address" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label htmlFor="address" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
                     Address <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
@@ -412,7 +412,7 @@ export function CheckoutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="city" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    <label htmlFor="city" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
                       City <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -430,7 +430,7 @@ export function CheckoutPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="postalCode" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    <label htmlFor="postalCode" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
                       Postal Code <span className="text-zinc-400 dark:text-zinc-500 font-medium normal-case">(optional)</span>
                     </label>
                     <input
@@ -447,7 +447,7 @@ export function CheckoutPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="notes" className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label htmlFor="notes" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">
                     Order Notes <span className="text-zinc-400 dark:text-zinc-500 font-medium normal-case">(optional)</span>
                   </label>
                   <div className="relative">
@@ -498,7 +498,7 @@ export function CheckoutPage() {
           {/* Order Summary Column */}
           <div className="lg:col-span-5">
             <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-xs lg:sticky lg:top-28 space-y-4">
-              <h2 className="text-lg font-black uppercase tracking-wider text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800 pb-4">
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800 pb-4">
                 Order Summary ({items.length})
               </h2>
 
@@ -552,7 +552,7 @@ export function CheckoutPage() {
               )}
 
               <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                <span className="text-sm font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
                   Total
                 </span>
                 <span className="text-2xl font-black text-zinc-900 dark:text-white">{formatLKR(total)}</span>
@@ -569,3 +569,5 @@ export function CheckoutPage() {
     </div>
   );
 }
+
+

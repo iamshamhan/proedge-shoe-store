@@ -155,7 +155,7 @@ export function CartPage() {
           {/* Order Summary Column */}
           <div className="lg:col-span-4">
             <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-xs lg:sticky lg:top-28 space-y-4">
-              <h2 className="text-lg font-black uppercase tracking-wider text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800 pb-4">
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800 pb-4">
                 Order Summary
               </h2>
 
@@ -185,7 +185,7 @@ export function CartPage() {
               )}
 
               <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                <span className="text-sm font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
                   Total
                 </span>
                 <span className="text-2xl font-black text-zinc-900 dark:text-white">{formatLKR(total)}</span>
