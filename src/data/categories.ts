@@ -11,6 +11,9 @@ export interface NavCategory {
   parentId?: string | null;
   sortOrder: number;
   description?: string | null;
+  image_url?: string | null;
+  subtitle?: string | null;
+  tagline?: string | null;
   children?: NavCategory[];
 }
 
@@ -362,3 +365,4 @@ export function buildCategoryHierarchy(flat: CategoryItem[]): CategoryItem[] {
     }))
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
+

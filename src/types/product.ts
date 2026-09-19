@@ -20,6 +20,9 @@ export interface CategoryItem {
   parentId?: string | null;
   sortOrder: number;
   description?: string | null;
+  imageUrl?: string | null;
+  subtitle?: string | null;
+  tagline?: string | null;
   children?: CategoryItem[];
 }
 

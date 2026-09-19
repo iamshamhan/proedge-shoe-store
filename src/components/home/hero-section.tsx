@@ -95,7 +95,7 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
               href={productHref}
               className="relative w-full max-w-md aspect-4/5 rounded-3xl bg-gradient-to-b from-zinc-800 to-zinc-900 p-3 border border-zinc-800 shadow-2xl overflow-hidden group block hover:border-amber-500/50 hover:shadow-amber-500/10 transition-all duration-300"
             >
-              <div className="relative w-full h-full rounded-2xl overflow-hidden">
+              <div className="relative w-full h-full rounded-2xl overflow-hidden" style={{ position: 'relative' }}>
                 <Image
                   src={productImage}
                   alt={productName}

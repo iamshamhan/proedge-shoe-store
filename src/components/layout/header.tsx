@@ -20,6 +20,7 @@ import {
   Sliders,
   LogOut,
   ExternalLink,
+  FolderTree,
 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useWishlist } from '@/context/wishlist-context';
@@ -164,7 +165,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
       {/* Main Sticky Header */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800/80 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-18 sm:h-20">
+          <div className="flex items-center justify-between h-16">
             {/* Mobile Menu Toggle Button */}
             <div className="flex items-center lg:hidden">
               <button
@@ -184,11 +185,11 @@ export function Header({ categories: propCategories }: HeaderProps) {
                 href={isAdminRoute ? '/admin' : '/'}
                 className="group flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500 focus-visible:rounded-sm"
               >
-                <span className="bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-black text-xl sm:text-2xl px-2.5 py-1 tracking-wider uppercase rounded-sm group-hover:bg-amber-600 dark:group-hover:bg-amber-500 dark:group-hover:text-zinc-950 transition-colors">
+                <span className="bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-black text-lg sm:text-xl px-2.5 py-0.5 tracking-wider uppercase rounded-sm group-hover:bg-amber-600 dark:group-hover:bg-amber-500 dark:group-hover:text-zinc-950 transition-colors">
                   {logoPrefix}
                 </span>
                 {logoSuffix && (
-                  <span className="font-black text-xl sm:text-2xl tracking-widest text-zinc-900 dark:text-white uppercase">
+                  <span className="font-black text-lg sm:text-xl tracking-widest text-zinc-900 dark:text-white uppercase">
                     {logoSuffix}
                   </span>
                 )}
@@ -208,7 +209,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
               >
                 <Link
                   href="/admin"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase rounded-lg transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase rounded-lg transition-colors ${
                     pathname === '/admin'
                       ? 'bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
@@ -219,7 +220,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                 </Link>
                 <Link
                   href="/admin/products"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase rounded-lg transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase rounded-lg transition-colors ${
                     pathname.startsWith('/admin/products')
                       ? 'bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
@@ -228,9 +229,10 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   <Package className="w-4 h-4" />
                   <span>Products</span>
                 </Link>
-                <Link
-                  href="/admin/settings"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase rounded-lg transition-colors ${
+                <Link href="/admin/categories" className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase rounded-lg transition-colors ${pathname.startsWith("/admin/categories") ? "bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"}`}><FolderTree className="w-4 h-4" /><span>Categories</span></Link>
+                  <Link
+                    href="/admin/settings"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase rounded-lg transition-colors ${
                     pathname === '/admin/settings'
                       ? 'bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
@@ -242,13 +244,13 @@ export function Header({ categories: propCategories }: HeaderProps) {
               </nav>
             ) : (
               <nav
-                className="hidden lg:flex items-center space-x-1 xl:space-x-3"
+                className="hidden lg:flex items-center space-x-2 xl:space-x-6"
                 aria-label="Main Navigation"
               >
                 {/* All Shop Link */}
                 <Link
                   href="/shop"
-                  className={`px-2.5 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                  className={`px-2.5 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                     pathname === '/shop'
                       ? 'text-zinc-900 dark:text-amber-400 font-extrabold'
                       : 'text-zinc-600 dark:text-zinc-300'
@@ -276,7 +278,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                           onKeyDown={(e) => handleDropdownKeyDown(e, sport.slug)}
                           aria-haspopup={hasChildren ? 'true' : undefined}
                           aria-expanded={hasChildren ? isDropdownActive : undefined}
-                          className={`flex items-center gap-1 px-2.5 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                          className={`flex items-center gap-1 px-2.5 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                             isDropdownActive || isCurrentCategory
                               ? 'text-zinc-900 dark:text-amber-400 font-extrabold'
                               : 'text-zinc-600 dark:text-zinc-300'
@@ -298,7 +300,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                         <div
                           role="menu"
                           aria-label={`${sport.name} Subcategories`}
-                          className="absolute left-0 top-full pt-2 z-50 w-64 xl:w-72 transition-all animate-in fade-in-50 slide-in-from-top-2 duration-150"
+                          className="absolute left-0 top-full pt-3 z-50 w-64 xl:w-72 transition-all animate-in fade-in-50 slide-in-from-top-2 duration-150"
                         >
                           <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-3 overflow-hidden">
                             {/* Dropdown Header link */}
@@ -341,7 +343,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                 {/* Sale Link with Badge */}
                 <Link
                   href="/sale"
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs xl:text-sm font-bold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase transition-colors rounded hover:text-zinc-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                     pathname === '/sale'
                       ? 'text-zinc-900 dark:text-amber-400 font-extrabold'
                       : 'text-zinc-600 dark:text-zinc-300'
@@ -561,10 +563,11 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   <Package className="w-4 h-4 text-amber-500" />
                   <span>Products</span>
                 </Link>
-                <Link
-                  href="/admin/settings"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                <Link href="/admin/categories" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${pathname.startsWith("/admin/categories") ? "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-extrabold" : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}><FolderTree className="w-4 h-4 text-amber-500" /><span>Categories</span></Link>
+                  <Link
+                    href="/admin/settings"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
                     pathname === '/admin/settings'
                       ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-extrabold'
                       : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'

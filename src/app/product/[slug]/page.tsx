@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -15,6 +14,14 @@ interface ProductDetailPageProps {
   params: Promise<{
     slug: string;
   }>;
+}
+
+
+export async function generateStaticParams() {
+  const products = await getAllProducts();
+  return products.map((product) => ({
+    slug: product.slug,
+  }));
 }
 
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {

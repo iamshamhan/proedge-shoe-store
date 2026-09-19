@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from '@supabase/supabase-js';
 
 export interface StoreSettings {
@@ -12,6 +13,11 @@ export interface StoreSettings {
   contactAddress?: string;
   contactPhone?: string;
   contactEmail?: string;
+  whatsappNumber?: string;
+  saleSectionTitle?: string;
+  saleSectionSubtitle?: string;
+  newArrivalsTitle?: string;
+  newArrivalsSubtitle?: string;
 }
 
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
@@ -26,6 +32,11 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   contactAddress: 'Galle Road, Colombo 03, Sri Lanka',
   contactPhone: '+94 11 234 5678',
   contactEmail: 'support@proedge.lk',
+  whatsappNumber: '+94 77 123 4567',
+  saleSectionTitle: 'Special Offers',
+  saleSectionSubtitle: 'Explore our top discounted sneakers and gear.',
+  newArrivalsTitle: 'New Arrivals',
+  newArrivalsSubtitle: 'Just released designs with improved sole ergonomics and cutting-edge material tech.',
 };
 
 type DbSettingsRow = {
@@ -41,6 +52,11 @@ type DbSettingsRow = {
   contact_address?: string | null;
   contact_phone?: string | null;
   contact_email?: string | null;
+  whatsapp_number?: string | null;
+  sale_section_title?: string | null;
+  sale_section_subtitle?: string | null;
+  new_arrivals_title?: string | null;
+  new_arrivals_subtitle?: string | null;
 };
 
 /**
@@ -48,7 +64,7 @@ type DbSettingsRow = {
  * If Supabase is unavailable or table does not exist yet,
  * it returns DEFAULT_STORE_SETTINGS gracefully.
  */
-export async function getStoreSettings(): Promise<StoreSettings> {
+export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -63,7 +79,7 @@ export async function getStoreSettings(): Promise<StoreSettings> {
         fetch: (input, init) =>
           fetch(input, {
             ...init,
-            cache: 'no-store',
+            next: { tags: ["store-settings"] },
           }),
       },
     });
@@ -99,9 +115,14 @@ export async function getStoreSettings(): Promise<StoreSettings> {
       contactAddress: row.contact_address?.trim() || DEFAULT_STORE_SETTINGS.contactAddress,
       contactPhone: row.contact_phone?.trim() || DEFAULT_STORE_SETTINGS.contactPhone,
       contactEmail: row.contact_email?.trim() || DEFAULT_STORE_SETTINGS.contactEmail,
+      whatsappNumber: row.whatsapp_number?.trim() || DEFAULT_STORE_SETTINGS.whatsappNumber,
+      saleSectionTitle: row.sale_section_title?.trim() || DEFAULT_STORE_SETTINGS.saleSectionTitle,
+      saleSectionSubtitle: row.sale_section_subtitle?.trim() || DEFAULT_STORE_SETTINGS.saleSectionSubtitle,
+      newArrivalsTitle: row.new_arrivals_title?.trim() || DEFAULT_STORE_SETTINGS.newArrivalsTitle,
+      newArrivalsSubtitle: row.new_arrivals_subtitle?.trim() || DEFAULT_STORE_SETTINGS.newArrivalsSubtitle,
     };
   } catch (err) {
     console.error('Error fetching store settings:', err);
     return DEFAULT_STORE_SETTINGS;
   }
-}
+});

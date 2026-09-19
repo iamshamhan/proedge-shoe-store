@@ -11,9 +11,10 @@ import { useWishlist } from '@/context/wishlist-context';
 
 interface ProductCardProps {
   product: Product;
+  priority?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, priority = false }: ProductCardProps) {
   const { addItem } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [isAdded, setIsAdded] = useState(false);
@@ -94,11 +95,13 @@ export function ProductCard({ product }: ProductCardProps) {
         href={`/product/${product.slug}`}
         aria-label={`View ${product.name}`}
         className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800/60 overflow-hidden block"
+        style={{ position: 'relative' }}
       >
         <Image
           src={product.images[0]}
           alt={product.name}
           fill
+          priority={priority}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className={`object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out ${
             isOutOfStock ? 'opacity-50 saturate-50' : ''

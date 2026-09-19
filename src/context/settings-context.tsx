@@ -17,6 +17,8 @@ const SettingsContext = createContext<StoreSettingsContextType>({
 
 let globalSettings: StoreSettings = DEFAULT_STORE_SETTINGS;
 const settingsListeners = new Set<() => void>();
+let currentFetchPromise: Promise<void> | null = null;
+let currentAbortController: AbortController | null = null;
 
 function emitSettingsChange() {
   settingsListeners.forEach((listener) => listener());
@@ -24,39 +26,58 @@ function emitSettingsChange() {
 
 async function fetchLatestSettings() {
   if (typeof window === 'undefined') return;
-  try {
-    const res = await fetch('/api/settings', {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-      },
-    });
-    if (res.ok) {
-      const data = (await res.json()) as StoreSettings;
-      if (data && typeof data.defaultDeliveryFee === 'number') {
-        const changed =
-          data.freeDeliveryEnabled !== globalSettings.freeDeliveryEnabled ||
-          data.freeDeliveryThreshold !== globalSettings.freeDeliveryThreshold ||
-          data.defaultDeliveryFee !== globalSettings.defaultDeliveryFee ||
-          data.bannerTagline !== globalSettings.bannerTagline ||
-          data.heroProductSlug !== globalSettings.heroProductSlug ||
-          data.saleEnabled !== globalSettings.saleEnabled ||
-          data.saleDiscountPercent !== globalSettings.saleDiscountPercent ||
-          data.brandName !== globalSettings.brandName ||
-          data.contactAddress !== globalSettings.contactAddress ||
-          data.contactPhone !== globalSettings.contactPhone ||
-          data.contactEmail !== globalSettings.contactEmail;
 
-        if (changed) {
-          globalSettings = data;
-          emitSettingsChange();
+  if (currentFetchPromise) {
+    return currentFetchPromise;
+  }
+
+  currentAbortController = new AbortController();
+
+  currentFetchPromise = (async () => {
+    try {
+      const res = await fetch('/api/settings', {
+        cache: 'no-store',
+        signal: currentAbortController?.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
+      if (res.ok) {
+        const data = (await res.json()) as StoreSettings;
+        if (data && typeof data.defaultDeliveryFee === 'number') {
+          const changed =
+            data.freeDeliveryEnabled !== globalSettings.freeDeliveryEnabled ||
+            data.freeDeliveryThreshold !== globalSettings.freeDeliveryThreshold ||
+            data.defaultDeliveryFee !== globalSettings.defaultDeliveryFee ||
+            data.bannerTagline !== globalSettings.bannerTagline ||
+            data.heroProductSlug !== globalSettings.heroProductSlug ||
+            data.saleEnabled !== globalSettings.saleEnabled ||
+            data.saleDiscountPercent !== globalSettings.saleDiscountPercent ||
+            data.brandName !== globalSettings.brandName ||
+            data.contactAddress !== globalSettings.contactAddress ||
+            data.contactPhone !== globalSettings.contactPhone ||
+            data.contactEmail !== globalSettings.contactEmail;
+
+          if (changed) {
+            globalSettings = data;
+            emitSettingsChange();
+          }
         }
       }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // safely ignore aborts
+        return;
+      }
+      console.error('Failed to fetch store settings:', err);
+    } finally {
+      currentFetchPromise = null;
+      currentAbortController = null;
     }
-  } catch (err) {
-    console.error('Failed to fetch store settings:', err);
-  }
+  })();
+
+  return currentFetchPromise;
 }
 
 function subscribeToSettings(callback: () => void) {
@@ -86,6 +107,10 @@ function subscribeToSettings(callback: () => void) {
     window.removeEventListener('proedge_settings_updated', handleCustomUpdate);
     window.removeEventListener('storage', handleStorage);
     window.removeEventListener('focus', handleFocus);
+    
+    if (settingsListeners.size === 0 && currentAbortController) {
+      currentAbortController.abort();
+    }
   };
 }
 

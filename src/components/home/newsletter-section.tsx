@@ -1,75 +1,49 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Mail, Check } from 'lucide-react';
+import React from 'react';
+import { MessageCircle } from 'lucide-react';
+import { useStoreSettings } from '@/context/settings-context';
 
 export function NewsletterSection() {
-  const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const { whatsappNumber } = useStoreSettings();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setIsSubscribed(true);
-      setEmail('');
-      setTimeout(() => setIsSubscribed(false), 3000);
-    }
+  const handleWhatsApp = () => {
+    if (!whatsappNumber) return;
+    const cleanNumber = whatsappNumber.replace(/[^0-9+]/g, '');
+    const message = encodeURIComponent('Hello PROEDGE team! I have an inquiry.');
+    window.open("https://wa.me/" + (cleanNumber.startsWith('+') ? cleanNumber.slice(1) : cleanNumber) + "?text=" + message, '_blank');
   };
 
   return (
     <section className="py-16 sm:py-24 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-colors">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 sm:p-12 shadow-sm">
-          <div className="w-12 h-12 bg-zinc-900 dark:bg-zinc-800 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Mail className="w-6 h-6" />
+          <div className="w-12 h-12 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+            <MessageCircle className="w-6 h-6" />
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
-            Stay Ahead Of The Curve
+            Need Help With Your Order?
           </h2>
           <p className="mt-2 text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
-            Subscribe to receive exclusive access to new PROEDGE drops, seasonal sales, and member-only perks.
+            Got doubts about sizing, bulk orders, or custom team kits? Reach out to us directly on WhatsApp for instant support.
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-8 max-w-md mx-auto flex flex-col sm:flex-row gap-3">
-            <label htmlFor="newsletter-email" className="sr-only">
-              Email address
-            </label>
-            <input
-              id="newsletter-email"
-              type="email"
-              placeholder="Enter your email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="flex-1 px-4 py-3.5 bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-amber-500 transition-all"
-            />
+          <div className="mt-8">
             <button
-              type="submit"
-              className="px-6 py-3.5 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-colors shrink-0 flex items-center justify-center gap-2"
+              onClick={handleWhatsApp}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#25D366] text-white text-sm font-black uppercase tracking-wider rounded-xl hover:bg-[#128C7E] transition-colors shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#25D366]/30"
             >
-              {isSubscribed ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-400" />
-                  <span>Subscribed!</span>
-                </>
-              ) : (
-                <span>Subscribe</span>
-              )}
+              <MessageCircle className="w-5 h-5" />
+              <span>Chat on WhatsApp</span>
             </button>
-          </form>
-
-          {isSubscribed && (
-            <p role="status" className="mt-3 text-xs text-emerald-600 font-semibold">
-              Thank you for subscribing to PROEDGE updates!
+            <p className="mt-3 text-xs font-semibold text-zinc-400 dark:text-zinc-500">
+              {whatsappNumber || 'Available 24/7'}
             </p>
-          )}
-
-          <p className="mt-4 text-[11px] text-zinc-400">
-            By subscribing, you agree to receive promotional updates. Unsubscribe anytime.
-          </p>
+          </div>
         </div>
       </div>
     </section>
   );
 }
+

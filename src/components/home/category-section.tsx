@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { ArrowRight, Trophy } from 'lucide-react';
+import type { CategoryItem } from '@/types/product';
 
 interface SportShowcaseItem {
   name: string;
@@ -11,7 +12,6 @@ interface SportShowcaseItem {
   image: string;
   subtitle: string;
   tagline: string;
-  gridSpan: string;
 }
 
 const SPORTS_SHOWCASE: SportShowcaseItem[] = [
@@ -22,7 +22,6 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000&auto=format&fit=crop',
     subtitle: 'Matchday Precision & Speed',
     tagline: 'Boots, Turf Shoes, Match Balls & Protection',
-    gridSpan: 'lg:col-span-2',
   },
   {
     name: 'Rugby',
@@ -31,7 +30,6 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     image: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?q=80&w=1000&auto=format&fit=crop',
     subtitle: 'Power, Traction & Impact',
     tagline: '8-Stud Boots, Match Balls & Kicking Tees',
-    gridSpan: 'lg:col-span-2',
   },
   {
     name: 'Basketball',
@@ -40,7 +38,6 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1000&auto=format&fit=crop',
     subtitle: 'High-Elevation Court Control',
     tagline: 'Court Shoes, Grip Balls & Accessories',
-    gridSpan: 'lg:col-span-2',
   },
   {
     name: 'Running',
@@ -49,7 +46,6 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=1000&auto=format&fit=crop',
     subtitle: 'Distance & Energy Return',
     tagline: 'Road Runners, Trail Max & Race Day Trainers',
-    gridSpan: 'lg:col-span-3',
   },
   {
     name: 'General Gear & Accessories',
@@ -58,11 +54,25 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1000&auto=format&fit=crop',
     subtitle: 'Training Bags, Slides & Essentials',
     tagline: 'Boot Bags, Gym Duffles, Grip Socks & Strapping Tape',
-    gridSpan: 'lg:col-span-3',
   },
 ];
 
-export function CategorySection() {
+interface CategorySectionProps {
+  categories?: CategoryItem[];
+}
+
+export function CategorySection({ categories }: CategorySectionProps) {
+  const displayCategories = categories && categories.length > 0
+    ? categories.slice(0, 6).map((cat) => ({
+        name: cat.name,
+        slug: cat.slug,
+        href: '/shop?category=' + cat.slug,
+        image: cat.imageUrl || 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=1000',
+        subtitle: cat.subtitle || 'Proedge Sports Collection',
+        tagline: cat.tagline || cat.description || 'Explore the best gear for your next match.',
+      }))
+    : SPORTS_SHOWCASE;
+
   return (
     <section className="py-16 sm:py-24 bg-white dark:bg-zinc-950 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,12 +84,13 @@ export function CategorySection() {
           linkHref="/shop"
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 sm:gap-8">
-          {SPORTS_SHOWCASE.map((item) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+          {displayCategories.map((item) => (
             <Link
               key={item.slug}
               href={item.href}
-              className={`group relative h-80 sm:h-96 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-end p-6 sm:p-8 ${item.gridSpan}`}
+              className="group relative h-80 sm:h-96 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-end p-6 sm:p-8"
+              style={{ position: 'relative' }}
             >
               {/* Background Image */}
               <Image
@@ -121,3 +132,5 @@ export function CategorySection() {
     </section>
   );
 }
+
+

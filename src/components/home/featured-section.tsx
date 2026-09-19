@@ -1,23 +1,25 @@
 import React from 'react';
-import { getFeaturedProducts } from '@/lib/supabase/products';
+import { getSaleProducts } from '@/lib/supabase/products';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { ProductGrid } from '@/components/ui/product-grid';
+import { getStoreSettings } from '@/lib/settings';
 
 export async function FeaturedSection() {
-  const featuredProducts = await getFeaturedProducts();
+  const saleProducts = await getSaleProducts();
+  const settings = await getStoreSettings();
 
   return (
     <section className="py-16 sm:py-24 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Top Picks"
-          title="Featured Footwear"
-          subtitle="Explore our top recommended sneakers engineered for peak comfort and standout presence."
+          title={settings.saleSectionTitle || 'Special Offers'}
+          subtitle={settings.saleSectionSubtitle || 'Explore our top discounted sneakers and gear.'}
           linkText="Browse All"
-          linkHref="/shop"
+          linkHref="/sale"
         />
 
-        <ProductGrid products={featuredProducts} />
+        <ProductGrid products={saleProducts} />
       </div>
     </section>
   );

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Product, ProductCategory, ProductVariant, SizeSystem, CategoryItem } from '@/types/product';
 import { MOCK_PRODUCTS } from '@/data/products';
@@ -17,7 +18,7 @@ function getSupabase(): SupabaseClient | null {
   supabaseClient = createClient(url, key, {
     auth: { persistSession: false },
     global: {
-      fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }),
+      fetch: (input, init) => fetch(input, { ...init, next: { tags: ["catalog"] } }),
     },
   });
   return supabaseClient;
@@ -264,7 +265,7 @@ async function fetchProductBySlug(slug: string): Promise<Product | null> {
 // Categories API
 // ---------------------------------------------------------------------------
 
-export async function getAllCategories(): Promise<CategoryItem[]> {
+export const getAllCategories = cache(async (): Promise<CategoryItem[]> => {
   const sb = getSupabase();
   if (!sb) {
     return ALL_CANONICAL_CATEGORIES.map((c) => ({
@@ -274,13 +275,16 @@ export async function getAllCategories(): Promise<CategoryItem[]> {
       parentId: c.parentId,
       sortOrder: c.sortOrder,
       description: c.description,
+      imageUrl: c.image_url,
+      subtitle: c.subtitle,
+      tagline: c.tagline,
     }));
   }
 
   try {
     const { data, error } = await sb
       .from('categories')
-      .select('id, slug, name, parent_id, sort_order, description')
+      .select('id, slug, name, parent_id, sort_order, description, image_url, subtitle, tagline')
       .order('sort_order', { ascending: true });
 
     if (error || !data || data.length === 0) {
@@ -291,6 +295,9 @@ export async function getAllCategories(): Promise<CategoryItem[]> {
         parentId: c.parentId,
         sortOrder: c.sortOrder,
         description: c.description,
+      imageUrl: c.image_url,
+      subtitle: c.subtitle,
+      tagline: c.tagline,
       }));
     }
 
@@ -301,6 +308,9 @@ export async function getAllCategories(): Promise<CategoryItem[]> {
       parentId: c.parent_id,
       sortOrder: c.sort_order,
       description: c.description,
+      imageUrl: c.image_url,
+      subtitle: c.subtitle,
+      tagline: c.tagline,
     }));
   } catch {
     return ALL_CANONICAL_CATEGORIES.map((c) => ({
@@ -310,9 +320,12 @@ export async function getAllCategories(): Promise<CategoryItem[]> {
       parentId: c.parentId,
       sortOrder: c.sortOrder,
       description: c.description,
+      imageUrl: c.image_url,
+      subtitle: c.subtitle,
+      tagline: c.tagline,
     }));
   }
-}
+});
 
 export async function getCategoriesHierarchy(): Promise<CategoryItem[]> {
   const categories = await getAllCategories();
@@ -336,38 +349,38 @@ export async function getCategoriesHierarchy(): Promise<CategoryItem[]> {
 // Public Products API
 // ---------------------------------------------------------------------------
 
-export async function getAllProducts(): Promise<Product[]> {
+export const getAllProducts = cache(async (): Promise<Product[]> => {
   return (await fetchProducts()) ?? MOCK_PRODUCTS;
-}
+});
 
 export async function getFeaturedProducts(): Promise<Product[]> {
   return (await fetchProducts({ featuredOnly: true })) ?? MOCK_PRODUCTS.filter((p) => p.featured);
 }
 
-export async function getNewArrivals(): Promise<Product[]> {
+export const getNewArrivals = cache(async (): Promise<Product[]> => {
   const db = await fetchProducts();
   if (db && db.length > 0) return db.filter((p) => p.newArrival).slice(0, 4);
   return MOCK_PRODUCTS.filter((p) => p.newArrival).slice(0, 4);
-}
+});
 
-export async function getSaleProducts(): Promise<Product[]> {
+export const getSaleProducts = cache(async (): Promise<Product[]> => {
   return (await fetchProducts({ saleOnly: true })) ?? MOCK_PRODUCTS.filter((p) => p.onSale);
-}
+});
 
-export async function getProductsByCategory(category: ProductCategory): Promise<Product[]> {
+export const getProductsByCategory = cache(async (category: ProductCategory): Promise<Product[]> => {
   return (
     (await fetchProducts({ categorySlug: category })) ??
     MOCK_PRODUCTS.filter((p) => p.category === category)
   );
-}
+});
 
-export async function getProductBySlug(slug: string): Promise<Product | null> {
+export const getProductBySlug = cache(async (slug: string): Promise<Product | null> => {
   const db = await fetchProductBySlug(slug);
   if (db) return db;
   return MOCK_PRODUCTS.find((p) => p.slug === slug) ?? null;
-}
+});
 
-export async function getHeroProduct(): Promise<Product | null> {
+export const getHeroProduct = cache(async (): Promise<Product | null> => {
   try {
     const settings = await getStoreSettings();
     if (settings.heroProductSlug) {
@@ -385,4 +398,6 @@ export async function getHeroProduct(): Promise<Product | null> {
     console.error('Error in getHeroProduct:', err);
     return MOCK_PRODUCTS.find((p) => p.slug === 'proedge-runner-x1') ?? MOCK_PRODUCTS[0] ?? null;
   }
-}
+});
+
+

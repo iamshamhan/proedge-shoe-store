@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from "next/cache";
 import { getSupabaseServer } from '@/lib/supabase/server';
 import type { ValidatedOrder } from '@/types/order';
 
@@ -45,7 +46,7 @@ function mapOrderError(message: string): string {
   if (message.includes('ERR_CUSTOMER_INVALID')) {
     return 'Please complete all required delivery fields.';
   }
-  return 'We could not place your order right now. Please try again.';
+  return 'We could not place your order right now. [Details: ' + message + ']';
 }
 
 export async function placeOrder(
@@ -141,6 +142,24 @@ export async function placeOrder(
   }
   if (!data || typeof data !== 'object') {
     return { success: false, error: 'We received an unexpected response from the server.' };
+  }
+
+    revalidatePath("/shop", "page");
+
+  try {
+    const productIds = Array.from(new Set(cleanItems.map(i => i.productId)));
+    const { data: products } = await supabase
+      .from("products")
+      .select("slug")
+      .in("id", productIds);
+      
+    if (products) {
+      products.forEach(p => {
+        if (p.slug) revalidatePath(`/product/${p.slug}`, "page");
+      });
+    }
+  } catch (err) {
+    console.error("Failed to revalidate product paths", err);
   }
 
   return { success: true, order: data as unknown as ValidatedOrder };

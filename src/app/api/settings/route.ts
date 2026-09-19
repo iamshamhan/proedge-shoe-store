@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getStoreSettings } from '@/lib/settings';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export async function GET() {
   const settings = await getStoreSettings();

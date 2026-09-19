@@ -71,6 +71,7 @@ export function CartPage() {
                 <Link
                   href={`/product/${item.slug}`}
                   className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 shrink-0 overflow-hidden"
+                  style={{ position: 'relative' }}
                 >
                   <Image
                     src={item.image}

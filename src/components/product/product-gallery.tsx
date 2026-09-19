@@ -28,7 +28,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* Main Large Image Display */}
-      <div className="relative aspect-square w-full rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden group shadow-xs">
+      <div className="relative aspect-square w-full rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden group shadow-xs" style={{ position: 'relative' }}>
         <Image
           src={imageList[selectedIndex]}
           alt={`${productName} - Image ${selectedIndex + 1}`}
@@ -77,6 +77,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                     ? 'border-amber-500 shadow-sm scale-95'
                     : 'border-zinc-200 dark:border-zinc-800 opacity-70 hover:opacity-100'
                 }`}
+                style={{ position: 'relative' }}
               >
                 <Image
                   src={img}

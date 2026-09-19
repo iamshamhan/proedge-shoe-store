@@ -217,12 +217,7 @@ to authenticated
 using (is_admin())
 with check (is_admin());
 
--- Orders: DEMO-ONLY public insert (see header warning) ------------------------
-drop policy if exists "Public submit orders (demo only)" on orders;
-create policy "Public submit orders (demo only)"
-on orders for insert
-to anon, authenticated
-with check (true);
+-- Orders: INSERT handled securely via place_order RPC
 
 drop policy if exists "Admin manage orders" on orders;
 create policy "Admin manage orders"
@@ -231,11 +226,7 @@ to authenticated
 using (is_admin())
 with check (is_admin());
 
-drop policy if exists "Public submit order items (demo only)" on order_items;
-create policy "Public submit order items (demo only)"
-on order_items for insert
-to anon, authenticated
-with check (true);
+
 
 drop policy if exists "Admin manage order items" on order_items;
 create policy "Admin manage order items"
@@ -245,9 +236,18 @@ using (is_admin())
 with check (is_admin());
 
 -- 7. Storage: product-images bucket (public reads, admin writes) ---------------
-insert into storage.buckets (id, name, public)
-values ('product-images', 'product-images', true)
-on conflict (id) do update set public = excluded.public;
+  insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  values (
+    'product-images', 
+    'product-images', 
+    true,
+    5242880,
+    array['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif']::text[]
+  )
+  on conflict (id) do update set 
+    public = excluded.public,
+    file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "Public read product images storage" on storage.objects;
 create policy "Public read product images storage"

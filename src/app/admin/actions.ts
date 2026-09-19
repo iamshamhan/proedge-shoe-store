@@ -61,6 +61,9 @@ type ProductInput = {
 export async function createProduct(
   data: ProductInput,
 ): Promise<{ id: string } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: "Unauthorized." };
+
   if (!data.name.trim()) return { error: 'Name is required.' };
   if (!data.slug.trim()) return { error: 'Slug is required.' };
   if (!data.category_id) return { error: 'Category is required.' };
@@ -98,6 +101,9 @@ export async function updateProduct(
   id: string,
   data: ProductInput,
 ): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: "Unauthorized." };
+
   if (!data.name.trim()) return { error: 'Name is required.' };
   if (!data.slug.trim()) return { error: 'Slug is required.' };
   if (!data.category_id) return { error: 'Category is required.' };
@@ -144,6 +150,9 @@ export async function updateProduct(
 export async function deleteProduct(
   id: string,
 ): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: "Unauthorized." };
+
   const supabase = await getSupabaseServer();
 
   // Fetch product slug before deleting to invalidate cache
@@ -161,6 +170,9 @@ export async function toggleProductActive(
   id: string,
   isActive: boolean,
 ): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: "Unauthorized." };
+
   const supabase = await getSupabaseServer();
 
   const { data: prod } = await supabase.from('products').select('slug').eq('id', id).single();
@@ -183,6 +195,9 @@ export async function addProductImage(
   altText: string,
   sortOrder: number,
 ): Promise<{ id: string } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: "Unauthorized." };
+
   const supabase = await getSupabaseServer();
   const { data, error } = await supabase
     .from('product_images')
@@ -202,6 +217,9 @@ export async function removeProductImage(
   imageId: string,
   imageUrl: string,
 ): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: "Unauthorized." };
+
   const supabase = await getSupabaseServer();
 
   const { data: img } = await supabase
@@ -237,6 +255,9 @@ export async function addProductVariant(
   stock: number,
   sizeSystem: string = 'EU',
 ): Promise<{ id: string } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: "Unauthorized." };
+
   if (!colour.trim()) return { error: 'Colour is required.' };
   const sizeValueStr = String(size).trim();
   if (!sizeValueStr) return { error: 'Size is required.' };
@@ -289,6 +310,9 @@ export async function addProductVariant(
 export async function removeProductVariant(
   variantId: string,
 ): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: "Unauthorized." };
+
   const supabase = await getSupabaseServer();
 
   const { data: v } = await supabase
@@ -312,6 +336,9 @@ export async function updateVariantStock(
   variantId: string,
   stock: number,
 ): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: "Unauthorized." };
+
   if (stock < 0) return { error: 'Stock cannot be negative.' };
   const supabase = await getSupabaseServer();
 
@@ -350,6 +377,11 @@ export type UpdateSettingsInput = {
   contact_address?: string;
   contact_phone?: string;
   contact_email?: string;
+  whatsapp_number?: string;
+  sale_section_title?: string;
+  sale_section_subtitle?: string;
+  new_arrivals_title?: string;
+  new_arrivals_subtitle?: string;
 };
 
 export async function updateStoreSettings(
@@ -411,9 +443,25 @@ export async function updateStoreSettings(
     upsertPayload.contact_phone = input.contact_phone.trim() || null;
   }
 
-  if (input.contact_email !== undefined) {
+    if (input.contact_email !== undefined) {
     upsertPayload.contact_email = input.contact_email.trim() || null;
   }
+  if (input.whatsapp_number !== undefined) {
+    upsertPayload.whatsapp_number = input.whatsapp_number.trim() || null;
+  }
+  if (input.sale_section_title !== undefined) {
+    upsertPayload.sale_section_title = input.sale_section_title.trim() || null;
+  }
+  if (input.sale_section_subtitle !== undefined) {
+    upsertPayload.sale_section_subtitle = input.sale_section_subtitle.trim() || null;
+  }
+  if (input.new_arrivals_title !== undefined) {
+    upsertPayload.new_arrivals_title = input.new_arrivals_title.trim() || null;
+  }
+  if (input.new_arrivals_subtitle !== undefined) {
+    upsertPayload.new_arrivals_subtitle = input.new_arrivals_subtitle.trim() || null;
+  }
+
 
   let { error } = await supabase.from('store_settings').upsert(upsertPayload);
 
@@ -463,7 +511,10 @@ export async function createCategory(data: {
   name: string;
   slug: string;
   description?: string;
-  parent_id?: string;
+    parent_id?: string;
+    image_url?: string;
+    subtitle?: string;
+    tagline?: string;
 }): Promise<{ success: true; id: string } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: 'Unauthorized.' };
@@ -486,7 +537,10 @@ export async function createCategory(data: {
       name: data.name,
       slug: data.slug,
       description: data.description || null,
-      parent_id: data.parent_id || null,
+        image_url: data.image_url || null,
+        subtitle: data.subtitle || null,
+        tagline: data.tagline || null,
+        parent_id: data.parent_id || null,
       sort_order,
     })
     .select('id')
@@ -499,4 +553,59 @@ export async function createCategory(data: {
 
   revalidatePath('/', 'layout');
   return { success: true, id: catData.id };
+}
+export async function updateAdminProfile(data: { email?: string; password?: string }) {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: 'Unauthorized.' };
+
+  const supabase = await getSupabaseServer();
+  const updates: Record<string, string> = {};
+  if (data.email) updates.email = data.email;
+  if (data.password) updates.password = data.password;
+
+  if (Object.keys(updates).length === 0) return { success: true };
+
+  const { error } = await supabase.auth.updateUser(updates);
+  if (error) return { error: error.message };
+
+  return { success: true };
+}
+
+export async function updateCategory(
+  id: string,
+  data: {
+    name: string;
+    slug: string;
+    description?: string;
+    parent_id?: string;
+    image_url?: string;
+    subtitle?: string;
+    tagline?: string;
+  }
+): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: 'Unauthorized.' };
+
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase
+    .from('categories')
+    .update({
+      name: data.name,
+      slug: data.slug,
+      description: data.description || null,
+      image_url: data.image_url || null,
+      subtitle: data.subtitle || null,
+      tagline: data.tagline || null,
+      parent_id: data.parent_id || null,
+    })
+    .eq('id', id);
+
+  if (error) {
+    if (error.code === '23505') {
+      return { error: 'A category with this slug already exists.' };
+    }
+    return { error: error.message };
+  }
+
+  return { success: true };
 }

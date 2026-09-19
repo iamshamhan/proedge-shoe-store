@@ -506,7 +506,7 @@ export function CheckoutPage() {
               <div className="space-y-4 max-h-72 overflow-y-auto pr-1">
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center gap-3">
-                    <div className="relative w-14 h-14 rounded-lg bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 overflow-hidden shrink-0">
+                    <div className="relative w-14 h-14 rounded-lg bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 overflow-hidden shrink-0" style={{ position: 'relative' }}>
                       <Image
                         src={item.image}
                         alt={item.name}

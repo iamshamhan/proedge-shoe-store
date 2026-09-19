@@ -8,8 +8,6 @@ export const metadata = pageMetadata({
   noindex: true,
 });
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export default function CheckoutPageWrapper() {
   return <CheckoutPage />;

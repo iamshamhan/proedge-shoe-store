@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
 import { ShopContent } from '@/components/shop/shop-content';

@@ -26,7 +26,7 @@ export function SizeSelector({
   const isOnlyOneSize = sizes.length === 1 && (sizes[0] === 'One Size' || sizes[0] === 'Standard');
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2.5" data-testid="size-selector">
       <div className="flex items-center justify-between">
         <label className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-1.5">
           <span>{labelText}</span>
@@ -73,3 +73,4 @@ export function SizeSelector({
     </div>
   );
 }
+

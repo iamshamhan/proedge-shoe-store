@@ -17,7 +17,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
   return (
     <div className="flex items-center gap-4 py-4 border-b border-zinc-200 dark:border-zinc-800">
       {/* Thumbnail Image */}
-      <Link href={`/product/${item.slug}`} className="relative w-20 h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 shrink-0 overflow-hidden group">
+      <Link href={`/product/${item.slug}`} className="relative w-20 h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 shrink-0 overflow-hidden group" style={{ position: 'relative' }}>
         <Image
           src={item.image}
           alt={item.name}
