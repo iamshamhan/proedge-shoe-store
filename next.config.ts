@@ -1,8 +1,17 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === 'development';
+const isPreview = process.env.VERCEL_ENV === 'preview';
+
+// React requires eval() in development. The Vercel Preview Toolbar also requires it.
+// We allow it ONLY in those environments, keeping Production strictly secure.
+const scriptSrc = (isDev || isPreview)
+  ? "'self' 'unsafe-inline' 'unsafe-eval'"
+  : "'self' 'unsafe-inline'";
+
 const cspHeader = `
   default-src 'self';
-  script-src 'self'  'unsafe-inline';
+  script-src ${scriptSrc};
   style-src 'self' 'unsafe-inline';
   img-src 'self' blob: data: https://images.unsplash.com https://*.supabase.co;
   font-src 'self';
