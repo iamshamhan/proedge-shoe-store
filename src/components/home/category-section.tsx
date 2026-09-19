@@ -112,15 +112,15 @@ export function CategorySection({ categories }: CategorySectionProps) {
                   <span>{item.subtitle}</span>
                 </div>
 
-                <h3 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
+                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   {item.name}
                 </h3>
 
-                <p className="text-xs text-zinc-300 line-clamp-1 sm:line-clamp-none font-medium">
+                <p className="text-xs text-zinc-300 line-clamp-1 sm:line-clamp-none font-medium leading-relaxed">
                   {item.tagline}
                 </p>
 
-                <div className="pt-2 flex items-center text-xs font-bold text-white uppercase tracking-wider group-hover:text-amber-400 transition-colors">
+                <div className="pt-2 flex items-center text-xs font-bold text-white group-hover:text-amber-400 transition-colors">
                   <span>Explore Department</span>
                   <ArrowRight className="w-4 h-4 ml-1.5 motion-safe:group-hover:translate-x-1.5 transition-transform" />
                 </div>

@@ -57,17 +57,17 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
               <Link
                 href="/shop"
-                className="w-full sm:w-auto px-8 py-4 bg-amber-500 text-zinc-950 font-black text-sm uppercase tracking-wider rounded-xl hover:bg-amber-400 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 group"
+                className="w-full sm:w-auto px-8 py-4 bg-amber-500 text-zinc-950 font-bold text-sm rounded-xl hover:bg-amber-400 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 group min-h-[44px]"
               >
-                <span>EXPLORE ALL GEAR</span>
+                <span>Explore All Gear</span>
                 <ArrowRight className="w-4 h-4 motion-safe:group-hover:translate-x-1 transition-transform" />
               </Link>
               
               <Link
                 href="/sale"
-                className="w-full sm:w-auto px-8 py-4 bg-zinc-900 text-white border border-zinc-700 font-extrabold text-sm uppercase tracking-wider rounded-xl hover:bg-zinc-800 hover:border-zinc-500 transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 bg-zinc-900 text-white border border-zinc-700 font-bold text-sm rounded-xl hover:bg-zinc-800 hover:border-zinc-500 transition-all flex items-center justify-center gap-2 min-h-[44px]"
               >
-                <span>VIEW SALE COLLECTION</span>
+                <span>View Sale Collection</span>
               </Link>
             </div>
 

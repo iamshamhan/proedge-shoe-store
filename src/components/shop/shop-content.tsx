@@ -300,10 +300,10 @@ export function ShopContent({
           <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest block mb-1">
             PROEDGE Catalog
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-zinc-900 dark:text-white tracking-tight">
             {pageTitle}
           </h1>
-          <p className="mt-2 text-zinc-500 dark:text-zinc-400 text-sm sm:text-base max-w-2xl">
+          <p className="mt-3 text-zinc-500 dark:text-zinc-400 text-sm sm:text-base max-w-2xl leading-relaxed">
             {pageSubtitle}
           </p>
         </div>
@@ -341,7 +341,7 @@ export function ShopContent({
             <button
               type="button"
               onClick={() => setIsMobileFilterOpen(true)}
-              className="lg:hidden px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl text-xs font-bold uppercase tracking-wider text-zinc-800 dark:text-zinc-200 flex items-center gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="lg:hidden px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               <SlidersHorizontal className="w-4 h-4 text-amber-500" />
               <span>Filters</span>
@@ -352,14 +352,14 @@ export function ShopContent({
 
             {/* Sort Selector */}
             <div className="relative flex items-center">
-              <span className="hidden sm:inline-block text-xs font-bold uppercase text-zinc-400 dark:text-zinc-500 mr-2">
+              <span className="hidden sm:inline-block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mr-2">
                 Sort:
               </span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
                 aria-label="Sort products"
-                className="px-3.5 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-amber-500 cursor-pointer"
+                className="px-3.5 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-amber-500 cursor-pointer"
               >
                 {SORT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -376,7 +376,7 @@ export function ShopContent({
           {/* Desktop Filter Sidebar */}
           <div className="hidden lg:block space-y-6 bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 h-fit transition-colors sticky top-24">
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-2">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <Filter className="w-4 h-4 text-amber-500" />
                 <span>Filter Catalog</span>
               </h3>
@@ -393,7 +393,7 @@ export function ShopContent({
 
             {/* Category Filter Tree */}
             <div className="space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                 Department
               </h4>
               {renderCategoryTree()}
@@ -401,7 +401,7 @@ export function ShopContent({
 
             {/* In Stock Toggle */}
             <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+              <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                 <input
                   type="checkbox"
                   checked={inStockOnly}
@@ -469,7 +469,7 @@ export function ShopContent({
           {/* Modal Panel */}
           <div className="relative w-full max-w-xs sm:max-w-sm bg-white dark:bg-zinc-900 h-full shadow-2xl flex flex-col z-10 p-6 overflow-y-auto transition-colors">
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-2">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <Filter className="w-4 h-4 text-amber-500" />
                 <span>Filter Products</span>
               </h3>
@@ -485,19 +485,19 @@ export function ShopContent({
 
             <div className="py-6 space-y-6 flex-1 overflow-y-auto">
               <div className="space-y-2">
-                <h4 className="text-xs font-bold uppercase text-zinc-400 dark:text-zinc-500">
+                <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                   Select Department
                 </h4>
                 {renderCategoryTree(() => setIsMobileFilterOpen(false))}
               </div>
 
               <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-800 dark:text-zinc-200">
+                <label className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={inStockOnly}
                     onChange={(e) => setInStockOnly(e.target.checked)}
-                    className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950"
+                    className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950 focus:ring-zinc-900 dark:focus:ring-amber-500"
                   />
                   <span>In Stock Only</span>
                 </label>
@@ -508,14 +508,14 @@ export function ShopContent({
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="flex-1 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-xl text-xs font-bold uppercase text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="flex-1 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 Reset
               </button>
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(false)}
-                className="flex-1 py-2.5 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 rounded-xl text-xs font-bold uppercase hover:bg-amber-600 dark:hover:bg-amber-400 transition-colors"
+                className="flex-1 py-2.5 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 rounded-xl text-sm font-bold hover:bg-amber-600 dark:hover:bg-amber-400 transition-colors"
               >
                 Apply
               </button>

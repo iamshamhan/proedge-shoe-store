@@ -197,21 +197,21 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
           {/* Stock Badge */}
           {currentStock <= 0 ? (
-            <span className="px-2.5 py-1 text-[11px] font-extrabold uppercase bg-rose-100 text-rose-800 rounded-md">
+            <span className="px-2.5 py-1 text-xs font-bold bg-rose-100 text-rose-800 rounded-md">
               Out of Stock
             </span>
           ) : currentStock <= 3 ? (
-            <span className="px-2.5 py-1 text-[11px] font-extrabold uppercase bg-amber-100 text-amber-900 rounded-md">
-              Only {currentStock} Left in Stock
+            <span className="px-2.5 py-1 text-xs font-bold bg-amber-100 text-amber-900 rounded-md">
+              Only {currentStock} Left
             </span>
           ) : (
-            <span className="px-2.5 py-1 text-[11px] font-extrabold uppercase bg-emerald-100 text-emerald-900 rounded-md">
-              In Stock ({currentStock} available)
+            <span className="px-2.5 py-1 text-xs font-bold bg-emerald-100 text-emerald-900 rounded-md">
+              In Stock
             </span>
           )}
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-zinc-900 dark:text-white">
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-900 dark:text-white">
           {product.name}
         </h1>
 
@@ -305,7 +305,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           type="button"
           onClick={handleAddToCart}
           disabled={currentStock <= 0}
-          className={`w-full py-4 font-extrabold text-sm uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg focus:outline-none focus-visible:ring-2 disabled:opacity-50 ${
+          className={`w-full py-4 font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg focus:outline-none focus-visible:ring-2 disabled:opacity-50 min-h-[44px] ${
             isAdded
               ? 'bg-emerald-600 text-white'
               : 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500'
@@ -314,14 +314,14 @@ export function ProductInfo({ product }: ProductInfoProps) {
           {isAdded ? (
             <>
               <Check className="w-5 h-5 text-white" />
-              <span>Added To Cart!</span>
+              <span>Added to Cart!</span>
             </>
           ) : currentStock <= 0 ? (
             <span>Sold Out</span>
           ) : (
             <>
               <ShoppingBag className="w-5 h-5" />
-              <span>Add To Cart</span>
+              <span>Add to Cart</span>
             </>
           )}
         </button>
@@ -330,7 +330,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           type="button"
           onClick={handleBuyNow}
           disabled={currentStock <= 0}
-          className="w-full py-4 bg-amber-500 text-zinc-950 font-black text-sm uppercase tracking-wider rounded-xl hover:bg-amber-400 transition-all flex items-center justify-center gap-2 shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 disabled:opacity-50"
+          className="w-full py-4 bg-amber-500 text-zinc-950 font-bold text-sm rounded-xl hover:bg-amber-400 transition-all flex items-center justify-center gap-2 shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 disabled:opacity-50 min-h-[44px]"
         >
           <Zap className="w-5 h-5" />
           <span>{currentStock <= 0 ? 'Out of Stock' : 'Buy Now'}</span>
