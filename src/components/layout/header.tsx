@@ -173,7 +173,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label="Toggle navigation menu"
                 aria-expanded={isMobileMenuOpen}
-                className="p-2 -ml-2 rounded-md text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500 transition-colors"
+                className="p-2.5 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center -ml-2 rounded-md text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500 transition-colors"
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -368,7 +368,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   onClick={toggleTheme}
                   aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                   title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-amber-400 dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                  className="p-2.5 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-amber-400 dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                 >
                   {theme === 'dark' ? (
                     <Sun className="w-5 h-5 text-amber-400" />
@@ -408,7 +408,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   onClick={toggleTheme}
                   aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                   title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-amber-400 dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                  className="p-2.5 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-amber-400 dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                 >
                   {theme === 'dark' ? (
                     <Sun className="w-5 h-5 text-amber-400" />
@@ -423,7 +423,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
                   aria-label="Open search bar"
                   aria-expanded={isSearchOpen}
-                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
+                  className="p-2.5 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
                 >
                   <Search className="w-5 h-5" />
                 </button>
@@ -434,7 +434,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   aria-label={`Wishlist, ${wishlistIds.length} ${
                     wishlistIds.length === 1 ? 'item' : 'items'
                   } saved`}
-                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
+                  className="p-2.5 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
                 >
                   <Heart className="w-5 h-5" />
                   {wishlistIds.length > 0 && (
@@ -450,7 +450,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   aria-label={`Shopping cart, ${totalItemsCount} ${
                     totalItemsCount === 1 ? 'item' : 'items'
                   }`}
-                  className="p-2 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
+                  className="p-2.5 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
                 >
                   <ShoppingBag className="w-5 h-5" />
                   {totalItemsCount > 0 && (
@@ -531,7 +531,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                 type="button"
                 onClick={() => setIsMobileMenuOpen(false)}
                 aria-label="Close menu"
-                className="p-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white rounded-md focus-visible:ring-2 focus-visible:ring-amber-500"
+                className="p-2.5 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white rounded-md focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 <X className="w-5 h-5" />
               </button>

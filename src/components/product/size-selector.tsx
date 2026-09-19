@@ -51,7 +51,7 @@ export function SizeSelector({
               disabled={soldOut}
               onClick={() => onSelectSize(size)}
               title={soldOut ? `${size} is out of stock` : undefined}
-              className={`py-3 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl border-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+              className={`py-3 min-h-[44px] text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl border-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 soldOut
                   ? 'opacity-40 border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800/40 text-zinc-400 line-through cursor-not-allowed'
                   : isSelected
@@ -73,4 +73,5 @@ export function SizeSelector({
     </div>
   );
 }
+
 
