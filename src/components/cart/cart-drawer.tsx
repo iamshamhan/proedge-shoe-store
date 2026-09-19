@@ -97,7 +97,7 @@ export function CartDrawer() {
               <Link
                 href="/shop"
                 onClick={close}
-                className="px-6 py-3 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
+                className="px-6 py-3 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold text-xs uppercase tracking-wider rounded-full hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 Shop Now
               </Link>
@@ -127,7 +127,7 @@ export function CartDrawer() {
               <Link
                 href="/cart"
                 onClick={close}
-                className="py-3.5 px-4 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-extrabold text-xs uppercase tracking-wider rounded-xl text-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
+                className="py-3.5 px-4 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-extrabold text-xs uppercase tracking-wider rounded-full text-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 View Cart
               </Link>
@@ -135,7 +135,7 @@ export function CartDrawer() {
               <Link
                 href="/checkout"
                 onClick={close}
-                className="py-3.5 px-4 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-black text-xs uppercase tracking-wider rounded-xl text-center hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-all flex items-center justify-center gap-1.5 shadow-md focus-visible:ring-2 focus-visible:ring-amber-500"
+                className="py-3.5 px-4 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-black text-xs uppercase tracking-wider rounded-full text-center hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-all flex items-center justify-center gap-1.5 soft-shadow focus-visible:ring-2 focus-visible:ring-amber-500"
               >
                 <span>Checkout</span>
                 <ArrowRight className="w-4 h-4" />

@@ -188,7 +188,7 @@ export function CheckoutPage() {
             </p>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 mt-8 px-8 py-4 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-black text-xs uppercase tracking-wider rounded-xl hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-all shadow-md"
+              className="inline-flex items-center gap-2 mt-8 px-8 py-4 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-black text-xs uppercase tracking-wider rounded-full hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 transition-all soft-shadow"
             >
               <span>Shop Now</span>
               <ArrowRight className="w-4 h-4" />
@@ -257,14 +257,14 @@ export function CheckoutPage() {
                 href={orderUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white font-black text-xs uppercase tracking-wider rounded-xl hover:bg-emerald-500 transition-all shadow-md"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white font-black text-xs uppercase tracking-wider rounded-full hover:bg-emerald-500 transition-all soft-shadow"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>Open WhatsApp Again</span>
               </a>
               <Link
                 href="/shop"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white font-black text-xs uppercase tracking-wider rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white font-black text-xs uppercase tracking-wider rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all soft-shadow"
               >
                 <span>Continue Shopping</span>
               </Link>
@@ -294,7 +294,7 @@ export function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Delivery Details Form */}
           <div className="lg:col-span-7 space-y-6">
-            <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs space-y-6" noValidate>
+            <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 soft-shadow space-y-6" noValidate>
               {/* Contact Info */}
               <fieldset className="space-y-4">
                 <legend className="flex items-center gap-2 text-lg font-bold text-zinc-900 dark:text-white pb-2">
@@ -486,7 +486,7 @@ export function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-8 py-4 bg-emerald-600 text-white font-black text-sm uppercase tracking-wider rounded-xl hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 shadow-md disabled:opacity-60"
+                  className="px-8 py-4 bg-emerald-600 text-white font-black text-sm uppercase tracking-wider rounded-full hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 soft-shadow disabled:opacity-60"
                 >
                   <MessageSquare className="w-5 h-5" />
                   <span>{isSubmitting ? 'Preparing Order...' : 'Place Order via WhatsApp'}</span>
@@ -497,7 +497,7 @@ export function CheckoutPage() {
 
           {/* Order Summary Column */}
           <div className="lg:col-span-5">
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-xs lg:sticky lg:top-28 space-y-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 p-6 soft-shadow lg:sticky lg:top-28 space-y-4">
               <h2 className="text-xl font-bold text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800 pb-4">
                 Order Summary ({items.length})
               </h2>

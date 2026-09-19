@@ -41,25 +41,25 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-tight text-foreground">
-              Natural <br />
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-tight text-foreground uppercase">
+              STEP INTO <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-light">
-                Movement.
+                YOUR STYLE
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-muted-foreground text-base sm:text-xl font-medium max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Designed to move with the earth. Unparalleled comfort meets sustainable materials in our lightest silhouettes yet.
+              Discover elite multi-sport footwear, performance apparel, balls, and equipment engineered for peak performance across Football, Rugby, Basketball, and Running.
             </p>
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
               <Link
                 href="/shop"
-                className="w-full sm:w-auto px-8 py-4 bg-foreground text-background font-semibold text-sm rounded-full hover:opacity-90 transition-all flex items-center justify-center gap-2 soft-shadow group min-h-[44px]"
+                className="w-full sm:w-auto px-8 py-4 bg-accent text-zinc-950 font-bold text-sm rounded-full hover:bg-amber-400 transition-all flex items-center justify-center gap-2 soft-shadow group min-h-[44px]"
               >
-                <span>Explore Collection</span>
+                <span>Explore All Gear</span>
                 <ArrowRight className="w-4 h-4 motion-safe:group-hover:translate-x-1 transition-transform" />
               </Link>
               

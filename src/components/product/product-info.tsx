@@ -229,7 +229,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* Pricing Display */}
-      <div className="p-4 bg-zinc-100/80 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 flex flex-wrap items-baseline gap-3">
+      <div className="p-5 bg-zinc-100/80 dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 flex flex-wrap items-baseline gap-3 soft-shadow">
         <span className="text-3xl font-black text-zinc-900 dark:text-white">
           {formatLKR(product.price)}
         </span>
@@ -305,7 +305,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           type="button"
           onClick={handleAddToCart}
           disabled={currentStock <= 0}
-          className={`w-full py-4 font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg focus:outline-none focus-visible:ring-2 disabled:opacity-50 min-h-[44px] ${
+          className={`w-full py-4 font-bold text-sm rounded-full transition-all flex items-center justify-center gap-2 soft-shadow focus:outline-none focus-visible:ring-2 disabled:opacity-50 min-h-[44px] ${
             isAdded
               ? 'bg-emerald-600 text-white'
               : 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500'
@@ -330,7 +330,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           type="button"
           onClick={handleBuyNow}
           disabled={currentStock <= 0}
-          className="w-full py-4 bg-amber-500 text-zinc-950 font-bold text-sm rounded-xl hover:bg-amber-400 transition-all flex items-center justify-center gap-2 shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 disabled:opacity-50 min-h-[44px]"
+          className="w-full py-4 bg-amber-500 text-zinc-950 font-bold text-sm rounded-full hover:bg-amber-400 transition-all flex items-center justify-center gap-2 soft-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 disabled:opacity-50 min-h-[44px]"
         >
           <Zap className="w-5 h-5" />
           <span>{currentStock <= 0 ? 'Out of Stock' : 'Buy Now'}</span>
