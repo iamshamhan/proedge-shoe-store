@@ -1,66 +1,121 @@
-# PROEDGE Shoe Store Database Workflow
+﻿# PROEDGE Shoe Store — Database Workflow
 
-This project uses the official **Supabase CLI** to manage database schema migrations and seed data.
+This project uses the **Supabase CLI** (@supabase/cli) to manage database migrations in version control.
 
-We **NEVER** manually paste SQL files into the Supabase Dashboard SQL Editor during normal development. All schema changes must be tracked in version control.
+You should **never** need to paste SQL into the Supabase Dashboard SQL Editor for normal development or deployment.
 
-## 1. Directory Structure
+---
 
-- supabase/migrations/: Contains strictly ordered, timestamped SQL files. These define the actual production schema (tables, RLS policies, functions, storage configuration). **NO mock data is allowed here.**
-- supabase/seed.sql: Contains development and test data only (fake products, dummy users, test orders). This is **never** applied to production.
-- supabase/config.toml: Contains the project's Supabase CLI configuration. Secrets are strictly omitted and managed via environment variables.
+## Directory Structure
 
-## 2. Managing Migrations
+```
+supabase/
+├── migrations/          ← Production schema changes (version-controlled)
+│   ├── 20240101000001_schema.sql
+│   ├── 20240101000002_add_settings.sql
+│   ├── ...
+│   └── 20240101000011_phase1_security_hardening.sql
+├── seed.sql             ← Development/test data ONLY (never runs in production)
+└── config.toml          ← Supabase CLI project configuration (no secrets)
+```
 
-When you need to change the database (e.g., adding a table, changing a policy):
+---
 
-1. **Create a new migration file:**
-   ``bash
-   npx supabase migration new my_descriptive_name
-   ``
-   This generates a timestamped file in supabase/migrations/ (e.g., 20240215120000_my_descriptive_name.sql).
+## Production vs Development
 
-2. **Write your SQL:**
-   Edit the new file. Use idempotent PostgreSQL constructs where appropriate:
-   - CREATE TABLE IF NOT EXISTS
-   - CREATE INDEX IF NOT EXISTS
-   - CREATE OR REPLACE FUNCTION
-   - DROP POLICY IF EXISTS ...; CREATE POLICY ...
+| | Production | Development |
+|---|---|---|
+| Migrations | ✅ Applied via db push | ✅ Applied automatically on supabase start |
+| seed.sql | ❌ Never applied | ✅ Applied automatically on supabase start |
+| Mock products/orders | ❌ Use Admin UI | ✅ Loaded from seed.sql |
 
-3. **Check migration status:**
-   Verify what is pending before applying:
-   ``bash
-   npx supabase migration list
-   ``
+---
 
-4. **Apply to your linked database:**
-   ``bash
-   npx supabase db push
-   ``
-   This command reads supabase_migrations.schema_migrations and applies ONLY the missing migrations sequentially.
+## Normal Application Data (no SQL needed)
 
-## 3. Local Development
+These operations go through the application — not SQL files:
 
-To spin up a local instance of the database (requires Docker):
-``bash
-npx supabase start
-``
-This automatically applies all migrations and loads supabase/seed.sql, giving you a fully seeded local testing environment at localhost:54322.
+| Operation | How |
+|---|---|
+| Create/edit products | Admin UI → /admin/products |
+| Create/edit categories | Admin UI → /admin/categories |
+| Store settings | Admin UI → /admin/settings |
+| Orders | Customer checkout flow |
+| Customer accounts | Supabase Auth / application |
 
-## 4. Production vs. Development
+---
 
-*   **Production**: Only receives the schema changes defined in supabase/migrations/ via the 
-px supabase db push command (or via CI/CD pipelines). Production never touches seed.sql.
-*   **Development/Testing**: Uses both migrations/ and seed.sql. Playwright tests run against this seeded data.
+## Developer Workflow
 
-## 5. Mock Data vs Real Operations
+### Linking the project (one-time setup)
 
-Never write migrations that insert normal application data (e.g., creating categories or products). The application relies on Admin UI endpoints for real-world data entry. Only use supabase/seed.sql for fake development data.
+Requires a Supabase Access Token (from https://supabase.com/dashboard/account/tokens)
+and your database password (Supabase Dashboard → Project Settings → Database).
 
-## 6. Linking the Remote Project
+```bash
+# Set access token (do not commit this)
+$env:SUPABASE_ACCESS_TOKEN = "your-token"    # PowerShell
+export SUPABASE_ACCESS_TOKEN="your-token"     # bash/zsh
 
-Before running supabase db push or supabase migration list, you must link your local repository to your Supabase project using your Project Reference ID and a Database Password:
-``bash
-npx supabase link --project-ref your-project-ref
-``
-Do not commit passwords or service-role keys to Git.
+# Link to the remote project
+npx supabase link --project-ref ettkbxmmdflpxwjpircs
+```
+
+### Creating a new migration
+
+```bash
+npx supabase migration new describe_your_change
+# Edit the generated file in supabase/migrations/
+git add supabase/migrations/
+git commit -m "chore(db): add describe_your_change migration"
+```
+
+### Checking migration status
+
+```bash
+npx supabase migration list --linked
+```
+
+Local and remote columns should match for all applied migrations.
+Any migration with a local entry but empty remote is pending.
+
+### Applying pending migrations to production
+
+```bash
+npx supabase db push --linked
+```
+
+This applies only migrations that are not yet in the remote history table.
+It does NOT re-run already applied migrations.
+
+### Dry-run (preview without applying)
+
+```bash
+npx supabase db push --linked --dry-run
+```
+
+---
+
+## Migration History Reconciliation (completed 2026-09-19)
+
+The first 11 migrations were originally applied manually via the Supabase SQL Editor
+before this migration system was established.
+
+They were reconciled using migration repair — which records them as applied in the
+supabase_migrations.schema_migrations tracking table **without re-executing any SQL**:
+
+```bash
+npx supabase migration repair --status applied 20240101000001 --linked
+# ... repeated for 20240101000002 through 20240101000011
+```
+
+All 11 migrations now appear as applied in both local and remote history.
+
+---
+
+## Security
+
+- Never commit secrets, passwords, or access tokens
+- The .env.local file (git-ignored) holds the anon key and Supabase URL
+- The service-role key and database password are never stored in the repository
+- Rotate credentials after any accidental exposure
