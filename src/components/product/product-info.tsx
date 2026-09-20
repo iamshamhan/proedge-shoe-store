@@ -8,7 +8,7 @@ import { SizeSelector } from '@/components/product/size-selector';
 import { ColorSelector } from '@/components/product/color-selector';
 import { QuantitySelector } from '@/components/product/quantity-selector';
 import { useCart } from '@/context/cart-context';
-import { ShoppingBag, Star, ShieldCheck, Truck, Zap, MessageSquare, Check } from 'lucide-react';
+import { ShoppingBag, ShieldCheck, Truck, Zap, MessageSquare, Check } from 'lucide-react';
 import { STORE_CONFIG } from '@/lib/config';
 
 interface ProductInfoProps {
@@ -215,17 +215,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           {product.name}
         </h1>
 
-        {/* Rating Placeholder */}
-        <div className="flex items-center gap-2 pt-1 text-xs text-zinc-500 dark:text-zinc-400 font-semibold">
-          <div className="flex items-center text-amber-500">
-            <Star className="w-4 h-4 fill-amber-500" />
-            <Star className="w-4 h-4 fill-amber-500" />
-            <Star className="w-4 h-4 fill-amber-500" />
-            <Star className="w-4 h-4 fill-amber-500" />
-            <Star className="w-4 h-4 fill-amber-500" />
-          </div>
-          <span>4.9 / 5.0 (Authentic PROEDGE Performance)</span>
-        </div>
+
       </div>
 
       {/* Pricing Display */}
