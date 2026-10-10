@@ -35,9 +35,10 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/admin')) {
     const url = request.nextUrl.clone();
     const isLoginPage = request.nextUrl.pathname === '/admin/login';
+    const isResetPage = request.nextUrl.pathname === '/admin/reset-password';
     const hasValidSession = Boolean(data?.claims && data.claims.role);
 
-    if (!hasValidSession && !isLoginPage) {
+    if (!hasValidSession && !isLoginPage && !isResetPage) {
       url.pathname = '/admin/login';
       return NextResponse.redirect(url);
     }
