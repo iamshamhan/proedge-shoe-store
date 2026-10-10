@@ -139,67 +139,67 @@ export function OrdersTable({ initialOrders }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Overview Stat Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
-              <Package className="h-5 w-5" />
+      {/* Overview Stat Cards (2x2 on mobile, 4-col on desktop) */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3.5 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+              <Package className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-2xl font-black text-zinc-900 dark:text-white">
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white truncate">
                 {stats.total}
               </p>
-              <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                Total Inquiries
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 truncate">
+                Inquiries
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20 p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
-              <Clock className="h-5 w-5" />
+        <div className="rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20 p-3.5 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-2xl font-black text-amber-600 dark:text-amber-400">
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 truncate">
                 {stats.pending}
               </p>
-              <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                Pending WhatsApp
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 truncate">
+                Pending WA
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="h-5 w-5" />
+        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 p-3.5 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 truncate">
                 {stats.confirmed}
               </p>
-              <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                Confirmed Sales
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 truncate">
+                Confirmed
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
-              <XCircle className="h-5 w-5" />
+        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3.5 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+              <XCircle className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-2xl font-black text-zinc-500 dark:text-zinc-400">
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-black text-zinc-500 dark:text-zinc-400 truncate">
                 {stats.cancelled}
               </p>
-              <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                Cancelled (No Sale)
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 truncate">
+                Cancelled
               </p>
             </div>
           </div>
@@ -250,7 +250,138 @@ export function OrdersTable({ initialOrders }: Props) {
 
       {/* Orders List / Table */}
       <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Dedicated Touch Cards (< md) */}
+        <div className="divide-y divide-zinc-100 dark:divide-zinc-800 md:hidden">
+          {filteredOrders.map((order) => {
+            const waLink = getWhatsAppLink(
+              order.phone,
+              order.order_number,
+              order.customer_name
+            );
+
+            return (
+              <div key={order.id} className="p-4 space-y-3.5">
+                {/* Header: Order #, Item Count & Status Selector */}
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <Link
+                      href={`/admin/orders/${order.id}`}
+                      className="font-mono text-sm font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1.5"
+                    >
+                      <span>{order.order_number}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                    </Link>
+                    <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 mt-0.5">
+                      <Calendar className="w-3 h-3 text-zinc-400" />
+                      <span>{formatDate(order.created_at)}</span>
+                      {order.item_count ? (
+                        <>
+                          <span>·</span>
+                          <span>{order.item_count} {order.item_count === 1 ? 'item' : 'items'}</span>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <OrderStatusSelect
+                    orderId={order.id}
+                    currentStatus={order.status}
+                    size="sm"
+                  />
+                </div>
+
+                {/* Customer Details & Amount Box */}
+                <div className="flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-800/50 p-3 border border-zinc-100 dark:border-zinc-800/80">
+                  <div className="min-w-0 pr-2">
+                    <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
+                      {order.customer_name}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                      {order.city} · <a href={`tel:${order.phone}`} className="hover:underline">{order.phone}</a>
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-black text-zinc-900 dark:text-white">
+                      {formatLKR(order.total)}
+                    </p>
+                    {order.delivery_fee > 0 ? (
+                      <p className="text-[10px] text-zinc-400">
+                        +{formatLKR(order.delivery_fee)} del.
+                      </p>
+                    ) : (
+                      <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                        Free delivery
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Mobile Action Buttons Bar */}
+                <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                  {order.status === 'pending' && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedForCompletion(order)}
+                      title="Confirm WhatsApp Sale"
+                      className="flex-1 min-w-[100px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 py-2 px-3 text-xs font-black uppercase tracking-wider text-white shadow-xs transition-colors"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Done</span>
+                    </button>
+                  )}
+
+                  {order.status === 'confirmed' && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedForCompletion(order)}
+                      title="Adjust items"
+                      className="flex-1 min-w-[80px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 py-2 px-3 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-colors"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Adjust</span>
+                    </button>
+                  )}
+
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Message customer on WhatsApp"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 py-2 px-3 text-xs font-bold text-white transition-colors shadow-xs"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
+                  </a>
+
+                  {(order.status === 'pending' || order.status === 'confirmed') && (
+                    <OrderCancelButton
+                      orderId={order.id}
+                      orderNumber={order.order_number}
+                      currentStatus={order.status}
+                      size="sm"
+                    />
+                  )}
+
+                  <Link
+                    href={`/admin/orders/${order.id}`}
+                    title="View order details"
+                    className="inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-200 dark:border-zinc-700 py-2 px-2.5 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+
+                  <OrderDeleteButton
+                    orderId={order.id}
+                    orderNumber={order.order_number}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop View: Full Data Table (visible on md+) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-400">
             <thead className="bg-zinc-50 dark:bg-zinc-900/80 text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100 border-b border-zinc-200 dark:border-zinc-800">
               <tr>
@@ -411,25 +542,24 @@ export function OrdersTable({ initialOrders }: Props) {
                   </tr>
                 );
               })}
-
-              {filteredOrders.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
-                    <Package className="w-8 h-8 mx-auto mb-2 text-zinc-300 dark:text-zinc-700" />
-                    <p className="font-bold text-sm text-zinc-700 dark:text-zinc-300">
-                      No orders found
-                    </p>
-                    <p className="text-xs text-zinc-400 mt-1">
-                      {search || statusFilter !== 'all'
-                        ? 'Try clearing your search or status filter.'
-                        : 'Orders submitted via the customer checkout will appear here.'}
-                    </p>
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
+
+        {/* Empty State (Shared) */}
+        {filteredOrders.length === 0 && (
+          <div className="px-6 py-12 text-center text-zinc-500">
+            <Package className="w-8 h-8 mx-auto mb-2 text-zinc-300 dark:text-zinc-700" />
+            <p className="font-bold text-sm text-zinc-700 dark:text-zinc-300">
+              No orders found
+            </p>
+            <p className="text-xs text-zinc-400 mt-1">
+              {search || statusFilter !== 'all'
+                ? 'Try clearing your search or status filter.'
+                : 'Orders submitted via the customer checkout will appear here.'}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* WhatsApp Sale Confirmation Modal */}

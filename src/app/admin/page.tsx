@@ -108,38 +108,38 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
           <Link
             href="/admin/orders"
-            className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-200 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-200 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
             <ClipboardList className="h-4 w-4" />
-            View Orders
+            <span>Orders</span>
           </Link>
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 sm:px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
           >
             <Plus className="h-4 w-4" />
-            Add Product
+            <span>Add Product</span>
           </Link>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Cards (2-col on mobile, 4-col on desktop) */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className={`rounded-2xl border bg-white dark:bg-zinc-900 p-5 shadow-xs ${
+            className={`rounded-2xl border bg-white dark:bg-zinc-900 p-3.5 sm:p-5 shadow-xs ${
               stat.highlight
                 ? 'border-amber-300 dark:border-amber-800/80'
                 : 'border-zinc-200 dark:border-zinc-800'
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2.5 sm:mb-3">
               <div
-                className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+                className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl ${
                   stat.highlight
                     ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'
                     : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
@@ -148,13 +148,13 @@ export default async function AdminPage() {
                 <stat.icon className="h-4 w-4" />
               </div>
               {stat.highlight && (
-                <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-full">
-                  Action Needed
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-full">
+                  Action
                 </span>
               )}
             </div>
             <p
-              className={`text-3xl font-black ${
+              className={`text-2xl sm:text-3xl font-black ${
                 stat.highlight
                   ? 'text-amber-600 dark:text-amber-400'
                   : 'text-zinc-900 dark:text-white'
@@ -162,7 +162,7 @@ export default async function AdminPage() {
             >
               {stat.value}
             </p>
-            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+            <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 truncate">
               {stat.label}
             </p>
           </div>

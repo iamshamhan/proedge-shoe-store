@@ -43,7 +43,7 @@ export function OrderDetailActions({ order }: Props) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full sm:w-auto">
               <OrderCancelButton
                 orderId={order.id}
                 orderNumber={order.order_number}
@@ -54,7 +54,7 @@ export function OrderDetailActions({ order }: Props) {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-xs transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-xs transition-colors"
               >
                 <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
                 <span>Confirm Sale (Done)</span>
@@ -81,11 +81,11 @@ export function OrderDetailActions({ order }: Props) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-zinc-800 px-4 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-zinc-700 transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-zinc-800 px-4 py-2.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-zinc-700 transition-colors"
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span>Adjust Sale Items</span>

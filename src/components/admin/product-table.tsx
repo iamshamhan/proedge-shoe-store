@@ -445,6 +445,15 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                                           <p className="text-xs text-zinc-400 dark:text-zinc-500">
                                             /{product.slug}
                                           </p>
+                                          <div className="flex items-center gap-2 mt-0.5 sm:hidden text-[11px] text-zinc-500">
+                                            <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                                              {formatLKR(product.price)}
+                                            </span>
+                                            <span>·</span>
+                                            <span className={totalStock === 0 ? 'text-red-500 font-bold' : ''}>
+                                              {totalStock} in stock
+                                            </span>
+                                          </div>
                                         </div>
                                       </div>
                                     </td>

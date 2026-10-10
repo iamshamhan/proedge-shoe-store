@@ -58,7 +58,7 @@ export function OrderCancelButton({
         }}
         disabled={isPending}
         title={isPendingInquiry ? 'Cancel Inquiry (No stock effect)' : 'Cancel Order (Restores stock)'}
-        className={`inline-flex items-center gap-1.5 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold uppercase tracking-wider hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors disabled:opacity-50 ${
+        className={`inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold uppercase tracking-wider hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors disabled:opacity-50 ${
           size === 'sm' ? 'px-2.5 py-1.5 text-[11px]' : 'px-3.5 py-2 text-xs'
         }`}
       >

@@ -86,13 +86,13 @@ export default async function AdminOrderDetailPage({
         <div className="flex items-center gap-3">
           <Link
             href="/admin/orders"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl font-black text-zinc-900 dark:text-white font-mono">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <h1 className="text-lg sm:text-xl font-black text-zinc-900 dark:text-white font-mono">
                 {order.order_number}
               </h1>
               <OrderStatusBadge status={order.status} size="md" />
@@ -104,12 +104,12 @@ export default async function AdminOrderDetailPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
           <a
             href={getWhatsAppLink()}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-colors shadow-xs"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-colors shadow-xs"
           >
             <MessageCircle className="w-4 h-4" />
             <span>Chat on WhatsApp</span>
@@ -139,7 +139,47 @@ export default async function AdminOrderDetailPage({
               </h2>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Mobile View: Item Cards (< sm) */}
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800 sm:hidden">
+              {(items ?? []).map((item) => {
+                const lineTotal = item.quantity * item.unit_price;
+                return (
+                  <div key={item.id} className="p-4 space-y-1.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-bold text-sm text-zinc-900 dark:text-white leading-snug">
+                        {item.product_name}
+                      </p>
+                      <span className="font-mono text-sm font-black text-zinc-900 dark:text-white shrink-0">
+                        {formatLKR(lineTotal)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-zinc-500 flex-wrap">
+                      <span>Color: <strong>{item.colour}</strong></span>
+                      {item.size && (
+                        <>
+                          <span>·</span>
+                          <span>Size: <strong className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">{item.size}</strong></span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-zinc-400 pt-0.5">
+                      <span>Quantity: <strong className="text-zinc-700 dark:text-zinc-300">{item.quantity}</strong></span>
+                      <span>{formatLKR(item.unit_price)} each</span>
+                    </div>
+                  </div>
+                );
+              })}
+              {(!items || items.length === 0) && (
+                <div className="px-5 py-6 text-center text-zinc-400 text-xs">
+                  No item records attached to this order.
+                </div>
+              )}
+            </div>
+
+            {/* Desktop View: Data Table (>= sm) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-400">
                 <thead className="bg-zinc-50 dark:bg-zinc-900/50 text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 border-b border-zinc-100 dark:border-zinc-800">
                   <tr>
