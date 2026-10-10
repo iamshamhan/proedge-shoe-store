@@ -51,7 +51,7 @@ const inputClasses =
   'w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-amber-500 transition-all';
 
 export function CheckoutPage() {
-  const { items, subtotal } = useCart();
+  const { items, subtotal, clearCart } = useCart();
   const settings = useStoreSettings();
 
   const [form, setForm] = useState<CheckoutFormState>(INITIAL_FORM);
@@ -169,6 +169,7 @@ export function CheckoutPage() {
     window.open(url, '_blank', 'noopener,noreferrer');
     setOrderUrl(url);
     setOrderData(order);
+    clearCart();
     setIsSubmitting(false);
   };
 

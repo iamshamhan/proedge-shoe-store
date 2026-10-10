@@ -44,3 +44,48 @@ export const VALID_ORDER_STATUSES = [
 ] as const;
 
 export type OrderStatus = (typeof VALID_ORDER_STATUSES)[number];
+
+export interface SaleItemInput {
+  productId: string;
+  variantId: string;
+  productName: string;
+  colour: string;
+  size: string;
+  sizeSystem?: string;
+  sizeValue?: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface CatalogVariantOption {
+  id: string;
+  colour: string;
+  size: number | string | null;
+  size_system?: string;
+  size_value?: string;
+  stock: number;
+}
+
+export interface CatalogProductOption {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  is_active: boolean;
+  product_variants: CatalogVariantOption[];
+}
+
+export interface OrderItemWithStock {
+  id: string;
+  order_id: string;
+  product_id: string;
+  variant_id: string | null;
+  product_name: string;
+  colour: string;
+  size: string;
+  size_system?: string;
+  size_value?: string;
+  quantity: number;
+  unit_price: number;
+  current_stock?: number;
+}

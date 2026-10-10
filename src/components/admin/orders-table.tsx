@@ -7,13 +7,16 @@ import {
   MessageCircle,
   ExternalLink,
   Calendar,
-  DollarSign,
   Package,
   Clock,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { formatLKR } from '@/data/products';
 import { OrderStatusSelect } from './order-status-select';
 import { OrderDeleteButton } from './order-delete-button';
+import { OrderCancelButton } from './order-cancel-button';
+import { OrderCompleteModal } from './order-complete-modal';
 
 export interface AdminOrderSummary {
   id: string;
@@ -41,6 +44,7 @@ type Props = {
 export function OrdersTable({ initialOrders }: Props) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedForCompletion, setSelectedForCompletion] = useState<AdminOrderSummary | null>(null);
 
   const filteredOrders = useMemo(() => {
     return initialOrders.filter((order) => {
@@ -66,13 +70,11 @@ export function OrdersTable({ initialOrders }: Props) {
     const total = initialOrders.length;
     const pending = initialOrders.filter((o) => o.status === 'pending').length;
     const confirmed = initialOrders.filter((o) =>
-      ['confirmed', 'processing', 'ready_to_ship'].includes(o.status)
+      ['confirmed', 'processing', 'ready_to_ship', 'shipped', 'delivered'].includes(o.status)
     ).length;
-    const revenue = initialOrders
-      .filter((o) => o.status !== 'cancelled')
-      .reduce((sum, o) => sum + o.total, 0);
+    const cancelled = initialOrders.filter((o) => o.status === 'cancelled').length;
 
-    return { total, pending, confirmed, revenue };
+    return { total, pending, confirmed, cancelled };
   }, [initialOrders]);
 
   const getWhatsAppLink = (phone: string, orderNumber: string, customerName: string) => {
@@ -149,15 +151,15 @@ export function OrdersTable({ initialOrders }: Props) {
                 {stats.total}
               </p>
               <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                Total Orders
+                Total Inquiries
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs">
+        <div className="rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20 p-5 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
               <Clock className="h-5 w-5" />
             </div>
             <div>
@@ -171,17 +173,17 @@ export function OrdersTable({ initialOrders }: Props) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs">
+        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 p-5 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
-              <MessageCircle className="h-5 w-5" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-black text-zinc-900 dark:text-white">
+              <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                 {stats.confirmed}
               </p>
               <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                In Progress
+                Confirmed Sales
               </p>
             </div>
           </div>
@@ -189,15 +191,15 @@ export function OrdersTable({ initialOrders }: Props) {
 
         <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
-              <DollarSign className="h-5 w-5" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+              <XCircle className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                {formatLKR(stats.revenue)}
+              <p className="text-2xl font-black text-zinc-500 dark:text-zinc-400">
+                {stats.cancelled}
               </p>
               <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                Active Volume
+                Cancelled (No Sale)
               </p>
             </div>
           </div>
@@ -333,25 +335,70 @@ export function OrdersTable({ initialOrders }: Props) {
                     {/* Action Buttons */}
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
+                        {order.status === 'pending' && (
+                          <>
+                            {/* Done / Confirm Sale button */}
+                            <button
+                              type="button"
+                              onClick={() => setSelectedForCompletion(order)}
+                              title="Confirm WhatsApp Sale (Pick purchased items & deduct stock)"
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white transition-colors shadow-xs"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                              <span>Done</span>
+                            </button>
+
+                            {/* Cancel Inquiry button (No stock change) */}
+                            <OrderCancelButton
+                              orderId={order.id}
+                              orderNumber={order.order_number}
+                              currentStatus={order.status}
+                              size="sm"
+                            />
+                          </>
+                        )}
+
+                        {order.status === 'confirmed' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedForCompletion(order)}
+                              title="Adjust items for this confirmed sale"
+                              className="inline-flex items-center gap-1 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/30 px-2.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-colors"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Adjust</span>
+                            </button>
+
+                            <OrderCancelButton
+                              orderId={order.id}
+                              orderNumber={order.order_number}
+                              currentStatus={order.status}
+                              size="sm"
+                            />
+                          </>
+                        )}
+
                         {/* Instant WhatsApp chat button */}
                         <a
                           href={waLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          title="Message on WhatsApp"
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 px-2.5 py-1.5 text-xs font-bold text-white transition-colors shadow-xs"
+                          title="Message customer on WhatsApp"
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-2.5 py-1.5 text-xs font-bold text-white transition-colors shadow-xs"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">WhatsApp</span>
+                          <span className="hidden md:inline">WhatsApp</span>
                         </a>
 
                         {/* View Order Link */}
                         <Link
                           href={`/admin/orders/${order.id}`}
-                          className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 dark:border-zinc-800 px-2.5 py-1.5 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                          title="View order details"
+                          className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 dark:border-zinc-800 px-2.5 py-1.5 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">Details</span>
+                          <span className="hidden md:inline">Details</span>
                         </Link>
 
                         {/* Delete button */}
@@ -384,6 +431,20 @@ export function OrdersTable({ initialOrders }: Props) {
           </table>
         </div>
       </div>
+
+      {/* WhatsApp Sale Confirmation Modal */}
+      {selectedForCompletion && (
+        <OrderCompleteModal
+          isOpen={!!selectedForCompletion}
+          orderId={selectedForCompletion.id}
+          orderNumber={selectedForCompletion.order_number}
+          customerName={selectedForCompletion.customer_name}
+          deliveryFee={selectedForCompletion.delivery_fee}
+          initialNotes={selectedForCompletion.notes}
+          onClose={() => setSelectedForCompletion(null)}
+          onSuccess={() => setSelectedForCompletion(null)}
+        />
+      )}
     </div>
   );
 }

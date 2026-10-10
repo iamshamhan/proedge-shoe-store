@@ -18,6 +18,7 @@ import { formatLKR } from '@/data/products';
 import { OrderStatusBadge } from '@/components/admin/order-status-badge';
 import { OrderStatusSelect } from '@/components/admin/order-status-select';
 import { OrderDeleteButton } from '@/components/admin/order-delete-button';
+import { OrderDetailActions } from '@/components/admin/order-detail-actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,6 +122,9 @@ export default async function AdminOrderDetailPage({
           />
         </div>
       </div>
+
+      {/* Verification Status & Action Banner */}
+      <OrderDetailActions order={order} />
 
       {/* Main Order Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
