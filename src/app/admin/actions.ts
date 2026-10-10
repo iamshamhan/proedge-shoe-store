@@ -499,6 +499,8 @@ export async function updateStoreSettings(
   revalidatePath('/sale');
   revalidatePath('/cart');
   revalidatePath('/checkout');
+  revalidatePath('/policies');
+  revalidatePath('/privacy');
   revalidatePath('/admin/settings');
   return { success: true };
 }
@@ -587,6 +589,35 @@ export async function updateCategory(
   if (!user?.isAdmin) return { error: 'Unauthorized.' };
 
   const supabase = await getSupabaseServer();
+
+  // Keep the tree to two levels (main category -> subcategory) and never loop.
+  if (data.parent_id) {
+    if (data.parent_id === id) {
+      return { error: 'A category cannot be its own parent.' };
+    }
+
+    const { data: parent } = await supabase
+      .from('categories')
+      .select('id, parent_id')
+      .eq('id', data.parent_id)
+      .maybeSingle();
+    if (!parent) return { error: 'The selected parent category no longer exists.' };
+    if (parent.parent_id) {
+      return { error: 'Subcategories can only be placed under a main category.' };
+    }
+
+    const { count: childCount } = await supabase
+      .from('categories')
+      .select('id', { count: 'exact', head: true })
+      .eq('parent_id', id);
+    if ((childCount ?? 0) > 0) {
+      return {
+        error:
+          'This category has subcategories, so it must stay a main category. Move or delete its subcategories first.',
+      };
+    }
+  }
+
   const { error } = await supabase
     .from('categories')
     .update({
@@ -607,5 +638,89 @@ export async function updateCategory(
     return { error: error.message };
   }
 
+  revalidatePath('/', 'layout');
+  return { success: true };
+}
+
+export async function deleteCategory(
+  id: string,
+): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: 'Unauthorized.' };
+
+  const supabase = await getSupabaseServer();
+
+  const [{ count: productCount }, { count: childCount }] = await Promise.all([
+    supabase.from('products').select('id', { count: 'exact', head: true }).eq('category_id', id),
+    supabase.from('categories').select('id', { count: 'exact', head: true }).eq('parent_id', id),
+  ]);
+
+  if ((productCount ?? 0) > 0) {
+    return {
+      error: `This category still has ${productCount} product${productCount === 1 ? '' : 's'}. Move or delete them first.`,
+    };
+  }
+  if ((childCount ?? 0) > 0) {
+    return {
+      error: `This category still has ${childCount} subcategor${childCount === 1 ? 'y' : 'ies'}. Delete or move them first.`,
+    };
+  }
+
+  const { error } = await supabase.from('categories').delete().eq('id', id);
+  if (error) return { error: error.message };
+
+  revalidatePath('/', 'layout');
+  revalidatePath('/admin/categories');
+  return { success: true };
+}
+
+/**
+ * Moves a category one position up/down among its siblings (same parent).
+ * The order is what the homepage, header menu and footer use.
+ */
+export async function moveCategory(
+  id: string,
+  direction: 'up' | 'down',
+): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: 'Unauthorized.' };
+
+  const supabase = await getSupabaseServer();
+
+  const { data: current } = await supabase
+    .from('categories')
+    .select('id, parent_id')
+    .eq('id', id)
+    .maybeSingle();
+  if (!current) return { error: 'Category not found.' };
+
+  const siblingsQuery = supabase
+    .from('categories')
+    .select('id')
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true });
+  const { data: siblings, error: listError } = current.parent_id
+    ? await siblingsQuery.eq('parent_id', current.parent_id)
+    : await siblingsQuery.is('parent_id', null);
+  if (listError || !siblings) return { error: listError?.message ?? 'Could not load categories.' };
+
+  const ids = siblings.map((s) => s.id);
+  const index = ids.indexOf(id);
+  const target = direction === 'up' ? index - 1 : index + 1;
+  if (index === -1 || target < 0 || target >= ids.length) return { success: true };
+
+  [ids[index], ids[target]] = [ids[target], ids[index]];
+
+  // Re-number all siblings so ties/gaps can never make the order ambiguous.
+  for (let i = 0; i < ids.length; i++) {
+    const { error } = await supabase
+      .from('categories')
+      .update({ sort_order: (i + 1) * 10 })
+      .eq('id', ids[i]);
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath('/', 'layout');
+  revalidatePath('/admin/categories');
   return { success: true };
 }

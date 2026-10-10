@@ -1,5 +1,6 @@
 
 import { formatLKR } from '@/data/products';
+import { STORE_CONFIG } from '@/lib/config';
 
 export interface CustomerOrderDetails {
   fullName: string;
@@ -83,7 +84,7 @@ export function generateWhatsAppOrderLink(params: GenerateWhatsAppOrderParams): 
   const text = generateWhatsAppOrderMessage(params);
   const encodedText = encodeURIComponent(text);
   // Default to a fallback number if storePhone is missing or invalid
-  const rawPhone = params.storePhone || '+94112345678';
+  const rawPhone = params.storePhone || STORE_CONFIG.whatsappNumber;
   let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
   
   // if no country code is found and it's a Sri Lankan local format (e.g. 077), prefix +94

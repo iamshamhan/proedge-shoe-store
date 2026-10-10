@@ -1,11 +1,13 @@
 import React from 'react';
+import { getStoreSettings } from '@/lib/settings';
 
 export const metadata = {
   title: 'Privacy Policy - Pro Edge',
   description: 'Privacy Policy for Pro Edge.',
 };
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage() {
+  const settings = await getStoreSettings();
   return (
     <div className="max-w-4xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-black mb-10 text-zinc-950 dark:text-white uppercase tracking-tight">Privacy Policy</h1>
@@ -37,7 +39,7 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-bold mb-4 text-amber-600 dark:text-amber-500 uppercase tracking-wide border-b border-zinc-200 dark:border-zinc-800 pb-2">4. Cookies</h2>
-          <p>Our website may use "cookies" to enhance user experience, such as keeping track of your shopping cart. You may choose to set your web browser to refuse cookies, but some parts of the site may not function properly as a result.</p>
+          <p>Our website may use &ldquo;cookies&rdquo; to enhance user experience, such as keeping track of your shopping cart. You may choose to set your web browser to refuse cookies, but some parts of the site may not function properly as a result.</p>
         </section>
 
         <section>
@@ -49,9 +51,9 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-xl font-bold mb-4 text-amber-600 dark:text-amber-500 uppercase tracking-wide border-b border-zinc-200 dark:border-zinc-800 pb-2">6. Contact Us</h2>
           <p>If you have any questions about this Privacy Policy, please contact us at:</p>
           <ul className="list-disc pl-5 mt-2 space-y-1">
-            <li><strong>Email:</strong> pro_edge@yahoo.com</li>
-            <li><strong>WhatsApp / Phone:</strong> 075 067 8675</li>
-            <li><strong>Address:</strong> 38 Attidiya Road, Kawdana, Dehiwala</li>
+            <li><strong>Email:</strong> {settings.contactEmail}</li>
+            <li><strong>WhatsApp / Phone:</strong> {settings.contactPhone}</li>
+            <li><strong>Address:</strong> {settings.contactAddress}</li>
           </ul>
         </section>
       </div>

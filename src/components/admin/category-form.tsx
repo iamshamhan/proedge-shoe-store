@@ -21,9 +21,11 @@ type CategoryFormProps = {
   };
   parentCategories?: { id: string; name: string }[];
   defaultParentId?: string;
+  /** True when this category already has subcategories (it must stay a main category). */
+  hasChildren?: boolean;
 };
 
-export function CategoryForm({ parentCategories = [], defaultParentId, initialData }: CategoryFormProps) {
+export function CategoryForm({ parentCategories = [], defaultParentId, initialData, hasChildren = false }: CategoryFormProps) {
   const isEdit = !!initialData;
   const router = useRouter();
   
@@ -203,6 +205,11 @@ export function CategoryForm({ parentCategories = [], defaultParentId, initialDa
               placeholder="football"
               className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
             />
+            <p className="text-xs text-zinc-500">
+              {isEdit
+                ? 'Changing the slug changes this category\'s web address and any saved links to it.'
+                : 'The web address of this category. Filled in automatically from the name.'}
+            </p>
           </div>
         </div>
 
@@ -294,14 +301,15 @@ export function CategoryForm({ parentCategories = [], defaultParentId, initialDa
 
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
-            Parent Category (Optional)
+            Belongs To
           </label>
           <select
             value={parentId}
             onChange={(e) => setParentId(e.target.value)}
-            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+            disabled={hasChildren}
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
           >
-            <option value="">None (Top-Level Category)</option>
+            <option value="">None (this is a main category)</option>
             {parentCategories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -309,7 +317,9 @@ export function CategoryForm({ parentCategories = [], defaultParentId, initialDa
             ))}
           </select>
           <p className="text-xs text-zinc-500 mt-1">
-            If left blank, this will be a top-level category displayed on the homepage.
+            {hasChildren
+              ? 'This category has subcategories, so it has to stay a main category.'
+              : 'Leave empty for a main category (shown on the homepage and menu). Pick a main category to make this a subcategory that products can be filed under.'}
           </p>
         </div>
       </div>

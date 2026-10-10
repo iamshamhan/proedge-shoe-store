@@ -21,7 +21,7 @@ export async function GET() {
     });
     
     // A simple lightweight query just to trigger activity and keep the DB awake
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('store_settings')
       .select('id')
       .limit(1);
@@ -39,9 +39,9 @@ export async function GET() {
       message: 'Database ping successful',
       time: new Date().toISOString() 
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { status: 'error', message: err.message || 'Unknown error' },
+      { status: 'error', message: err instanceof Error ? err.message : 'Unknown error' },
       { status: 500 }
     );
   }

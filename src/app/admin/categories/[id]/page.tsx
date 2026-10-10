@@ -33,10 +33,17 @@ export default async function EditCategoryPage({
     .from('categories')
     .select('id, name')
     .is('parent_id', null)
+    .neq('id', id)
     .order('sort_order');
+
+  const { count: childCount } = await supabase
+    .from('categories')
+    .select('id', { count: 'exact', head: true })
+    .eq('parent_id', id);
 
   return (
     <CategoryForm
+      hasChildren={(childCount ?? 0) > 0}
       parentCategories={parentCategories ?? []}
       initialData={{
         id: category.id,

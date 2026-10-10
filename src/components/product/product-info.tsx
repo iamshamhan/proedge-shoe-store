@@ -8,6 +8,7 @@ import { SizeSelector } from '@/components/product/size-selector';
 import { ColorSelector } from '@/components/product/color-selector';
 import { QuantitySelector } from '@/components/product/quantity-selector';
 import { useCart } from '@/context/cart-context';
+import { useStoreSettings } from '@/context/settings-context';
 import { ShoppingBag, ShieldCheck, Truck, Zap, MessageSquare, Check } from 'lucide-react';
 import { STORE_CONFIG } from '@/lib/config';
 
@@ -18,6 +19,7 @@ interface ProductInfoProps {
 export function ProductInfo({ product }: ProductInfoProps) {
   const router = useRouter();
   const { addItem } = useCart();
+  const { whatsappNumber } = useStoreSettings();
 
   // Authoritative variants from product
   const variants = useMemo(() => product.variants ?? [], [product.variants]);
@@ -335,11 +337,11 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </div>
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
-          <span>100% Quality Guaranteed</span>
+          <span>7-Day Returns (T&amp;C apply)</span>
         </div>
         <div className="flex items-center gap-2 col-span-2 pt-1">
           <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>WhatsApp support: {STORE_CONFIG.whatsappNumber}</span>
+          <span>WhatsApp support: {whatsappNumber || STORE_CONFIG.whatsappNumber}</span>
         </div>
       </div>
     </div>

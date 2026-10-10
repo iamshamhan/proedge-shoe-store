@@ -1,11 +1,13 @@
 import React from 'react';
+import { getStoreSettings } from '@/lib/settings';
 
 export const metadata = {
   title: 'Store Policies - Pro Edge',
   description: 'Delivery, returns, exchanges, and payment policies for Pro Edge.',
 };
 
-export default function PoliciesPage() {
+export default async function PoliciesPage() {
+  const settings = await getStoreSettings();
   return (
     <div className="max-w-4xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-black mb-10 text-zinc-950 dark:text-white uppercase tracking-tight">Store Policies</h1>
@@ -43,9 +45,9 @@ export default function PoliciesPage() {
           <h2 className="text-xl font-bold mb-4 text-amber-600 dark:text-amber-500 uppercase tracking-wide border-b border-zinc-200 dark:border-zinc-800 pb-2">Contact Support</h2>
           <p className="text-zinc-700 dark:text-zinc-300">If you have any questions about our policies, please contact us:</p>
           <ul className="list-disc pl-5 mt-2 space-y-2 text-zinc-700 dark:text-zinc-300">
-            <li><strong>Address:</strong> 38 Attidiya Road, Kawdana, Dehiwala</li>
-            <li><strong>Phone / WhatsApp:</strong> 075 067 8675</li>
-            <li><strong>Email:</strong> pro_edge@yahoo.com</li>
+            <li><strong>Address:</strong> {settings.contactAddress}</li>
+            <li><strong>Phone / WhatsApp:</strong> {settings.contactPhone}</li>
+            <li><strong>Email:</strong> {settings.contactEmail}</li>
           </ul>
         </section>
       </div>
