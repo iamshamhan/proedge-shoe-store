@@ -20,12 +20,12 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Store Settings
-  const [brandName, setBrandName] = useState(initialSettings.brandName || 'PROEDGE');
+  const [brandName, setBrandName] = useState(initialSettings.brandName || 'Pro Edge');
   const [bannerTagline, setBannerTagline] = useState(initialSettings.bannerTagline || 'Built for Your Next Step');
-  const [contactAddress, setContactAddress] = useState(initialSettings.contactAddress || 'Galle Road, Colombo 03, Sri Lanka');
-  const [contactPhone, setContactPhone] = useState(initialSettings.contactPhone || '+94 11 234 5678');
-  const [contactEmail, setContactEmail] = useState(initialSettings.contactEmail || 'support@proedge.lk');
-  const [whatsappNumber, setWhatsappNumber] = useState(initialSettings.whatsappNumber || '+94 77 123 4567');
+  const [contactAddress, setContactAddress] = useState(initialSettings.contactAddress || '38 Attidiya Road Kawdana Dehiwala');
+  const [contactPhone, setContactPhone] = useState(initialSettings.contactPhone || '0750678675');
+  const [contactEmail, setContactEmail] = useState(initialSettings.contactEmail || 'pro_edge@yahoo.com');
+  const [whatsappNumber, setWhatsappNumber] = useState(initialSettings.whatsappNumber || '0750678675');
 
   // Delivery
   const [freeDeliveryEnabled, setFreeDeliveryEnabled] = useState(initialSettings.freeDeliveryEnabled);

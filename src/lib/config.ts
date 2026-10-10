@@ -1,8 +1,8 @@
 export const STORE_CONFIG = {
-  name: 'PROEDGE',
+  name: 'Pro Edge',
   tagline: 'Built for Your Next Step',
-  whatsappNumber: '94771234567', // Sri Lanka format e.g. +94 77 123 4567
-  defaultDeliveryFee: 500, // in LKR
+  whatsappNumber: '94750678675', // Sri Lanka format +94 75 067 8675
+  defaultDeliveryFee: 600, // in LKR
   freeDeliveryThreshold: 30000, // in LKR
   currencySymbol: 'Rs.',
 };

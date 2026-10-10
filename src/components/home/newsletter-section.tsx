@@ -9,9 +9,12 @@ export function NewsletterSection() {
 
   const handleWhatsApp = () => {
     if (!whatsappNumber) return;
-    const cleanNumber = whatsappNumber.replace(/[^0-9+]/g, '');
+    let cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
+    if (cleanNumber.length === 10 && cleanNumber.startsWith('0')) {
+      cleanNumber = '94' + cleanNumber.substring(1);
+    }
     const message = encodeURIComponent('Hello PROEDGE team! I have an inquiry.');
-    window.open("https://wa.me/" + (cleanNumber.startsWith('+') ? cleanNumber.slice(1) : cleanNumber) + "?text=" + message, '_blank');
+    window.open("https://wa.me/" + cleanNumber + "?text=" + message, '_blank');
   };
 
   return (

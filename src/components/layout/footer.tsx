@@ -47,10 +47,13 @@ export function Footer({ categories: propCategories }: FooterProps) {
     logoSuffix = '';
   }
 
-  const cleanPhone = contactPhone || '+94 11 234 5678';
-  const cleanEmail = contactEmail || 'support@proedge.lk';
-  const cleanAddress = contactAddress || 'Galle Road, Colombo 03, Sri Lanka';
-  const whatsappNumber = cleanPhone.replace(/[^0-9]/g, '');
+  const cleanPhone = contactPhone || '0750678675';
+  const cleanEmail = contactEmail || 'pro_edge@yahoo.com';
+  const cleanAddress = contactAddress || '38 Attidiya Road Kawdana Dehiwala';
+  let whatsappNumber = cleanPhone.replace(/[^0-9]/g, '');
+  if (whatsappNumber.length === 10 && whatsappNumber.startsWith('0')) {
+    whatsappNumber = '94' + whatsappNumber.substring(1);
+  }
 
   return (
     <footer className="bg-zinc-950 text-zinc-300 border-t border-zinc-800">
@@ -179,6 +182,9 @@ export function Footer({ categories: propCategories }: FooterProps) {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
           <p>&copy; {new Date().getFullYear()} {normalizedBrand} Footwear. All rights reserved.</p>
           <div className="flex items-center space-x-6">
+            <Link href="/policies" className="hover:text-zinc-400 transition-colors">
+              Store Policies
+            </Link>
             <Link href="/shop" className="hover:text-zinc-400 transition-colors">
               Footwear Catalog
             </Link>
