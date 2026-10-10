@@ -9,11 +9,15 @@ import {
   ShieldX,
   Plus,
   ArrowRight,
+  ClipboardList,
+  Clock,
+  ExternalLink,
 } from 'lucide-react';
 import { getAuthUser } from '@/lib/auth/admin';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { signOut } from './actions';
 import { formatLKR } from '@/data/products';
+import { OrderStatusBadge } from '@/components/admin/order-status-badge';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,20 +58,40 @@ export default async function AdminPage() {
   }
 
   const supabase = await getSupabaseServer();
-  const [{ count: productCount }, { count: activeCount }, { data: recentProducts }] =
-    await Promise.all([
-      supabase.from('products').select('id', { count: 'exact', head: true }),
-      supabase.from('products').select('id', { count: 'exact', head: true }).eq('is_active', true),
-      supabase
-        .from('products')
-        .select('id, name, slug, price, is_active, categories(name)')
-        .order('created_at', { ascending: false })
-        .limit(6),
-    ]);
+  const [
+    { count: productCount },
+    { count: activeCount },
+    { data: recentProducts },
+    { count: orderCount },
+    { count: pendingOrderCount },
+    { data: recentOrders },
+  ] = await Promise.all([
+    supabase.from('products').select('id', { count: 'exact', head: true }),
+    supabase.from('products').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    supabase
+      .from('products')
+      .select('id, name, slug, price, is_active, categories(name)')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase.from('orders').select('id', { count: 'exact', head: true }),
+    supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase
+      .from('orders')
+      .select('id, order_number, customer_name, phone, city, total, status, created_at')
+      .order('created_at', { ascending: false })
+      .limit(5),
+  ]);
 
   const stats = [
     { label: 'Total Products', value: productCount ?? 0, icon: Package },
     { label: 'Active in Catalog', value: activeCount ?? 0, icon: ShieldCheck },
+    { label: 'Total Orders', value: orderCount ?? 0, icon: ClipboardList },
+    {
+      label: 'Pending WhatsApp',
+      value: pendingOrderCount ?? 0,
+      icon: Clock,
+      highlight: (pendingOrderCount ?? 0) > 0,
+    },
   ];
 
   return (
@@ -84,26 +108,60 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <Link
-          href="/admin/products/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
-        >
-          <Plus className="h-4 w-4" />
-          Add Product
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/orders"
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-200 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          >
+            <ClipboardList className="h-4 w-4" />
+            View Orders
+          </Link>
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
+          >
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Link>
+        </div>
       </div>
 
-      {/* Stats Cards (Images & Variants removed as requested) */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xs"
+            className={`rounded-2xl border bg-white dark:bg-zinc-900 p-5 shadow-xs ${
+              stat.highlight
+                ? 'border-amber-300 dark:border-amber-800/80'
+                : 'border-zinc-200 dark:border-zinc-800'
+            }`}
           >
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-              <stat.icon className="h-4 w-4" />
+            <div className="flex items-center justify-between mb-3">
+              <div
+                className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+                  stat.highlight
+                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                }`}
+              >
+                <stat.icon className="h-4 w-4" />
+              </div>
+              {stat.highlight && (
+                <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-full">
+                  Action Needed
+                </span>
+              )}
             </div>
-            <p className="text-3xl font-black text-zinc-900 dark:text-white">{stat.value}</p>
+            <p
+              className={`text-3xl font-black ${
+                stat.highlight
+                  ? 'text-amber-600 dark:text-amber-400'
+                  : 'text-zinc-900 dark:text-white'
+              }`}
+            >
+              {stat.value}
+            </p>
             <p className="mt-1 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
               {stat.label}
             </p>
@@ -111,57 +169,122 @@ export default async function AdminPage() {
         ))}
       </div>
 
-      {/* Recent Catalog Items */}
-      <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xs">
-        <div className="flex items-center justify-between mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-4">
-          <h2 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
-            Recent Catalog Products
-          </h2>
-          <Link
-            href="/admin/products"
-            className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
-          >
-            <span>View all products</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
+      {/* Two Column Grid: Recent Orders & Recent Catalog Products */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Orders Widget */}
+        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xs">
+          <div className="flex items-center justify-between mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-4">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="w-4 h-4 text-amber-500" />
+              <h2 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
+                Recent Orders
+              </h2>
+            </div>
+            <Link
+              href="/admin/orders"
+              className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
+            >
+              <span>All orders</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
 
-        <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-          {(recentProducts ?? []).map((product) => {
-            const categoryName = Array.isArray(product.categories)
-              ? product.categories[0]?.name
-              : (product.categories as { name?: string } | null)?.name;
-
-            return (
-              <div key={product.id} className="py-3 flex items-center justify-between text-sm">
+          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {(recentOrders ?? []).map((order) => (
+              <div
+                key={order.id}
+                className="py-3 flex items-center justify-between text-sm hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors"
+              >
                 <div>
                   <Link
-                    href={`/admin/products/${product.id}`}
-                    className="font-bold text-zinc-900 dark:text-white hover:text-amber-500 transition-colors"
+                    href={`/admin/orders/${order.id}`}
+                    className="font-bold text-zinc-900 dark:text-white hover:text-amber-500 transition-colors flex items-center gap-2"
                   >
-                    {product.name}
+                    <span>{order.order_number}</span>
+                    <OrderStatusBadge status={order.status} />
                   </Link>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">
-                    {categoryName ?? 'Uncategorized'} • /{product.slug}
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    {order.customer_name} · {order.city}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-zinc-900 dark:text-white text-xs">
-                    {formatLKR(product.price)}
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                      product.is_active
-                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
-                        : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
-                    }`}
+                <div className="text-right">
+                  <p className="font-bold text-zinc-900 dark:text-white text-xs">
+                    {formatLKR(order.total)}
+                  </p>
+                  <Link
+                    href={`/admin/orders/${order.id}`}
+                    className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-0.5"
                   >
-                    {product.is_active ? 'Active' : 'Inactive'}
-                  </span>
+                    <span>View</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
                 </div>
               </div>
-            );
-          })}
+            ))}
+
+            {(!recentOrders || recentOrders.length === 0) && (
+              <div className="py-8 text-center text-zinc-400 text-xs">
+                No orders received yet.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Catalog Products */}
+        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xs">
+          <div className="flex items-center justify-between mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-4">
+            <div className="flex items-center gap-2">
+              <Package className="w-4 h-4 text-amber-500" />
+              <h2 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
+                Recent Catalog Products
+              </h2>
+            </div>
+            <Link
+              href="/admin/products"
+              className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
+            >
+              <span>View all products</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {(recentProducts ?? []).map((product) => {
+              const categoryName = Array.isArray(product.categories)
+                ? product.categories[0]?.name
+                : (product.categories as { name?: string } | null)?.name;
+
+              return (
+                <div key={product.id} className="py-3 flex items-center justify-between text-sm">
+                  <div>
+                    <Link
+                      href={`/admin/products/${product.id}`}
+                      className="font-bold text-zinc-900 dark:text-white hover:text-amber-500 transition-colors"
+                    >
+                      {product.name}
+                    </Link>
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                      {categoryName ?? 'Uncategorized'} • /{product.slug}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold text-zinc-900 dark:text-white text-xs">
+                      {formatLKR(product.price)}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                        product.is_active
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                          : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                      }`}
+                    >
+                      {product.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

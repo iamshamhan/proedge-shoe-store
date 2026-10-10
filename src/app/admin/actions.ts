@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth/admin';
+import { VALID_ORDER_STATUSES, type OrderStatus } from '@/types/order';
 
 
 // ---------------------------------------------------------------------------
@@ -724,3 +725,112 @@ export async function moveCategory(
   revalidatePath('/admin/categories');
   return { success: true };
 }
+
+// ---------------------------------------------------------------------------
+// Orders Management
+// ---------------------------------------------------------------------------
+
+export async function updateOrderStatus(
+  orderId: string,
+  newStatus: OrderStatus,
+  restoreStockOnCancel: boolean = true
+): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: 'Unauthorized.' };
+
+  if (!VALID_ORDER_STATUSES.includes(newStatus)) {
+    return { error: 'Invalid order status.' };
+  }
+
+  const supabase = await getSupabaseServer();
+
+  // Get current order status
+  const { data: order, error: orderErr } = await supabase
+    .from('orders')
+    .select('id, status')
+    .eq('id', orderId)
+    .single();
+
+  if (orderErr || !order) return { error: 'Order not found.' };
+
+  // If transitioning to 'cancelled' and was not cancelled before, optionally return stock
+  if (newStatus === 'cancelled' && order.status !== 'cancelled' && restoreStockOnCancel) {
+    const { data: items } = await supabase
+      .from('order_items')
+      .select('variant_id, quantity')
+      .eq('order_id', orderId);
+
+    if (items && items.length > 0) {
+      for (const item of items) {
+        if (item.variant_id && item.quantity > 0) {
+          const { data: v } = await supabase
+            .from('product_variants')
+            .select('stock')
+            .eq('id', item.variant_id)
+            .single();
+          if (v) {
+            await supabase
+              .from('product_variants')
+              .update({ stock: v.stock + item.quantity })
+              .eq('id', item.variant_id);
+          }
+        }
+      }
+    }
+  }
+
+  // If moving out of 'cancelled' back to an active status, re-reserve stock
+  if (order.status === 'cancelled' && newStatus !== 'cancelled') {
+    const { data: items } = await supabase
+      .from('order_items')
+      .select('variant_id, quantity')
+      .eq('order_id', orderId);
+
+    if (items && items.length > 0) {
+      for (const item of items) {
+        if (item.variant_id && item.quantity > 0) {
+          const { data: v } = await supabase
+            .from('product_variants')
+            .select('stock')
+            .eq('id', item.variant_id)
+            .single();
+          if (v) {
+            await supabase
+              .from('product_variants')
+              .update({ stock: Math.max(0, v.stock - item.quantity) })
+              .eq('id', item.variant_id);
+          }
+        }
+      }
+    }
+  }
+
+  const { error: updateErr } = await supabase
+    .from('orders')
+    .update({ status: newStatus, updated_at: new Date().toISOString() })
+    .eq('id', orderId);
+
+  if (updateErr) return { error: updateErr.message };
+
+  revalidatePath('/admin/orders');
+  revalidatePath(`/admin/orders/${orderId}`);
+  revalidatePath('/admin');
+  return { success: true };
+}
+
+export async function deleteOrder(
+  orderId: string
+): Promise<{ success: true } | { error: string }> {
+  const user = await getAuthUser();
+  if (!user?.isAdmin) return { error: 'Unauthorized.' };
+
+  const supabase = await getSupabaseServer();
+
+  const { error } = await supabase.from('orders').delete().eq('id', orderId);
+  if (error) return { error: error.message };
+
+  revalidatePath('/admin/orders');
+  revalidatePath('/admin');
+  return { success: true };
+}
+

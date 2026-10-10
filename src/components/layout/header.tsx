@@ -21,6 +21,7 @@ import {
   LogOut,
   ExternalLink,
   FolderTree,
+  ClipboardList,
 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useWishlist } from '@/context/wishlist-context';
@@ -230,9 +231,20 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   <span>Products</span>
                 </Link>
                 <Link href="/admin/categories" className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase rounded-lg transition-colors ${pathname.startsWith("/admin/categories") ? "bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"}`}><FolderTree className="w-4 h-4" /><span>Categories</span></Link>
-                  <Link
-                    href="/admin/settings"
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase rounded-lg transition-colors ${
+                <Link
+                  href="/admin/orders"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase rounded-lg transition-colors ${
+                    pathname.startsWith('/admin/orders')
+                      ? 'bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  <ClipboardList className="w-4 h-4" />
+                  <span>Orders</span>
+                </Link>
+                <Link
+                  href="/admin/settings"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs xl:text-[13px] font-semibold tracking-wider uppercase rounded-lg transition-colors ${
                     pathname === '/admin/settings'
                       ? 'bg-zinc-100 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
@@ -564,10 +576,22 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   <span>Products</span>
                 </Link>
                 <Link href="/admin/categories" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${pathname.startsWith("/admin/categories") ? "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-extrabold" : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}><FolderTree className="w-4 h-4 text-amber-500" /><span>Categories</span></Link>
-                  <Link
-                    href="/admin/settings"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                <Link
+                  href="/admin/orders"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                    pathname.startsWith('/admin/orders')
+                      ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-extrabold'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  <ClipboardList className="w-4 h-4 text-amber-500" />
+                  <span>Orders</span>
+                </Link>
+                <Link
+                  href="/admin/settings"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
                     pathname === '/admin/settings'
                       ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-extrabold'
                       : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'

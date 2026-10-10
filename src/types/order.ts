@@ -32,3 +32,15 @@ export interface ValidatedOrder {
   customer: ValidatedOrderCustomer;
   items: ValidatedOrderItem[];
 }
+
+export const VALID_ORDER_STATUSES = [
+  'pending',
+  'confirmed',
+  'processing',
+  'ready_to_ship',
+  'shipped',
+  'delivered',
+  'cancelled',
+] as const;
+
+export type OrderStatus = (typeof VALID_ORDER_STATUSES)[number];
