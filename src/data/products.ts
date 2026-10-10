@@ -1,5 +1,5 @@
-import { Product, ProductCategory, ProductFilterParams } from '@/types/product';
-import { getCategorySlugsForQuery } from './categories';
+import { Product, ProductCategory, ProductFilterParams, CategoryItem } from '@/types/product';
+import { getCategorySlugsForQuery, NavCategory } from './categories';
 
 export const MOCK_PRODUCTS: Product[] = [
   {
@@ -788,11 +788,15 @@ export function getProductsByCategory(category: ProductCategory): Product[] {
   );
 }
 
-export function filterProductList(products: Product[], params: ProductFilterParams): Product[] {
+export function filterProductList(
+  products: Product[],
+  params: ProductFilterParams,
+  categoriesHierarchy?: (CategoryItem | NavCategory)[],
+): Product[] {
   let result = [...products];
 
   if (params.category && params.category !== 'all') {
-    const matchingSlugs = getCategorySlugsForQuery(params.category);
+    const matchingSlugs = getCategorySlugsForQuery(params.category, categoriesHierarchy);
     result = result.filter(
       (p) =>
         matchingSlugs.includes(p.category) ||

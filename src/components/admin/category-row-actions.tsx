@@ -79,6 +79,10 @@ export function CategoryRowActions({ id, name, canMoveUp, canMoveDown }: Props) 
         </button>
       </div>
 
+      {error && !confirmOpen && (
+        <p className="text-[11px] text-red-500 font-medium text-right max-w-[200px] mt-0.5">{error}</p>
+      )}
+
       <ConfirmDialog
         open={confirmOpen}
         title="Delete Category?"

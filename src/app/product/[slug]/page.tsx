@@ -115,8 +115,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600" />
             </li>
             <li>
-              <Link href={`/${product.category}`} className="hover:text-zinc-900 dark:hover:text-white transition-colors capitalize">
-                {product.category}
+              <Link
+                href={`/shop?category=${product.category}`}
+                className="hover:text-zinc-900 dark:hover:text-white transition-colors capitalize"
+              >
+                {product.categoryName || product.category.replace(/-/g, ' ')}
               </Link>
             </li>
             <li>

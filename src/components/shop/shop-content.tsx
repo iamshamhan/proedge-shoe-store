@@ -110,13 +110,17 @@ export function ShopContent({
 
   // Filter products using robust helper
   const filteredProducts = useMemo(() => {
-    return filterProductList(products, {
-      category: selectedCategory,
-      search: searchQuery,
-      sortBy: sortBy,
-      inStockOnly: inStockOnly,
-    });
-  }, [products, selectedCategory, searchQuery, sortBy, inStockOnly]);
+    return filterProductList(
+      products,
+      {
+        category: selectedCategory,
+        search: searchQuery,
+        sortBy: sortBy,
+        inStockOnly: inStockOnly,
+      },
+      sportsHierarchy,
+    );
+  }, [products, selectedCategory, searchQuery, sortBy, inStockOnly, sportsHierarchy]);
 
   const handleClearFilters = () => {
     setSearchQuery('');

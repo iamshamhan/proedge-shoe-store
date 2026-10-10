@@ -307,7 +307,10 @@ export const LEGACY_SLUG_MAP: Record<string, string[]> = {
  * If the slug is a legacy category (e.g. 'sports'), returns mapped sport/shoe slugs.
  * If the slug is a child category (e.g. 'football-boots'), returns ['football-boots'].
  */
-export function getCategorySlugsForQuery(slug: string | null | undefined): string[] {
+export function getCategorySlugsForQuery(
+  slug: string | null | undefined,
+  customHierarchy?: (CategoryItem | NavCategory)[],
+): string[] {
   if (!slug || slug === 'all') return [];
 
   // Check legacy mapping
@@ -327,7 +330,16 @@ export function getCategorySlugsForQuery(slug: string | null | undefined): strin
     ];
   }
 
-  // Check parent sports
+  // Check custom hierarchy first if provided (for newly created admin categories)
+  if (customHierarchy && customHierarchy.length > 0) {
+    const customParent = customHierarchy.find((s) => s.slug === slug);
+    if (customParent && customParent.children && customParent.children.length > 0) {
+      const childSlugs = customParent.children.map((c) => c.slug);
+      return [customParent.slug, ...childSlugs];
+    }
+  }
+
+  // Check canonical parent sports
   const parent = PARENT_SPORTS.find((s) => s.slug === slug);
   if (parent) {
     const childSlugs = (parent.children || []).map((c) => c.slug);
@@ -341,7 +353,19 @@ export function getCategorySlugsForQuery(slug: string | null | undefined): strin
 /**
  * Given a category slug or ID, finds its parent sport if any.
  */
-export function getParentCategory(slugOrId: string): NavCategory | undefined {
+export function getParentCategory(
+  slugOrId: string,
+  customHierarchy?: (CategoryItem | NavCategory)[],
+): NavCategory | CategoryItem | undefined {
+  if (customHierarchy && customHierarchy.length > 0) {
+    for (const sport of customHierarchy) {
+      if (sport.id === slugOrId || sport.slug === slugOrId) return sport;
+      if (sport.children?.some((c) => c.id === slugOrId || c.slug === slugOrId)) {
+        return sport;
+      }
+    }
+  }
+
   for (const sport of PARENT_SPORTS) {
     if (sport.id === slugOrId || sport.slug === slugOrId) return sport;
     if (sport.children?.some((c) => c.id === slugOrId || c.slug === slugOrId)) {

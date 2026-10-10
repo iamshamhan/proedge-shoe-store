@@ -202,6 +202,14 @@ export default async function CategoriesAdminPage() {
                         </div>
                         <div className="flex items-center gap-3 sm:justify-end">
                           <Link
+                            href={`/shop?category=${child.slug}`}
+                            target="_blank"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            View
+                          </Link>
+                          <Link
                             href={`/admin/categories/${child.id}`}
                             className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
                           >

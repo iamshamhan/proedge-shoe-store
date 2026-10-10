@@ -124,7 +124,9 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           {/* Brand & Category */}
           <div className="flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-500 font-semibold tracking-wider uppercase mb-1">
             <span>{product.brand}</span>
-            <span className="capitalize">{product.category}</span>
+            <span className="capitalize truncate max-w-[140px] text-right">
+              {product.categoryName || product.category.replace(/-/g, ' ')}
+            </span>
           </div>
 
           {/* Product Name */}
@@ -139,7 +141,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           {!isOutOfStock && (
             <div className="mt-2.5 flex items-center gap-1 overflow-x-auto py-0.5 no-scrollbar">
               <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold tracking-wider uppercase mr-1">
-                EU:
+                {product.sizeSystem || 'EU'}:
               </span>
               {product.sizes.map((size) => (
                 <span

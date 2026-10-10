@@ -561,6 +561,8 @@ export async function createCategory(data: {
   }
 
   revalidatePath('/', 'layout');
+  revalidatePath('/shop', 'page');
+  revalidatePath('/admin/categories');
   return { success: true, id: catData.id };
 }
 export async function updateAdminProfile(data: { email?: string; password?: string }) {
@@ -646,6 +648,8 @@ export async function updateCategory(
   }
 
   revalidatePath('/', 'layout');
+  revalidatePath('/shop', 'page');
+  revalidatePath('/admin/categories');
   return { success: true };
 }
 
@@ -677,6 +681,7 @@ export async function deleteCategory(
   if (error) return { error: error.message };
 
   revalidatePath('/', 'layout');
+  revalidatePath('/shop', 'page');
   revalidatePath('/admin/categories');
   return { success: true };
 }
@@ -728,6 +733,7 @@ export async function moveCategory(
   }
 
   revalidatePath('/', 'layout');
+  revalidatePath('/shop', 'page');
   revalidatePath('/admin/categories');
   return { success: true };
 }

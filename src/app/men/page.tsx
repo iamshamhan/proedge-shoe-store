@@ -1,7 +1,7 @@
 
 import { Suspense } from 'react';
 import { ShopContent } from '@/components/shop/shop-content';
-import { getProductsByCategory } from '@/lib/supabase/products';
+import { getProductsByCategory, getCategoriesHierarchy } from '@/lib/supabase/products';
 import { pageMetadata } from '@/lib/site';
 
 export const metadata = pageMetadata({
@@ -11,7 +11,10 @@ export const metadata = pageMetadata({
 });
 
 export default async function MenPage() {
-  const products = await getProductsByCategory('men');
+  const [products, categories] = await Promise.all([
+    getProductsByCategory('men'),
+    getCategoriesHierarchy(),
+  ]);
 
   return (
     <Suspense fallback={<div className="py-20 text-center font-bold text-zinc-400">Loading catalog...</div>}>
@@ -20,6 +23,7 @@ export default async function MenPage() {
         pageTitle="Men's Footwear"
         pageSubtitle="Engineered sneakers and performance shoes designed for maximum durability and strength."
         products={products}
+        categories={categories}
       />
     </Suspense>
   );

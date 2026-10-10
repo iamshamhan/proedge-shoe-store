@@ -61,8 +61,8 @@ export function CategoryForm({ parentCategories = [], defaultParentId, initialDa
     setSlug(
       e.target.value
         .toLowerCase()
-        .replace(/[^a-z0-9\-]+/g, '')
-        .replace(/(^-|-$)+/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
     );
   };
 
@@ -103,7 +103,8 @@ export function CategoryForm({ parentCategories = [], defaultParentId, initialDa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !slug.trim()) {
+    const cleanSlug = slug.trim().toLowerCase().replace(/(^-|-$)+/g, '');
+    if (!name.trim() || !cleanSlug) {
       setError('Name and slug are required.');
       return;
     }
@@ -113,7 +114,7 @@ export function CategoryForm({ parentCategories = [], defaultParentId, initialDa
 
     const payload = {
       name: name.trim(),
-      slug: slug.trim(),
+      slug: cleanSlug,
       description: description.trim() || undefined,
       image_url: imageUrl.trim() || undefined,
       subtitle: subtitle.trim() || undefined,
