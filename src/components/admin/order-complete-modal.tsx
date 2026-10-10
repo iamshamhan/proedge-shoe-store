@@ -140,6 +140,18 @@ export function OrderCompleteModal({
     };
   }, [isOpen, orderId, initialDeliveryFee, initialNotes]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isPending) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isPending, onClose]);
+
   // When selected product changes in "Add Item" form, update selected variant
   useEffect(() => {
     if (!selectedProductId) return;
@@ -251,25 +263,28 @@ export function OrderCompleteModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isPending) onClose();
+      }}
     >
-      <div className="relative w-full max-w-2xl rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+      <div className="relative w-full max-w-xl rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="p-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/50">
+        <div className="p-4 sm:p-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/50">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-black text-zinc-900 dark:text-white">
+                <h2 className="text-sm sm:text-base font-black text-zinc-900 dark:text-white">
                   Confirm WhatsApp Sale
                 </h2>
                 <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
                   {orderNumber}
                 </span>
               </div>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-zinc-500 mt-0.5">
                 Customer: <strong className="text-zinc-700 dark:text-zinc-300">{customerName}</strong>
               </p>
             </div>
@@ -286,15 +301,10 @@ export function OrderCompleteModal({
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1">
           {/* Explainer Notice */}
-          <div className="rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/20 p-3.5 text-xs text-amber-800 dark:text-amber-300 space-y-1">
-            <p className="font-bold flex items-center gap-1.5">
-              <span>WhatsApp Final Sale Verification</span>
-            </p>
-            <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-[11px]">
-              Tick only the items the customer agreed to buy on WhatsApp. You can adjust quantities, uncheck items they rejected, or add extra items from your catalog. <strong>Stock will only be deducted for checked items.</strong>
-            </p>
+          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-800/40 p-3 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            Tick the items the customer agreed to buy. Stock will only be deducted for checked items upon saving.
           </div>
 
           {error && (

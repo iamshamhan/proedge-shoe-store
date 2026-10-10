@@ -79,21 +79,21 @@ export function CategoryRowActions({ id, name, canMoveUp, canMoveDown }: Props) 
         </button>
       </div>
 
-      {error && (
-        <p className="max-w-[16rem] text-right text-[11px] font-medium leading-snug text-red-600 dark:text-red-400">
-          {error}
-        </p>
-      )}
-
       <ConfirmDialog
         open={confirmOpen}
-        title={`Delete "${name}"?`}
-        message="This permanently removes the category. Categories that still contain products or subcategories cannot be deleted."
+        title="Delete Category?"
+        badge={name}
+        message="This permanently removes the category. Categories containing products or subcategories cannot be deleted."
         confirmLabel="Delete"
+        cancelLabel="Keep"
         destructive
         loading={isPending}
+        error={error}
         onConfirm={remove}
-        onCancel={() => setConfirmOpen(false)}
+        onCancel={() => {
+          setError(null);
+          setConfirmOpen(false);
+        }}
       />
     </div>
   );

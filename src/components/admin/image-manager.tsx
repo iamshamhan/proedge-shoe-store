@@ -146,9 +146,10 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
 
       <ConfirmDialog
         open={!!targetDelete}
-        title="Delete image"
-        message="Are you sure you want to remove this image from the product? This also deletes the file from storage."
+        title="Delete Image?"
+        message="Remove this image from the product gallery? The file will be deleted from storage."
         confirmLabel="Delete"
+        cancelLabel="Keep Image"
         destructive
         loading={deleting}
         onConfirm={handleDelete}

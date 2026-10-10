@@ -207,9 +207,10 @@ export function VariantManager({ productId, variants: initialVariants }: Variant
 
       <ConfirmDialog
         open={!!targetDelete}
-        title="Delete variant"
-        message="Are you sure you want to delete this colour/size variant? This action cannot be undone."
+        title="Delete Variant?"
+        message="Are you sure you want to delete this size/colour variant? This cannot be undone."
         confirmLabel="Delete"
+        cancelLabel="Keep Variant"
         destructive
         loading={deleting}
         onConfirm={handleDelete}

@@ -554,9 +554,11 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
 
       <ConfirmDialog
         open={!!targetDelete}
-        title="Delete product"
-        message={`Are you sure you want to delete "${targetDelete?.name}"? This will permanently remove the product, its images, and all variants. This action cannot be undone.`}
+        title="Delete Product?"
+        badge={targetDelete?.name}
+        message="This permanently removes the product, its images, and all variants from your catalog."
         confirmLabel="Delete"
+        cancelLabel="Keep Product"
         destructive
         loading={deleting}
         onConfirm={handleDelete}

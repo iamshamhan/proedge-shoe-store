@@ -42,30 +42,33 @@ export function OrderDeleteButton({
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setError(null);
+          setOpen(true);
+        }}
         disabled={isPending}
-        title="Delete Order"
+        title="Delete Order Record"
         className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 p-2 text-xs font-bold text-zinc-500 hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors disabled:opacity-50"
       >
         <Trash2 className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Delete</span>
       </button>
 
-      {error && (
-        <span className="text-[11px] text-red-600 dark:text-red-400 font-medium ml-2">
-          {error}
-        </span>
-      )}
-
       <ConfirmDialog
         open={open}
-        title={`Delete Order ${orderNumber}?`}
-        message="Are you sure you want to permanently delete this order? This action cannot be undone."
-        confirmLabel="Delete Order"
+        title="Delete Order Record?"
+        badge={orderNumber}
+        message="Permanently remove this order from the system? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Keep Record"
         destructive
         loading={isPending}
+        error={error}
         onConfirm={handleDelete}
-        onCancel={() => setOpen(false)}
+        onCancel={() => {
+          setError(null);
+          setOpen(false);
+        }}
       />
     </>
   );
