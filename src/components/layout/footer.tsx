@@ -185,6 +185,12 @@ export function Footer({ categories: propCategories }: FooterProps) {
             <Link href="/policies" className="hover:text-zinc-400 transition-colors">
               Store Policies
             </Link>
+            <Link href="/terms" className="hover:text-zinc-400 transition-colors">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">
+              Privacy Policy
+            </Link>
             <Link href="/shop" className="hover:text-zinc-400 transition-colors">
               Footwear Catalog
             </Link>
