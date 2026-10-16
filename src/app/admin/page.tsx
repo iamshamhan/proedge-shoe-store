@@ -12,6 +12,9 @@ import {
   ClipboardList,
   Clock,
   ExternalLink,
+  AlertTriangle,
+  Banknote,
+  FolderTree,
 } from 'lucide-react';
 import { getAuthUser } from '@/lib/auth/admin';
 import { getSupabaseServer } from '@/lib/supabase/server';
@@ -65,6 +68,8 @@ export default async function AdminPage() {
     { count: orderCount },
     { count: pendingOrderCount },
     { data: recentOrders },
+    { data: confirmedOrders },
+    { data: lowStockVariants },
   ] = await Promise.all([
     supabase.from('products').select('id', { count: 'exact', head: true }),
     supabase.from('products').select('id', { count: 'exact', head: true }).eq('is_active', true),
@@ -80,23 +85,58 @@ export default async function AdminPage() {
       .select('id, order_number, customer_name, phone, city, total, status, created_at')
       .order('created_at', { ascending: false })
       .limit(5),
+    supabase
+      .from('orders')
+      .select('total')
+      .in('status', ['confirmed', 'processing', 'shipped', 'delivered']),
+    supabase
+      .from('product_variants')
+      .select('id, product_id, colour, size, size_system, size_value, stock, products!inner(id, name, slug, is_active)')
+      .eq('products.is_active', true)
+      .lte('stock', 3)
+      .order('stock', { ascending: true })
+      .limit(8),
   ]);
 
+  const confirmedRevenue = (confirmedOrders ?? []).reduce(
+    (sum, o) => sum + (Number(o.total) || 0),
+    0,
+  );
+
   const stats = [
-    { label: 'Total Products', value: productCount ?? 0, icon: Package },
-    { label: 'Active in Catalog', value: activeCount ?? 0, icon: ShieldCheck },
-    { label: 'Total Orders', value: orderCount ?? 0, icon: ClipboardList },
+    {
+      label: 'Confirmed Sales',
+      value: formatLKR(confirmedRevenue),
+      sub: `${(confirmedOrders ?? []).length} completed orders`,
+      icon: Banknote,
+      highlight: false,
+    },
     {
       label: 'Pending WhatsApp',
-      value: pendingOrderCount ?? 0,
+      value: String(pendingOrderCount ?? 0),
+      sub: `${orderCount ?? 0} total orders`,
       icon: Clock,
       highlight: (pendingOrderCount ?? 0) > 0,
+    },
+    {
+      label: 'Active Products',
+      value: `${activeCount ?? 0} / ${productCount ?? 0}`,
+      sub: 'Live in storefront',
+      icon: ShieldCheck,
+      highlight: false,
+    },
+    {
+      label: 'Low / Out of Stock',
+      value: String((lowStockVariants ?? []).length),
+      sub: 'Variants with ≤ 3 units',
+      icon: AlertTriangle,
+      highlight: (lowStockVariants ?? []).length > 0,
     },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Dashboard Title & Quick Action */}
+      {/* Dashboard Title & Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 dark:bg-zinc-800 text-amber-500">
@@ -104,21 +144,30 @@ export default async function AdminPage() {
           </div>
           <div>
             <h1 className="text-xl font-black text-zinc-900 dark:text-white">Admin Dashboard</h1>
-            <p className="text-sm text-zinc-400 dark:text-zinc-500">Catalog and store overview</p>
+            <p className="text-sm text-zinc-400 dark:text-zinc-500">
+              Live sales, WhatsApp order queue, and inventory health
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <Link
             href="/admin/orders"
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-200 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-200 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
-            <ClipboardList className="h-4 w-4" />
+            <ClipboardList className="h-4 w-4 text-amber-500" />
             <span>Orders</span>
           </Link>
           <Link
+            href="/admin/categories"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-200 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          >
+            <FolderTree className="h-4 w-4 text-amber-500" />
+            <span>Categories</span>
+          </Link>
+          <Link
             href="/admin/products/new"
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 sm:px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 px-4 sm:px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
           >
             <Plus className="h-4 w-4" />
             <span>Add Product</span>
@@ -154,7 +203,7 @@ export default async function AdminPage() {
               )}
             </div>
             <p
-              className={`text-2xl sm:text-3xl font-black ${
+              className={`text-xl sm:text-2xl font-black truncate ${
                 stat.highlight
                   ? 'text-amber-600 dark:text-amber-400'
                   : 'text-zinc-900 dark:text-white'
@@ -162,12 +211,75 @@ export default async function AdminPage() {
             >
               {stat.value}
             </p>
-            <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 truncate">
+            <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 truncate">
               {stat.label}
             </p>
+            {stat.sub && (
+              <p className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate mt-0.5">
+                {stat.sub}
+              </p>
+            )}
           </div>
         ))}
       </div>
+
+      {/* Low Stock / Out of Stock Inventory Alert Banner */}
+      {lowStockVariants && lowStockVariants.length > 0 && (
+        <div className="rounded-2xl border border-amber-300/80 dark:border-amber-800/70 bg-amber-50/50 dark:bg-amber-950/20 p-5 sm:p-6 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-amber-200/70 dark:border-amber-800/50">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              <h2 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
+                Inventory Restock Alerts ({lowStockVariants.length})
+              </h2>
+            </div>
+            <Link
+              href="/admin/products"
+              className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
+            >
+              <span>Manage All Inventory</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {lowStockVariants.map((v) => {
+              const prod = Array.isArray(v.products) ? v.products[0] : v.products;
+              const sizeLabel =
+                v.size_system && v.size_system !== 'Custom'
+                  ? `${v.size_system} ${v.size_value || v.size}`
+                  : v.size_value || String(v.size);
+              const isOut = v.stock <= 0;
+
+              return (
+                <Link
+                  key={v.id}
+                  href={`/admin/products/${v.product_id}`}
+                  className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3.5 flex items-center justify-between gap-3 hover:border-amber-500 dark:hover:border-amber-500 transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                      {prod?.name ?? 'Product'}
+                    </p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
+                      {v.colour} · {sizeLabel}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                      isOut
+                        ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
+                        : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                    }`}
+                  >
+                    {isOut ? '0 Left' : `${v.stock} Left`}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Two Column Grid: Recent Orders & Recent Catalog Products */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

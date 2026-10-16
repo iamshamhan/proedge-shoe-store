@@ -141,21 +141,24 @@ export function ProductForm({ categories, defaultCategoryId, product }: ProductF
     );
 
     const groups: { name: string; children: Category[] }[] = [];
+    const handledIds = new Set<string>();
 
     for (const parent of parents) {
       const children = categories.filter((c) => c.parent_id === parent.id);
-      if (children.length > 0) {
-        groups.push({
-          name: parent.name,
-          children,
-        });
-      }
+      const parentOption: Category = {
+        ...parent,
+        name: children.length > 0 ? `${parent.name} (Main Department)` : parent.name,
+      };
+      groups.push({
+        name: parent.name,
+        children: [parentOption, ...children],
+      });
+      handledIds.add(parent.id);
+      children.forEach((c) => handledIds.add(c.id));
     }
 
     // Capture any remaining categories (e.g. legacy or unlinked)
-    const handledIds = new Set(groups.flatMap((g) => g.children.map((c) => c.id)));
-    const parentIds = new Set(parents.map((p) => p.id));
-    const remaining = categories.filter((c) => !handledIds.has(c.id) && !parentIds.has(c.id));
+    const remaining = categories.filter((c) => !handledIds.has(c.id));
 
     if (remaining.length > 0) {
       groups.push({
@@ -170,8 +173,8 @@ export function ProductForm({ categories, defaultCategoryId, product }: ProductF
   const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400';
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center gap-4">
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex items-center gap-4">
         <Link
           href="/admin/products"
           className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-2.5 text-zinc-500 dark:text-zinc-400 transition-colors hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-zinc-900 dark:hover:text-white"
@@ -344,13 +347,6 @@ export function ProductForm({ categories, defaultCategoryId, product }: ProductF
           </div>
         </section>
 
-        {isEdit && (
-          <>
-            <ImageManager productId={product.id} images={product.product_images} />
-            <VariantManager productId={product.id} variants={product.product_variants} />
-          </>
-        )}
-
         {error && (
           <p className="rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 px-4 py-2.5 text-sm text-red-700 dark:text-red-300">
             {error}
@@ -381,10 +377,17 @@ export function ProductForm({ categories, defaultCategoryId, product }: ProductF
             ) : (
               <Check className="h-4 w-4" />
             )}
-            {isEdit ? 'Save Changes' : 'Create Product'}
+            {isEdit ? 'Save Product Info' : 'Create Product'}
           </button>
         </div>
       </form>
+
+      {isEdit && (
+        <div className="space-y-6">
+          <ImageManager productId={product.id} images={product.product_images} />
+          <VariantManager productId={product.id} variants={product.product_variants} />
+        </div>
+      )}
     </div>
   );
 }

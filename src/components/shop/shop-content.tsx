@@ -31,6 +31,16 @@ const SORT_OPTIONS: { label: string; value: SortOption }[] = [
   { label: 'Price: High to Low', value: 'price-desc' },
 ];
 
+type PriceRangeKey = 'all' | 'under-10k' | '10k-20k' | '20k-30k' | 'over-30k';
+
+const PRICE_RANGE_OPTIONS: { key: PriceRangeKey; label: string; min?: number; max?: number }[] = [
+  { key: 'all', label: 'All Prices' },
+  { key: 'under-10k', label: 'Under Rs. 10,000', max: 10000 },
+  { key: '10k-20k', label: 'Rs. 10,000 – Rs. 20,000', min: 10000, max: 20000 },
+  { key: '20k-30k', label: 'Rs. 20,000 – Rs. 30,000', min: 20000, max: 30000 },
+  { key: 'over-30k', label: 'Over Rs. 30,000', min: 30000 },
+];
+
 export function ShopContent({
   initialCategory = 'all',
   pageTitle = 'PROEDGE Gear & Footwear',
@@ -62,7 +72,21 @@ export function ShopContent({
   const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [sortBy, setSortBy] = useState<SortOption>(initialSortFromUrl);
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [onSaleOnly, setOnSaleOnly] = useState(false);
+  const [priceRange, setPriceRange] = useState<PriceRangeKey>('all');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  // Sync searchQuery and sortBy when URL search/sort params change (e.g. Header search while on /shop)
+  const [prevUrlSearch, setPrevUrlSearch] = useState(urlSearch);
+  if (prevUrlSearch !== urlSearch) {
+    setPrevUrlSearch(urlSearch);
+    setSearchQuery(urlSearch);
+  }
+  const [prevUrlSort, setPrevUrlSort] = useState(urlSort);
+  if (prevUrlSort !== urlSort) {
+    setPrevUrlSort(urlSort);
+    setSortBy(initialSortFromUrl);
+  }
 
   // User manually toggled accordion states
   const [userExpandedSports, setUserExpandedSports] = useState<Record<string, boolean>>({});
@@ -108,9 +132,9 @@ export function ShopContent({
     router.replace(`/shop${query}`, { scroll: false });
   };
 
-  // Filter products using robust helper
+  // Filter products using robust helper + price range & sale filters
   const filteredProducts = useMemo(() => {
-    return filterProductList(
+    const base = filterProductList(
       products,
       {
         category: selectedCategory,
@@ -120,12 +144,44 @@ export function ShopContent({
       },
       sportsHierarchy,
     );
-  }, [products, selectedCategory, searchQuery, sortBy, inStockOnly, sportsHierarchy]);
+
+    const activePriceRule = PRICE_RANGE_OPTIONS.find((r) => r.key === priceRange);
+
+    return base.filter((p) => {
+      if (onSaleOnly) {
+        const isDiscounted = Boolean(p.onSale || (p.compareAtPrice && p.compareAtPrice > p.price));
+        if (!isDiscounted) return false;
+      }
+      if (activePriceRule && activePriceRule.key !== 'all') {
+        if (activePriceRule.min !== undefined && p.price < activePriceRule.min) return false;
+        if (activePriceRule.max !== undefined && p.price > activePriceRule.max) return false;
+      }
+      return true;
+    });
+  }, [
+    products,
+    selectedCategory,
+    searchQuery,
+    sortBy,
+    inStockOnly,
+    onSaleOnly,
+    priceRange,
+    sportsHierarchy,
+  ]);
+
+  const hasActiveFilters =
+    selectedCategory !== 'all' ||
+    Boolean(searchQuery) ||
+    inStockOnly ||
+    onSaleOnly ||
+    priceRange !== 'all';
 
   const handleClearFilters = () => {
     setSearchQuery('');
     setSortBy('featured');
     setInStockOnly(false);
+    setOnSaleOnly(false);
+    setPriceRange('all');
 
     const current = new URLSearchParams(Array.from(searchParams.entries()));
     current.delete('category');
@@ -135,12 +191,17 @@ export function ShopContent({
     router.replace(`/shop${query}`, { scroll: false });
   };
 
-  // Find human-readable label of the currently selected category
+  // Find human-readable label of the currently selected category (checking live DB categories first)
   const selectedCategoryLabel = useMemo(() => {
     if (selectedCategory === 'all') return 'All Categories';
+    for (const parent of sportsHierarchy) {
+      if (parent.slug === selectedCategory) return parent.name;
+      const child = parent.children?.find((c) => c.slug === selectedCategory);
+      if (child) return child.name;
+    }
     const found = ALL_CANONICAL_CATEGORIES.find((c) => c.slug === selectedCategory);
-    return found ? found.name : selectedCategory;
-  }, [selectedCategory]);
+    return found ? found.name : selectedCategory.replace(/-/g, ' ');
+  }, [selectedCategory, sportsHierarchy]);
 
   // Reusable Category Tree component for desktop & mobile
   const renderCategoryTree = (onSelectAfter?: () => void) => (
@@ -377,14 +438,14 @@ export function ShopContent({
 
         {/* Main Catalog Layout (Sidebar + Product Grid) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Desktop Filter Sidebar */}
+            {/* Desktop Filter Sidebar */}
           <div className="hidden lg:block space-y-6 bg-white dark:bg-zinc-900 p-6 rounded-[32px] border border-zinc-200 dark:border-zinc-800 soft-shadow h-fit transition-colors sticky top-24">
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <Filter className="w-4 h-4 text-amber-500" />
                 <span>Filter Catalog</span>
               </h3>
-              {(selectedCategory !== 'all' || searchQuery || inStockOnly) && (
+              {hasActiveFilters && (
                 <button
                   type="button"
                   onClick={handleClearFilters}
@@ -403,8 +464,35 @@ export function ShopContent({
               {renderCategoryTree()}
             </div>
 
-            {/* In Stock Toggle */}
-            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            {/* Price Range Filter */}
+            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+              <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                Price Range (LKR)
+              </h4>
+              <div className="space-y-1">
+                {PRICE_RANGE_OPTIONS.map((range) => {
+                  const active = priceRange === range.key;
+                  return (
+                    <button
+                      key={range.key}
+                      type="button"
+                      onClick={() => setPriceRange(range.key)}
+                      className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center justify-between ${
+                        active
+                          ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold'
+                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <span>{range.label}</span>
+                      {active && <Check className="w-3.5 h-3.5 text-amber-400 dark:text-zinc-950" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Availability & Deals Toggles */}
+            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
               <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                 <input
                   type="checkbox"
@@ -413,6 +501,16 @@ export function ShopContent({
                   className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 focus:ring-zinc-900 dark:focus:ring-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950"
                 />
                 <span>In Stock Only</span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                <input
+                  type="checkbox"
+                  checked={onSaleOnly}
+                  onChange={(e) => setOnSaleOnly(e.target.checked)}
+                  className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 focus:ring-zinc-900 dark:focus:ring-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950"
+                />
+                <span>On Sale / Discounted</span>
               </label>
             </div>
 
@@ -427,11 +525,13 @@ export function ShopContent({
           <div className="lg:col-span-3 space-y-4">
             {/* Active filter pills & count bar */}
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500 dark:text-zinc-400 font-medium px-1">
-              <div className="flex items-center gap-2">
-                <span>Showing {filteredProducts.length} items</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-bold text-zinc-700 dark:text-zinc-300">
+                  Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
+                </span>
                 {selectedCategory !== 'all' && (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 rounded-full font-bold uppercase text-[10px]">
-                    <span>Category: {selectedCategoryLabel}</span>
+                    <span>{selectedCategoryLabel}</span>
                     <button
                       type="button"
                       onClick={() => handleSelectCategory('all')}
@@ -442,15 +542,67 @@ export function ShopContent({
                     </button>
                   </span>
                 )}
+                {priceRange !== 'all' && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-full font-bold uppercase text-[10px]">
+                    <span>{PRICE_RANGE_OPTIONS.find((r) => r.key === priceRange)?.label}</span>
+                    <button
+                      type="button"
+                      onClick={() => setPriceRange('all')}
+                      aria-label="Remove price filter"
+                      className="hover:text-amber-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {onSaleOnly && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 rounded-full font-bold uppercase text-[10px]">
+                    <span>On Sale</span>
+                    <button
+                      type="button"
+                      onClick={() => setOnSaleOnly(false)}
+                      aria-label="Remove sale filter"
+                      className="hover:text-rose-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {inStockOnly && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 rounded-full font-bold uppercase text-[10px]">
+                    <span>In Stock</span>
+                    <button
+                      type="button"
+                      onClick={() => setInStockOnly(false)}
+                      aria-label="Remove in stock filter"
+                      className="hover:text-emerald-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {searchQuery && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-full font-bold text-[10px]">
+                    <span>&ldquo;{searchQuery}&rdquo;</span>
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      aria-label="Clear search query"
+                      className="hover:text-amber-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
               </div>
 
-              {(selectedCategory !== 'all' || searchQuery || inStockOnly) && (
+              {hasActiveFilters && (
                 <button
                   type="button"
                   onClick={handleClearFilters}
                   className="text-amber-600 dark:text-amber-400 font-bold hover:underline"
                 >
-                  Clear Filters
+                  Clear All
                 </button>
               )}
             </div>
@@ -495,7 +647,33 @@ export function ShopContent({
                 {renderCategoryTree(() => setIsMobileFilterOpen(false))}
               </div>
 
-              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+                <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                  Price Range (LKR)
+                </h4>
+                <div className="space-y-1">
+                  {PRICE_RANGE_OPTIONS.map((range) => {
+                    const active = priceRange === range.key;
+                    return (
+                      <button
+                        key={range.key}
+                        type="button"
+                        onClick={() => setPriceRange(range.key)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-between ${
+                          active
+                            ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold'
+                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                        }`}
+                      >
+                        <span>{range.label}</span>
+                        {active && <Check className="w-3.5 h-3.5 text-amber-400 dark:text-zinc-950" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
                 <label className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200 cursor-pointer">
                   <input
                     type="checkbox"
@@ -504,6 +682,16 @@ export function ShopContent({
                     className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950 focus:ring-zinc-900 dark:focus:ring-amber-500"
                   />
                   <span>In Stock Only</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={onSaleOnly}
+                    onChange={(e) => setOnSaleOnly(e.target.checked)}
+                    className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950 focus:ring-zinc-900 dark:focus:ring-amber-500"
+                  />
+                  <span>On Sale / Discounted</span>
                 </label>
               </div>
             </div>

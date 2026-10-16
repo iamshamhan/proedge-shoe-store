@@ -15,11 +15,28 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
-  const { addItem } = useCart();
+  const { addItem, setIsCartDrawerOpen } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [isAdded, setIsAdded] = useState(false);
 
   const isOutOfStock = product.stock <= 0;
+  const hasVariants = Boolean(product.variants && product.variants.length > 0);
+
+  const isSizeAvailable = (size: string | number) => {
+    if (!hasVariants) return product.stock > 0;
+    return product.variants!.some(
+      (v) =>
+        (v.sizeValue === String(size) || String(v.size) === String(size)) &&
+        v.stock > 0,
+    );
+  };
+
+  // Default to the first in-stock size
+  const firstAvailableSize =
+    product.sizes?.find((s) => isSizeAvailable(s)) ?? product.sizes?.[0];
+  const [selectedQuickSize, setSelectedQuickSize] = useState<string | number | undefined>(
+    firstAvailableSize,
+  );
 
   const discountPercent =
     product.compareAtPrice && product.compareAtPrice > product.price
@@ -30,31 +47,45 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     e.preventDefault();
     if (isOutOfStock) return;
 
-    const defaultSize = product.sizes?.[0];
-    const defaultColor = product.colors?.[0] ?? 'Standard';
-    const defaultVariant = product.variants?.find(
-      (v) =>
-        (v.sizeValue === String(defaultSize) || String(v.size) === String(defaultSize)) &&
-        v.colour === defaultColor,
-    );
+    const targetSize = selectedQuickSize ?? firstAvailableSize;
+    // Pick an in-stock variant matching targetSize, or fallback to first in-stock variant
+    const targetVariant =
+      product.variants?.find(
+        (v) =>
+          (v.sizeValue === String(targetSize) || String(v.size) === String(targetSize)) &&
+          v.stock > 0,
+      ) ??
+      product.variants?.find((v) => v.stock > 0) ??
+      product.variants?.[0];
+
+    const resolvedSize =
+      targetVariant?.sizeValue ?? targetVariant?.size ?? targetSize ?? product.sizes?.[0] ?? 40;
+    const resolvedColor = targetVariant?.colour ?? product.colors?.[0] ?? 'Standard';
+    const resolvedSizeSystem = targetVariant?.sizeSystem ?? product.sizeSystem;
+    const resolvedMaxStock = targetVariant ? targetVariant.stock : product.stock;
+
+    if (resolvedMaxStock <= 0) return;
 
     addItem({
       productId: product.id,
-      variantId: defaultVariant?.id,
+      variantId: targetVariant?.id,
       name: product.name,
       slug: product.slug,
       image: product.images[0],
       price: product.price,
-      size: defaultSize,
-      sizeSystem: product.sizeSystem,
-      color: defaultColor,
+      size: resolvedSize,
+      sizeSystem: resolvedSizeSystem,
+      color: resolvedColor,
       quantity: 1,
+      maxStock: resolvedMaxStock,
     });
     setIsAdded(true);
+    setIsCartDrawerOpen(true);
     window.setTimeout(() => setIsAdded(false), 1800);
   };
 
   const wishlisted = isWishlisted(product.id);
+  const secondaryImage = product.images && product.images.length > 1 ? product.images[1] : null;
 
   return (
     <div className="group cursor-pointer relative bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:border-zinc-300 dark:hover:border-zinc-700">
@@ -68,6 +99,11 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {product.newArrival && discountPercent === 0 && (
           <span className="px-2.5 py-1 text-[11px] font-black tracking-wider uppercase bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 rounded-md shadow-xs font-black">
             NEW
+          </span>
+        )}
+        {!isOutOfStock && product.stock <= 5 && (
+          <span className="px-2 py-0.5 text-[10px] font-extrabold tracking-wider uppercase bg-rose-600 text-white rounded-md shadow-xs">
+            Only {product.stock} left
           </span>
         )}
       </div>
@@ -103,13 +139,24 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           fill
           priority={priority}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className={`object-cover object-center motion-safe:group-hover:scale-105 transition-transform duration-500 ease-out ${
-            isOutOfStock ? 'opacity-50 saturate-50' : ''
-          }`}
+          className={`object-cover object-center motion-safe:group-hover:scale-105 transition-all duration-500 ease-out ${
+            secondaryImage ? 'group-hover:opacity-0' : ''
+          } ${isOutOfStock ? 'opacity-50 saturate-50' : ''}`}
         />
+        {secondaryImage && (
+          <Image
+            src={secondaryImage}
+            alt={`${product.name} alternate view`}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className={`object-cover object-center opacity-0 group-hover:opacity-100 motion-safe:group-hover:scale-105 transition-all duration-500 ease-out ${
+              isOutOfStock ? 'saturate-50' : ''
+            }`}
+          />
+        )}
 
         {isOutOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/50">
+          <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/50 z-10">
             <span className="px-3 py-1.5 flex items-center gap-1.5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white text-xs font-black uppercase tracking-wider rounded-lg shadow-md">
               <PackageX className="w-4 h-4" />
               Out of Stock
@@ -137,20 +184,38 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             {product.name}
           </Link>
 
-          {/* Size Quick Preview */}
-          {!isOutOfStock && (
-            <div className="mt-2.5 flex items-center gap-1 overflow-x-auto py-0.5 no-scrollbar">
-              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold tracking-wider uppercase mr-1">
-                {product.sizeSystem || 'EU'}:
+          {/* Interactive Size Quick-Select Strip */}
+          {!isOutOfStock && product.sizes.length > 0 && (
+            <div className="mt-2.5 flex items-center gap-1 overflow-x-auto py-0.5 no-scrollbar relative z-20">
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold tracking-wider uppercase mr-1 shrink-0">
+                {product.sizeSystem && product.sizeSystem !== 'Custom' ? product.sizeSystem : 'Size'}:
               </span>
-              {product.sizes.map((size) => (
-                <span
-                  key={size}
-                  className="px-1.5 py-0.5 text-[10px] font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-xs shrink-0"
-                >
-                  {size}
-                </span>
-              ))}
+              {product.sizes.map((size) => {
+                const available = isSizeAvailable(size);
+                const isSelected = String(selectedQuickSize) === String(size);
+                return (
+                  <button
+                    key={size}
+                    type="button"
+                    disabled={!available}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (available) setSelectedQuickSize(size);
+                    }}
+                    title={available ? `Select size ${size}` : `Size ${size} out of stock`}
+                    className={`px-1.5 py-0.5 text-[10px] font-bold rounded-xs shrink-0 transition-colors ${
+                      !available
+                        ? 'bg-zinc-100/60 dark:bg-zinc-800/40 text-zinc-300 dark:text-zinc-600 line-through cursor-not-allowed'
+                        : isSelected
+                          ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

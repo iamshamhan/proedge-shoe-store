@@ -1,9 +1,11 @@
 import React from 'react';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata = {
-  title: 'Terms of Service - Pro Edge',
-  description: 'Terms of Service and Conditions for Pro Edge.',
-};
+export const metadata = pageMetadata({
+  title: 'Terms of Service',
+  description: 'Terms of Service and Conditions for PROEDGE.',
+  path: '/terms',
+});
 
 export default function TermsPage() {
   return (

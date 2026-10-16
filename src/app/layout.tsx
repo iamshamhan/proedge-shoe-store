@@ -9,6 +9,7 @@ import {
 import './globals.css';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { CartDrawer } from '@/components/cart/cart-drawer';
 import { CartProvider } from '@/context/cart-context';
 import { WishlistProvider } from '@/context/wishlist-context';
 import { SettingsProvider } from '@/context/settings-context';
@@ -96,6 +97,7 @@ export default async function RootLayout({
                 <Header categories={categories} />
                 <main id="main" className="flex-1">{children}</main>
                 <Footer categories={categories} />
+                <CartDrawer />
               </WishlistProvider>
             </CartProvider>
           </SettingsProvider>

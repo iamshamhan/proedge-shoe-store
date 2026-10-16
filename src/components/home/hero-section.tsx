@@ -43,7 +43,7 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-tight text-foreground uppercase">
               STEP INTO <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-light">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-400 dark:to-amber-500">
                 YOUR STYLE
               </span>
             </h1>
@@ -95,27 +95,27 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
               href={productHref}
               className="relative w-full max-w-md aspect-4/5 rounded-[40px] bg-card p-4 soft-shadow group block hover:-translate-y-1 transition-all duration-300"
             >
-              <div className="relative w-full h-full rounded-[32px] overflow-hidden bg-background">
+              <div className="relative w-full h-full rounded-[32px] overflow-hidden bg-zinc-900">
                 <Image
                   src={productImage}
                   alt={productName}
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 40vw"
-                  className="object-cover object-center mix-blend-multiply dark:mix-blend-screen dark:brightness-90 dark:contrast-110 motion-safe:group-hover:scale-105 transition-transform duration-700"
+                  className="object-cover object-center motion-safe:group-hover:scale-105 transition-transform duration-700"
                 />
                 
                 {/* Product Info Block */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-card to-transparent pt-20 flex items-end justify-between transition-all">
+                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-zinc-950/90 via-zinc-950/50 to-transparent pt-20 flex items-end justify-between transition-all">
                   <div className="min-w-0 pr-2 space-y-1">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest block truncate">
+                    <span className="text-xs font-semibold text-amber-400 uppercase tracking-widest block truncate">
                       {productBadge}
                     </span>
-                    <h3 className="font-bold text-lg text-foreground truncate">
+                    <h3 className="font-bold text-lg text-white truncate">
                       {productName}
                     </h3>
                   </div>
-                  <span className="shrink-0 text-lg font-bold text-foreground">
+                  <span className="shrink-0 text-lg font-bold text-white">
                     {productPrice}
                   </span>
                 </div>

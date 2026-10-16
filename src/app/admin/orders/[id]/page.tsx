@@ -19,6 +19,7 @@ import { OrderStatusBadge } from '@/components/admin/order-status-badge';
 import { OrderStatusSelect } from '@/components/admin/order-status-select';
 import { OrderDeleteButton } from '@/components/admin/order-delete-button';
 import { OrderDetailActions } from '@/components/admin/order-detail-actions';
+import { OrderPrintButton } from '@/components/admin/order-print-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,8 +62,19 @@ export default async function AdminOrderDetailPage({
     if (clean.length === 10 && clean.startsWith('0')) {
       clean = '94' + clean.substring(1);
     }
+
+    const itemLines = (items ?? [])
+      .map(
+        (it) =>
+          `• ${it.product_name} (${it.colour}${it.size ? `, Size ${it.size}` : ''}) × ${it.quantity} — ${formatLKR(it.quantity * it.unit_price)}`
+      )
+      .join('\n');
+
+    const deliveryText =
+      order.delivery_fee > 0 ? formatLKR(order.delivery_fee) : 'Free Delivery';
+
     const message = encodeURIComponent(
-      `Hello ${order.customer_name}! This is PROEDGE regarding your order #${order.order_number}.`
+      `Hello ${order.customer_name}! 👋\nThis is *PROEDGE Sports* regarding your order *${order.order_number}*.\n\n*Order Summary:*\n${itemLines || '• Order items'}\n\n*Delivery:* ${deliveryText}\n*Grand Total:* ${formatLKR(order.total)}\n*Delivery Address:* ${order.address}, ${order.city}\n\nThank you for shopping with PROEDGE!`
     );
     return `https://wa.me/${clean}?text=${message}`;
   };
@@ -86,7 +98,7 @@ export default async function AdminOrderDetailPage({
         <div className="flex items-center gap-3">
           <Link
             href="/admin/orders"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors print:hidden"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
@@ -104,7 +116,9 @@ export default async function AdminOrderDetailPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto print:hidden">
+          <OrderPrintButton />
+
           <a
             href={getWhatsAppLink()}
             target="_blank"
@@ -112,7 +126,7 @@ export default async function AdminOrderDetailPage({
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-colors shadow-xs"
           >
             <MessageCircle className="w-4 h-4" />
-            <span>Chat on WhatsApp</span>
+            <span>Send Receipt on WhatsApp</span>
           </a>
 
           <OrderDeleteButton

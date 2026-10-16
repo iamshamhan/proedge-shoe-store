@@ -12,12 +12,18 @@ interface CartItemRowProps {
 }
 
 export function CartItemRow({ item }: CartItemRowProps) {
-  const { updateQuantity, removeItem } = useCart();
+  const { updateQuantity, removeItem, setIsCartDrawerOpen } = useCart();
+  const isAtMaxStock = item.maxStock !== undefined && item.maxStock > 0 && item.quantity >= item.maxStock;
 
   return (
     <div className="flex items-center gap-4 py-4 border-b border-zinc-200 dark:border-zinc-800">
       {/* Thumbnail Image */}
-      <Link href={`/product/${item.slug}`} className="relative w-20 h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 shrink-0 overflow-hidden group" style={{ position: 'relative' }}>
+      <Link
+        href={`/product/${item.slug}`}
+        onClick={() => setIsCartDrawerOpen(false)}
+        className="relative w-20 h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 shrink-0 overflow-hidden group"
+        style={{ position: 'relative' }}
+      >
         <Image
           src={item.image}
           alt={item.name}
@@ -29,7 +35,11 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
       {/* Item Details */}
       <div className="flex-1 min-w-0">
-        <Link href={`/product/${item.slug}`} className="font-bold text-sm text-zinc-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors line-clamp-1 block">
+        <Link
+          href={`/product/${item.slug}`}
+          onClick={() => setIsCartDrawerOpen(false)}
+          className="font-bold text-sm text-zinc-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors line-clamp-1 block"
+        >
           {item.name}
         </Link>
         <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 font-medium">
@@ -53,8 +63,10 @@ export function CartItemRow({ item }: CartItemRowProps) {
             <button
               type="button"
               onClick={() => updateQuantity(item.id, item.quantity + 1)}
+              disabled={isAtMaxStock}
+              title={isAtMaxStock ? `Max available stock (${item.maxStock}) reached` : 'Increase quantity'}
               aria-label="Increase quantity"
-              className="w-6 h-6 rounded flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="w-6 h-6 rounded flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <Plus className="w-3 h-3" />
             </button>

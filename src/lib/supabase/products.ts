@@ -66,10 +66,10 @@ import {
 // Mapper — DB row → existing UI Product model
 // ---------------------------------------------------------------------------
 
-function mapProduct(row: DbProductRow): Product {
+function mapProduct(row: DbProductRow, customHierarchy?: CategoryItem[]): Product {
   const categorySlug = (row.categories?.slug ?? 'running-shoes') as ProductCategory;
   const categoryName = row.categories?.name ?? undefined;
-  const parent = getParentCategory(categorySlug);
+  const parent = getParentCategory(categorySlug, customHierarchy);
   const sport = parent?.slug;
   const sportName = parent?.name;
 
@@ -172,7 +172,12 @@ type FetchOptions = {
   saleOnly?: boolean;
 };
 
-async function executeProductQuery(sb: SupabaseClient, querySelect: string, opts: FetchOptions) {
+async function executeProductQuery(
+  sb: SupabaseClient,
+  querySelect: string,
+  opts: FetchOptions,
+  customHierarchy?: CategoryItem[],
+) {
   let q = sb
     .from('products')
     .select(querySelect)
@@ -180,7 +185,7 @@ async function executeProductQuery(sb: SupabaseClient, querySelect: string, opts
     .order('created_at', { ascending: false });
 
   if (opts.categorySlug) {
-    const matchingSlugs = getCategorySlugsForQuery(opts.categorySlug);
+    const matchingSlugs = getCategorySlugsForQuery(opts.categorySlug, customHierarchy);
     if (matchingSlugs.length > 1) {
       q = q.in('categories.slug', matchingSlugs);
     } else if (matchingSlugs.length === 1) {
@@ -198,12 +203,14 @@ async function fetchProducts(opts: FetchOptions = {}): Promise<Product[] | null>
   if (!sb) return null;
 
   try {
+    const hierarchy = await getCategoriesHierarchy();
+
     // Try full select first
-    let { data, error } = await executeProductQuery(sb, PRODUCT_SELECT_FULL, opts);
+    let { data, error } = await executeProductQuery(sb, PRODUCT_SELECT_FULL, opts, hierarchy);
 
     // If size_system column doesn't exist yet, fall back to legacy select
     if (error && error.message.includes('size_system')) {
-      const fallbackResult = await executeProductQuery(sb, PRODUCT_SELECT_LEGACY, opts);
+      const fallbackResult = await executeProductQuery(sb, PRODUCT_SELECT_LEGACY, opts, hierarchy);
       data = fallbackResult.data;
       error = fallbackResult.error;
     }
@@ -213,7 +220,7 @@ async function fetchProducts(opts: FetchOptions = {}): Promise<Product[] | null>
       return null;
     }
 
-    return (data as unknown as DbProductRow[]).map(mapProduct);
+    return (data as unknown as DbProductRow[]).map((row) => mapProduct(row, hierarchy));
   } catch (err) {
     console.error('[supabase] connection error:', err);
     return null;
@@ -225,6 +232,7 @@ async function fetchProductBySlug(slug: string): Promise<Product | null> {
   if (!sb) return null;
 
   try {
+    const hierarchy = await getCategoriesHierarchy();
     let data: unknown;
     let error: { message: string } | null = null;
 
@@ -254,7 +262,7 @@ async function fetchProductBySlug(slug: string): Promise<Product | null> {
       return null;
     }
 
-    return mapProduct(data as unknown as DbProductRow);
+    return mapProduct(data as unknown as DbProductRow, hierarchy);
   } catch (err) {
     console.error('[supabase] connection error:', err);
     return null;
@@ -369,9 +377,15 @@ export const getSaleProducts = cache(async (): Promise<Product[]> => {
 });
 
 export const getProductsByCategory = cache(async (category: ProductCategory): Promise<Product[]> => {
-  return (
-    (await fetchProducts({ categorySlug: category })) ??
-    MOCK_PRODUCTS.filter((p) => p.category === category)
+  const db = await fetchProducts({ categorySlug: category });
+  if (db) return db;
+  const matchingSlugs = getCategorySlugsForQuery(category);
+  return MOCK_PRODUCTS.filter(
+    (p) =>
+      matchingSlugs.includes(p.category) ||
+      (p.sport && matchingSlugs.includes(p.sport)) ||
+      p.category === category ||
+      p.sport === category,
   );
 });
 

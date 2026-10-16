@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   Edit,
   Trash2,
@@ -14,8 +14,14 @@ import {
   X,
   ExternalLink,
   Search,
+  Copy,
 } from 'lucide-react';
-import { toggleProductActive, deleteProduct } from '@/app/admin/actions';
+import {
+  toggleProductActive,
+  deleteProduct,
+  updateProductFlags,
+  duplicateProduct,
+} from '@/app/admin/actions';
 import { ConfirmDialog } from './confirm-dialog';
 import { formatLKR } from '@/data/products';
 
@@ -45,6 +51,8 @@ export type Product = {
   product_variants: { id: string; stock: number }[];
 };
 
+type QuickFilter = 'all' | 'low-stock' | 'out-of-stock' | 'on-sale' | 'featured' | 'inactive';
+
 interface ProductTableProps {
   products: Product[];
   categories?: Category[];
@@ -54,11 +62,18 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
   const router = useRouter();
   const [products, setProducts] = useState(initial);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [flagBusy, setFlagBusy] = useState<string | null>(null);
+  const [duplicating, setDuplicating] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [targetDelete, setTargetDelete] = useState<Product | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
+
+  useEffect(() => {
+    setProducts(initial);
+  }, [initial]);
 
   const handleToggle = useCallback(
     async (product: Product) => {
@@ -78,6 +93,42 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
     [router],
   );
 
+  const handleFlagToggle = useCallback(
+    async (product: Product, field: 'featured' | 'is_new_arrival' | 'is_on_sale') => {
+      setActionError(null);
+      const key = `${product.id}:${field}`;
+      setFlagBusy(key);
+      const nextVal = !product[field];
+      const result = await updateProductFlags(product.id, { [field]: nextVal });
+      setFlagBusy(null);
+      if ('error' in result) {
+        setActionError(result.error);
+        return;
+      }
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, [field]: nextVal } : p)),
+      );
+      router.refresh();
+    },
+    [router],
+  );
+
+  const handleDuplicate = useCallback(
+    async (product: Product) => {
+      setActionError(null);
+      setDuplicating(product.id);
+      const result = await duplicateProduct(product.id);
+      setDuplicating(null);
+      if ('error' in result) {
+        setActionError(result.error);
+        return;
+      }
+      router.push(`/admin/products/${result.id}`);
+      router.refresh();
+    },
+    [router],
+  );
+
   const handleDelete = useCallback(async () => {
     if (!targetDelete) return;
     setActionError(null);
@@ -86,6 +137,7 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
     setDeleting(false);
     if ('error' in result) {
       setActionError(result.error);
+      setTargetDelete(null);
       return;
     }
     setProducts((prev) => prev.filter((p) => p.id !== targetDelete.id));
@@ -110,14 +162,22 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   }, [categories]);
 
-  // Filter products by search query
+  // Filter products by search query and quick filter
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return products;
     const q = searchQuery.toLowerCase().trim();
-    return products.filter(
-      (p) => p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q),
-    );
-  }, [products, searchQuery]);
+    return products.filter((p) => {
+      if (q && !p.name.toLowerCase().includes(q) && !p.slug.toLowerCase().includes(q)) {
+        return false;
+      }
+      const totalStock = p.product_variants.reduce((s, v) => s + v.stock, 0);
+      if (quickFilter === 'out-of-stock') return totalStock === 0;
+      if (quickFilter === 'low-stock') return totalStock > 0 && totalStock <= 5;
+      if (quickFilter === 'on-sale') return p.is_on_sale;
+      if (quickFilter === 'featured') return p.featured;
+      if (quickFilter === 'inactive') return !p.is_active;
+      return true;
+    });
+  }, [products, searchQuery, quickFilter]);
 
   // Group filtered products by Big Category and Small Category
   const groupedData = useMemo(() => {
@@ -280,63 +340,95 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
       )}
 
       {/* Search & Sports Tab Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Category Tabs */}
-        <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
-          <button
-            type="button"
-            onClick={() => setActiveTab('all')}
-            className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${
-              activeTab === 'all'
-                ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-            }`}
-          >
-            All ({filteredProducts.length})
-          </button>
-          {groupedData.map((group) => (
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Category Tabs */}
+          <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
             <button
-              key={group.bigCat.id}
               type="button"
-              onClick={() => setActiveTab(group.bigCat.slug)}
+              onClick={() => setActiveTab('all')}
               className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${
-                activeTab === group.bigCat.slug
+                activeTab === 'all'
                   ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950'
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
-              {group.bigCat.name} ({group.totalCount})
+              All ({filteredProducts.length})
             </button>
-          ))}
+            {groupedData.map((group) => (
+              <button
+                key={group.bigCat.id}
+                type="button"
+                onClick={() => setActiveTab(group.bigCat.slug)}
+                className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${
+                  activeTab === group.bigCat.slug
+                    ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                }`}
+              >
+                {group.bigCat.name} ({group.totalCount})
+              </button>
+            ))}
+          </div>
+
+          {/* Search Box */}
+          <div className="relative min-w-[220px]">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products…"
+              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-9 pr-4 py-2 text-xs font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Search Box */}
-        <div className="relative min-w-[220px]">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search products…"
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-9 pr-4 py-2 text-xs font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
-          {searchQuery && (
+        {/* Quick Inventory & Status Filter Pills */}
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+          <span className="font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mr-1">
+            Quick Filter:
+          </span>
+          {(
+            [
+              { id: 'all', label: 'All Inventory' },
+              { id: 'low-stock', label: 'Low Stock (≤ 5)' },
+              { id: 'out-of-stock', label: 'Out of Stock (0)' },
+              { id: 'on-sale', label: 'On Sale' },
+              { id: 'featured', label: 'Featured' },
+              { id: 'inactive', label: 'Inactive' },
+            ] as { id: QuickFilter; label: string }[]
+          ).map((f) => (
             <button
+              key={f.id}
               type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+              onClick={() => setQuickFilter(f.id)}
+              className={`px-2.5 py-1 rounded-full font-bold transition-colors ${
+                quickFilter === f.id
+                  ? 'bg-amber-500 text-zinc-950'
+                  : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-amber-500'
+              }`}
             >
-              <X className="h-4 w-4" />
+              {f.label}
             </button>
-          )}
+          ))}
         </div>
       </div>
 
       {/* Categorized Product Sections */}
       <div className="space-y-10">
         {visibleGroups.map((group) => {
-          // If in "All" view and this group has 0 products and not searching, we can hide or keep minimal
-          if (group.totalCount === 0 && activeTab === 'all' && !searchQuery) {
+          // If in "All" view and this group has 0 products and not searching/filtering, hide empty groups
+          if (group.totalCount === 0 && activeTab === 'all' && !searchQuery && quickFilter === 'all') {
             return null;
           }
 
@@ -353,14 +445,16 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                   </span>
                 </div>
 
-                <Link
-                  href={`/admin/categories/new?parent=${group.bigCat.id}`}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 hover:text-amber-500 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 hover:border-amber-500 transition-colors"
-                  title={`Add subcategory to ${group.bigCat.name}`}
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Add Subcategory</span>
-                </Link>
+                {group.bigCat.id !== 'uncategorized' && (
+                  <Link
+                    href={`/admin/categories/new?parent=${group.bigCat.id}`}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 hover:text-amber-500 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 hover:border-amber-500 transition-colors"
+                    title={`Add subcategory to ${group.bigCat.name}`}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Subcategory</span>
+                  </Link>
+                )}
               </div>
 
               {/* Subcategories under this Big Category */}
@@ -386,14 +480,16 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                           </span>
                         </div>
 
-                        <Link
-                          href={`/admin/products/new?category=${subgroup.subcat.id}`}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline px-2 py-1 rounded hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
-                          title={`Add product directly to ${subgroup.subcat.name}`}
-                        >
-                          <Plus className="w-3 h-3" />
-                          <span>Add {subgroup.subcat.name}</span>
-                        </Link>
+                        {subgroup.subcat.id !== 'uncategorized' && (
+                          <Link
+                            href={`/admin/products/new?category=${subgroup.subcat.id}`}
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline px-2 py-1 rounded hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                            title={`Add product directly to ${subgroup.subcat.name}`}
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span>Add {subgroup.subcat.name}</span>
+                          </Link>
+                        )}
                       </div>
 
                       {/* Products Table for this Subcategory */}
@@ -405,7 +501,7 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                                 <th className="px-4 py-2.5">Product</th>
                                 <th className="hidden px-4 py-2.5 sm:table-cell">Price</th>
                                 <th className="hidden px-4 py-2.5 sm:table-cell">Stock</th>
-                                <th className="hidden px-4 py-2.5 md:table-cell">Status</th>
+                                <th className="hidden px-4 py-2.5 md:table-cell">Quick Flags</th>
                                 <th className="px-4 py-2.5 text-right">Actions</th>
                               </tr>
                             </thead>
@@ -439,9 +535,12 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                                           </div>
                                         )}
                                         <div>
-                                          <p className="font-bold text-zinc-900 dark:text-white">
+                                          <Link
+                                            href={`/admin/products/${product.id}`}
+                                            className="font-bold text-zinc-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                                          >
                                             {product.name}
-                                          </p>
+                                          </Link>
                                           <p className="text-xs text-zinc-400 dark:text-zinc-500">
                                             /{product.slug}
                                           </p>
@@ -465,7 +564,9 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                                         className={`font-bold ${
                                           totalStock === 0
                                             ? 'text-red-500'
-                                            : 'text-zinc-900 dark:text-white'
+                                            : totalStock <= 5
+                                              ? 'text-amber-600 dark:text-amber-400'
+                                              : 'text-zinc-900 dark:text-white'
                                         }`}
                                       >
                                         {totalStock} in stock
@@ -473,21 +574,45 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                                     </td>
                                     <td className="hidden px-4 py-3 md:table-cell">
                                       <div className="flex flex-wrap gap-1">
-                                        {product.featured && (
-                                          <span className="rounded bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
-                                            Featured
-                                          </span>
-                                        )}
-                                        {product.is_new_arrival && (
-                                          <span className="rounded bg-green-100 dark:bg-green-950/60 px-1.5 py-0.5 text-[10px] font-bold text-green-700 dark:text-green-400">
-                                            New
-                                          </span>
-                                        )}
-                                        {product.is_on_sale && (
-                                          <span className="rounded bg-red-100 dark:bg-red-950/60 px-1.5 py-0.5 text-[10px] font-bold text-red-700 dark:text-red-400">
-                                            Sale
-                                          </span>
-                                        )}
+                                        <button
+                                          type="button"
+                                          disabled={flagBusy === `${product.id}:featured`}
+                                          onClick={() => handleFlagToggle(product, 'featured')}
+                                          title="Click to toggle Featured status"
+                                          className={`rounded px-2 py-0.5 text-[10px] font-bold transition-colors ${
+                                            product.featured
+                                              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-800'
+                                              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                                          }`}
+                                        >
+                                          Featured
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={flagBusy === `${product.id}:is_new_arrival`}
+                                          onClick={() => handleFlagToggle(product, 'is_new_arrival')}
+                                          title="Click to toggle New Arrival status"
+                                          className={`rounded px-2 py-0.5 text-[10px] font-bold transition-colors ${
+                                            product.is_new_arrival
+                                              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800'
+                                              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                                          }`}
+                                        >
+                                          New
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={flagBusy === `${product.id}:is_on_sale`}
+                                          onClick={() => handleFlagToggle(product, 'is_on_sale')}
+                                          title="Click to toggle On Sale status"
+                                          className={`rounded px-2 py-0.5 text-[10px] font-bold transition-colors ${
+                                            product.is_on_sale
+                                              ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-800'
+                                              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                                          }`}
+                                        >
+                                          Sale
+                                        </button>
                                       </div>
                                     </td>
                                     <td className="px-4 py-3">
@@ -505,6 +630,19 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                                             <ToggleRight className="h-5 w-5 text-green-600 dark:text-green-500" />
                                           ) : (
                                             <ToggleLeft className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
+                                          )}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDuplicate(product)}
+                                          disabled={duplicating === product.id}
+                                          title="Duplicate product (clones images & variants)"
+                                          className="rounded-lg p-2 text-zinc-400 dark:text-zinc-500 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-amber-600 dark:hover:text-amber-400 disabled:opacity-50"
+                                        >
+                                          {duplicating === product.id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                          ) : (
+                                            <Copy className="h-4 w-4" />
                                           )}
                                         </button>
                                         <Link

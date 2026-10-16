@@ -127,8 +127,14 @@ export function CartPage() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        disabled={item.maxStock !== undefined && item.quantity >= item.maxStock}
                         aria-label="Increase quantity"
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                        title={
+                          item.maxStock !== undefined && item.quantity >= item.maxStock
+                            ? `Maximum available stock (${item.maxStock}) reached`
+                            : 'Increase quantity'
+                        }
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -177,10 +183,28 @@ export function CartPage() {
                 </div>
               </div>
 
-              {settings.freeDeliveryEnabled && deliveryFee > 0 && (
-                <div className="rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 px-4 py-3 text-xs text-amber-900 dark:text-amber-300 font-medium">
-                  Add {formatLKR(settings.freeDeliveryThreshold - subtotal)} more to unlock
-                  free islandwide delivery.
+              {settings.freeDeliveryEnabled && settings.freeDeliveryThreshold > 0 && (
+                <div className="rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/50 px-4 py-3 space-y-2">
+                  {deliveryFee > 0 ? (
+                    <p className="text-xs text-amber-900 dark:text-amber-300 font-medium">
+                      Add <span className="font-black">{formatLKR(Math.max(0, settings.freeDeliveryThreshold - subtotal))}</span> more to unlock{' '}
+                      <span className="font-bold">FREE islandwide delivery</span>.
+                    </p>
+                  ) : (
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-bold">
+                      You unlocked FREE Islandwide Delivery!
+                    </p>
+                  )}
+                  <div className="h-1.5 w-full rounded-full bg-amber-200/60 dark:bg-zinc-800 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        deliveryFee === 0 ? 'bg-emerald-500' : 'bg-amber-500'
+                      }`}
+                      style={{
+                        width: `${Math.min(100, Math.round((subtotal / settings.freeDeliveryThreshold) * 100))}%`,
+                      }}
+                    />
+                  </div>
                 </div>
               )}
 

@@ -98,29 +98,29 @@ export function CategorySection({ categories }: CategorySectionProps) {
                 alt={item.name}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover object-center motion-safe:group-hover:scale-105 mix-blend-multiply dark:mix-blend-screen dark:brightness-90 transition-transform duration-700 ease-out"
+                className="object-cover object-center motion-safe:group-hover:scale-105 transition-transform duration-700 ease-out"
               />
 
               {/* Semantic Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/45 to-transparent transition-opacity" />
               <div className="absolute inset-0 bg-accent/0 group-hover:bg-accent/10 transition-colors duration-300" />
 
               {/* Category Info */}
               <div className="relative z-10 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-accent uppercase tracking-widest">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 uppercase tracking-widest">
                   <Trophy className="w-3.5 h-3.5" />
                   <span>{item.subtitle}</span>
                 </div>
 
-                <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+                <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                   {item.name}
                 </h3>
 
-                <p className="text-sm text-muted-foreground line-clamp-1 sm:line-clamp-none font-medium leading-relaxed">
+                <p className="text-sm text-zinc-300 line-clamp-1 sm:line-clamp-none font-medium leading-relaxed">
                   {item.tagline}
                 </p>
 
-                <div className="pt-2 flex items-center text-xs font-bold text-foreground group-hover:text-accent transition-colors">
+                <div className="pt-2 flex items-center text-xs font-bold text-white group-hover:text-amber-400 transition-colors">
                   <span>Explore Department</span>
                   <ArrowRight className="w-4 h-4 ml-1.5 motion-safe:group-hover:translate-x-1.5 transition-transform" />
                 </div>

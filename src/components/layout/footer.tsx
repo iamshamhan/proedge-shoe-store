@@ -19,6 +19,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
     bannerTagline,
     contactAddress,
     contactPhone,
+    whatsappNumber: storeWhatsappNumber,
     contactEmail,
     saleEnabled,
     saleDiscountPercent,
@@ -50,7 +51,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
   const cleanPhone = contactPhone || '0750678675';
   const cleanEmail = contactEmail || 'pro_edge@yahoo.com';
   const cleanAddress = contactAddress || '38 Attidiya Road Kawdana Dehiwala';
-  let whatsappNumber = cleanPhone.replace(/[^0-9]/g, '');
+  let whatsappNumber = (storeWhatsappNumber || cleanPhone).replace(/[^0-9]/g, '');
   if (whatsappNumber.length === 10 && whatsappNumber.startsWith('0')) {
     whatsappNumber = '94' + whatsappNumber.substring(1);
   }

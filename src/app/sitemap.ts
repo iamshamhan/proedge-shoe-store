@@ -9,6 +9,9 @@ const STATIC_ENTRIES: Array<Pick<MetadataRoute.Sitemap[number], 'url' | 'changeF
   { url: '/women', changeFrequency: 'weekly', priority: 0.8 },
   { url: '/sports', changeFrequency: 'weekly', priority: 0.8 },
   { url: '/sale', changeFrequency: 'weekly', priority: 0.7 },
+  { url: '/policies', changeFrequency: 'monthly', priority: 0.5 },
+  { url: '/privacy', changeFrequency: 'monthly', priority: 0.4 },
+  { url: '/terms', changeFrequency: 'monthly', priority: 0.4 },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

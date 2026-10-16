@@ -11,12 +11,15 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
+  Download,
+  Plus,
 } from 'lucide-react';
 import { formatLKR } from '@/data/products';
 import { OrderStatusSelect } from './order-status-select';
 import { OrderDeleteButton } from './order-delete-button';
 import { OrderCancelButton } from './order-cancel-button';
 import { OrderCompleteModal } from './order-complete-modal';
+import { ManualOrderModal } from './manual-order-modal';
 
 export interface AdminOrderSummary {
   id: string;
@@ -45,6 +48,7 @@ export function OrdersTable({ initialOrders }: Props) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedForCompletion, setSelectedForCompletion] = useState<AdminOrderSummary | null>(null);
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
 
   const filteredOrders = useMemo(() => {
     return initialOrders.filter((order) => {
@@ -77,15 +81,75 @@ export function OrdersTable({ initialOrders }: Props) {
     return { total, pending, confirmed, cancelled };
   }, [initialOrders]);
 
-  const getWhatsAppLink = (phone: string, orderNumber: string, customerName: string) => {
-    let clean = phone.replace(/[^0-9]/g, '');
+  const getWhatsAppLink = (order: AdminOrderSummary) => {
+    let clean = order.phone.replace(/[^0-9]/g, '');
     if (clean.length === 10 && clean.startsWith('0')) {
       clean = '94' + clean.substring(1);
     }
+    const statusNote =
+      order.status === 'confirmed'
+        ? 'Your order has been confirmed and is being prepared!'
+        : order.status === 'shipped'
+          ? 'Great news! Your order has been dispatched for delivery.'
+          : 'We received your order inquiry and would love to confirm your items.';
     const message = encodeURIComponent(
-      `Hello ${customerName}! This is PROEDGE regarding your order #${orderNumber}.`
+      `Hello ${order.customer_name}! This is PROEDGE Sports regarding your order *${order.order_number}* (${formatLKR(order.total)}).\n\n${statusNote}`
     );
     return `https://wa.me/${clean}?text=${message}`;
+  };
+
+  const handleExportCsv = () => {
+    if (filteredOrders.length === 0) return;
+    const escapeCsv = (val: unknown) => {
+      const str = String(val ?? '').replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const headers = [
+      'Order Number',
+      'Date',
+      'Status',
+      'Customer Name',
+      'Phone',
+      'Email',
+      'City',
+      'Address',
+      'Postal Code',
+      'Items Count',
+      'Subtotal (LKR)',
+      'Delivery Fee (LKR)',
+      'Total (LKR)',
+      'Notes',
+    ];
+
+    const rows = filteredOrders.map((o) => [
+      escapeCsv(o.order_number),
+      escapeCsv(new Date(o.created_at).toISOString()),
+      escapeCsv(o.status),
+      escapeCsv(o.customer_name),
+      escapeCsv(o.phone),
+      escapeCsv(o.email || ''),
+      escapeCsv(o.city),
+      escapeCsv(o.address),
+      escapeCsv(o.postal_code || ''),
+      escapeCsv(o.item_count ?? 0),
+      escapeCsv(o.subtotal),
+      escapeCsv(o.delivery_fee),
+      escapeCsv(o.total),
+      escapeCsv(o.notes || ''),
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const dateSlug = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.setAttribute('download', `proedge-orders-${dateSlug}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const formatDate = (dateStr: string) => {
@@ -235,16 +299,40 @@ export function OrdersTable({ initialOrders }: Props) {
           ))}
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by order number, customer name, phone, or city..."
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 pl-10 pr-4 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-          />
+        {/* Search & Quick Actions Toolbar */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by order number, customer name, phone, or city..."
+              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 pl-10 pr-4 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              disabled={filteredOrders.length === 0}
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3.5 py-2.5 text-xs font-bold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-40"
+              title="Export filtered orders to CSV"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export CSV</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsManualModalOpen(true)}
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors shadow-xs"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>New Walk-In Order</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -253,11 +341,7 @@ export function OrdersTable({ initialOrders }: Props) {
         {/* Mobile View: Dedicated Touch Cards (< md) */}
         <div className="divide-y divide-zinc-100 dark:divide-zinc-800 md:hidden">
           {filteredOrders.map((order) => {
-            const waLink = getWhatsAppLink(
-              order.phone,
-              order.order_number,
-              order.customer_name
-            );
+            const waLink = getWhatsAppLink(order);
 
             return (
               <div key={order.id} className="p-4 space-y-3.5">
@@ -395,11 +479,7 @@ export function OrdersTable({ initialOrders }: Props) {
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {filteredOrders.map((order) => {
-                const waLink = getWhatsAppLink(
-                  order.phone,
-                  order.order_number,
-                  order.customer_name
-                );
+                const waLink = getWhatsAppLink(order);
 
                 return (
                   <tr
@@ -575,6 +655,12 @@ export function OrdersTable({ initialOrders }: Props) {
           onSuccess={() => setSelectedForCompletion(null)}
         />
       )}
+
+      {/* Manual / Walk-In Order Modal */}
+      <ManualOrderModal
+        isOpen={isManualModalOpen}
+        onClose={() => setIsManualModalOpen(false)}
+      />
     </div>
   );
 }

@@ -30,7 +30,7 @@ export default async function AdminProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 dark:bg-zinc-800 text-white">
             <Package className="h-5 w-5 text-amber-500" />
@@ -43,17 +43,17 @@ export default async function AdminProductsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Link
             href="/admin/categories/new"
-            className="inline-flex items-center gap-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-900 dark:text-zinc-100 transition-colors hover:bg-zinc-300 dark:hover:bg-zinc-700"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-900 dark:text-zinc-100 transition-colors hover:bg-zinc-300 dark:hover:bg-zinc-700"
           >
             <Plus className="h-4 w-4" />
             <span>New Main Category</span>
           </Link>
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
           >
             <Plus className="h-4 w-4" />
             <span>New Product</span>

@@ -8,8 +8,18 @@ import { SizeSelector } from '@/components/product/size-selector';
 import { ColorSelector } from '@/components/product/color-selector';
 import { QuantitySelector } from '@/components/product/quantity-selector';
 import { useCart } from '@/context/cart-context';
+import { useWishlist } from '@/context/wishlist-context';
 import { useStoreSettings } from '@/context/settings-context';
-import { ShoppingBag, ShieldCheck, Truck, Zap, MessageSquare, Check } from 'lucide-react';
+import {
+  ShoppingBag,
+  ShieldCheck,
+  Truck,
+  Zap,
+  MessageSquare,
+  Check,
+  Heart,
+  Share2,
+} from 'lucide-react';
 import { STORE_CONFIG } from '@/lib/config';
 
 interface ProductInfoProps {
@@ -18,8 +28,12 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product }: ProductInfoProps) {
   const router = useRouter();
-  const { addItem } = useCart();
+  const { addItem, setIsCartDrawerOpen } = useCart();
+  const { isWishlisted, toggleWishlist } = useWishlist();
   const { whatsappNumber } = useStoreSettings();
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const wishlisted = isWishlisted(product.id);
 
   // Authoritative variants from product
   const variants = useMemo(() => product.variants ?? [], [product.variants]);
@@ -134,6 +148,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const handleAddToCart = () => {
     if (requiresSizeSelection && !selectedSize) {
       setValidationError(true);
+      const sizeEl = document.querySelector('[data-testid="size-selector"]');
+      sizeEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     setValidationError(false);
@@ -154,15 +170,19 @@ export function ProductInfo({ product }: ProductInfoProps) {
       sizeSystem: finalSizeSystem,
       color: selectedColor,
       quantity: effectiveQuantity,
+      maxStock: currentStock,
     });
 
     setIsAdded(true);
+    setIsCartDrawerOpen(true);
     window.setTimeout(() => setIsAdded(false), 2000);
   };
 
   const handleBuyNow = () => {
     if (requiresSizeSelection && !selectedSize) {
       setValidationError(true);
+      const sizeEl = document.querySelector('[data-testid="size-selector"]');
+      sizeEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     setValidationError(false);
@@ -183,41 +203,93 @@ export function ProductInfo({ product }: ProductInfoProps) {
       sizeSystem: finalSizeSystem,
       color: selectedColor,
       quantity: effectiveQuantity,
+      maxStock: currentStock,
     });
 
     router.push('/checkout');
   };
 
+  const handleShare = async () => {
+    if (typeof window === 'undefined') return;
+    const shareUrl = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: product.name, url: shareUrl });
+        return;
+      } catch {
+        // Fallback to clipboard copy
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setLinkCopied(true);
+      window.setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Ignore clipboard failure
+    }
+  };
+
   return (
-    <div className="space-y-6 lg:space-y-8">
+    <div className="space-y-6 lg:space-y-8 pb-20 lg:pb-0">
       {/* Brand & Stock Status */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-black uppercase tracking-widest text-amber-600">
+          <span className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
             {product.brand} • {product.categoryName || product.category}
           </span>
 
           {/* Stock Badge */}
           {currentStock <= 0 ? (
-            <span className="px-2.5 py-1 text-xs font-bold bg-rose-100 text-rose-800 rounded-md">
+            <span className="px-2.5 py-1 text-xs font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 rounded-md">
               Out of Stock
             </span>
           ) : currentStock <= 3 ? (
-            <span className="px-2.5 py-1 text-xs font-bold bg-amber-100 text-amber-900 rounded-md">
+            <span className="px-2.5 py-1 text-xs font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 rounded-md">
               Only {currentStock} Left
             </span>
           ) : (
-            <span className="px-2.5 py-1 text-xs font-bold bg-emerald-100 text-emerald-900 rounded-md">
+            <span className="px-2.5 py-1 text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 rounded-md">
               In Stock
             </span>
           )}
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-900 dark:text-white">
-          {product.name}
-        </h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-900 dark:text-white">
+            {product.name}
+          </h1>
 
-
+          {/* Quick Wishlist & Share Actions */}
+          <div className="flex items-center gap-2 shrink-0 pt-1">
+            <button
+              type="button"
+              onClick={() => toggleWishlist(product.id)}
+              aria-pressed={wishlisted}
+              aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
+              title={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
+              className={`p-2.5 rounded-full border transition-all ${
+                wishlisted
+                  ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-400 text-amber-500'
+                  : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:border-amber-500'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${wishlisted ? 'fill-amber-500 text-amber-500' : ''}`} />
+            </button>
+            <button
+              type="button"
+              onClick={handleShare}
+              aria-label="Share product"
+              title={linkCopied ? 'Link copied!' : 'Share product'}
+              className="p-2.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:border-amber-500 transition-all relative"
+            >
+              {linkCopied ? (
+                <Check className="w-4 h-4 text-emerald-500" />
+              ) : (
+                <Share2 className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Pricing Display */}
@@ -343,6 +415,47 @@ export function ProductInfo({ product }: ProductInfoProps) {
           <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>WhatsApp support: {whatsappNumber || STORE_CONFIG.whatsappNumber}</span>
         </div>
+      </div>
+
+      {/* Sticky Mobile Bottom Add-to-Bag Bar */}
+      <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 truncate">
+            {selectedSize
+              ? `${product.sizeSystem && product.sizeSystem !== 'Custom' ? `${product.sizeSystem} ` : ''}${selectedSize} • ${selectedColor}`
+              : 'Select size above'}
+          </p>
+          <p className="text-base font-black text-zinc-900 dark:text-white">
+            {formatLKR(product.price * effectiveQuantity)}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={currentStock <= 0}
+          className={`px-6 py-3 rounded-full font-black text-xs uppercase tracking-wider flex items-center gap-2 shrink-0 transition-all shadow-md disabled:opacity-50 ${
+            isAdded
+              ? 'bg-emerald-600 text-white'
+              : 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950'
+          }`}
+        >
+          {isAdded ? (
+            <>
+              <Check className="w-4 h-4" />
+              <span>Added</span>
+            </>
+          ) : currentStock <= 0 ? (
+            <span>Sold Out</span>
+          ) : requiresSizeSelection && !selectedSize ? (
+            <span>Select Size</span>
+          ) : (
+            <>
+              <ShoppingBag className="w-4 h-4" />
+              <span>Add to Bag</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
 import React from 'react';
 import { getStoreSettings } from '@/lib/settings';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata = {
-  title: 'Store Policies - Pro Edge',
-  description: 'Delivery, returns, exchanges, and payment policies for Pro Edge.',
-};
+export const metadata = pageMetadata({
+  title: 'Store Policies',
+  description: 'Delivery, returns, exchanges, and payment policies for PROEDGE.',
+  path: '/policies',
+});
 
 export default async function PoliciesPage() {
   const settings = await getStoreSettings();
@@ -18,7 +20,12 @@ export default async function PoliciesPage() {
           <ul className="list-disc pl-5 space-y-2 text-zinc-700 dark:text-zinc-300">
             <li><strong>Delivery Areas:</strong> Island-wide delivery across Sri Lanka.</li>
             <li><strong>Delivery Time:</strong> 1 - 2 working days.</li>
-            <li><strong>Delivery Fee:</strong> Rs. 600 - 800 depending on the delivery location.</li>
+            <li>
+              <strong>Delivery Fee:</strong> Rs. {settings.defaultDeliveryFee.toLocaleString()} standard courier fee
+              {settings.freeDeliveryEnabled
+                ? ` (FREE on orders over Rs. ${settings.freeDeliveryThreshold.toLocaleString()}).`
+                : '.'}
+            </li>
           </ul>
         </section>
 

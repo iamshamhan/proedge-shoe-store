@@ -57,7 +57,12 @@ async function fetchLatestSettings() {
             data.brandName !== globalSettings.brandName ||
             data.contactAddress !== globalSettings.contactAddress ||
             data.contactPhone !== globalSettings.contactPhone ||
-            data.contactEmail !== globalSettings.contactEmail;
+            data.contactEmail !== globalSettings.contactEmail ||
+            data.whatsappNumber !== globalSettings.whatsappNumber ||
+            data.saleSectionTitle !== globalSettings.saleSectionTitle ||
+            data.saleSectionSubtitle !== globalSettings.saleSectionSubtitle ||
+            data.newArrivalsTitle !== globalSettings.newArrivalsTitle ||
+            data.newArrivalsSubtitle !== globalSettings.newArrivalsSubtitle;
 
           if (changed) {
             globalSettings = data;

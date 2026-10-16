@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { updateOrderStatus } from '@/app/admin/actions';
@@ -32,6 +32,10 @@ export function OrderStatusSelect({
   const [status, setStatus] = useState<string>(currentStatus);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setStatus(currentStatus);
+  }, [currentStatus]);
+
   const handleChange = (newStatus: string) => {
     if (newStatus === status) return;
     setError(null);
@@ -60,7 +64,7 @@ export function OrderStatusSelect({
           value={status}
           disabled={isPending}
           onChange={(e) => handleChange(e.target.value)}
-          className={`${selectClasses} text-zinc-900 dark:text-white cursor-pointer disabled:opacity-50`}
+          className={`${selectClasses} ${isPending ? 'pr-8' : ''} text-zinc-900 dark:text-white cursor-pointer disabled:opacity-50`}
         >
           {VALID_ORDER_STATUSES.map((st) => (
             <option key={st} value={st}>
@@ -69,7 +73,7 @@ export function OrderStatusSelect({
           ))}
         </select>
         {isPending && (
-          <span className="absolute right-6 pointer-events-none">
+          <span className="absolute right-2.5 pointer-events-none">
             <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />
           </span>
         )}

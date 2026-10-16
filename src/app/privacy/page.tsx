@@ -1,10 +1,12 @@
 import React from 'react';
 import { getStoreSettings } from '@/lib/settings';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata = {
-  title: 'Privacy Policy - Pro Edge',
-  description: 'Privacy Policy for Pro Edge.',
-};
+export const metadata = pageMetadata({
+  title: 'Privacy Policy',
+  description: 'Privacy Policy for PROEDGE.',
+  path: '/privacy',
+});
 
 export default async function PrivacyPolicyPage() {
   const settings = await getStoreSettings();

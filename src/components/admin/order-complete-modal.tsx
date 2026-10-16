@@ -185,23 +185,37 @@ export function OrderCompleteModal({
     const variant = product.product_variants.find((v) => v.id === selectedVariantId);
     if (!variant) return;
 
-    const newItem: OrderItemRowState = {
-      tempId: `new-${Date.now()}-${Math.random()}`,
-      productId: product.id,
-      variantId: variant.id,
-      productName: product.name,
-      colour: variant.colour,
-      size: String(variant.size_value || variant.size || ''),
-      sizeSystem: variant.size_system || 'EU',
-      sizeValue: variant.size_value || String(variant.size || ''),
-      quantity: newQuantity,
-      unitPrice: product.price,
-      currentStock: variant.stock,
-      selected: true,
-      isNew: true,
-    };
+    setItems((prev) => {
+      const existingIdx = prev.findIndex((it) => it.variantId === variant.id);
+      if (existingIdx !== -1) {
+        return prev.map((it, idx) =>
+          idx === existingIdx
+            ? {
+                ...it,
+                quantity: it.quantity + newQuantity,
+                selected: true,
+              }
+            : it
+        );
+      }
 
-    setItems((prev) => [...prev, newItem]);
+      const newItem: OrderItemRowState = {
+        tempId: `new-${Date.now()}-${Math.random()}`,
+        productId: product.id,
+        variantId: variant.id,
+        productName: product.name,
+        colour: variant.colour,
+        size: String(variant.size_value || variant.size || ''),
+        sizeSystem: variant.size_system || 'EU',
+        sizeValue: variant.size_value || String(variant.size || ''),
+        quantity: newQuantity,
+        unitPrice: product.price,
+        currentStock: variant.stock,
+        selected: true,
+        isNew: true,
+      };
+      return [...prev, newItem];
+    });
     setShowAddForm(false);
     setNewQuantity(1);
   };

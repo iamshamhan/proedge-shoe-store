@@ -38,7 +38,7 @@ interface HeaderProps {
 export function Header({ categories: propCategories }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { totalItemsCount } = useCart();
+  const { totalItemsCount, setIsCartDrawerOpen } = useCart();
   const { productIds: wishlistIds } = useWishlist();
   const {
     freeDeliveryEnabled,
@@ -456,9 +456,16 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   )}
                 </Link>
 
-                {/* Cart Link */}
-                <Link
-                  href="/cart"
+                {/* Cart Drawer Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (pathname === '/cart' || pathname === '/checkout') {
+                      router.push('/cart');
+                    } else {
+                      setIsCartDrawerOpen(true);
+                    }
+                  }}
                   aria-label={`Shopping cart, ${totalItemsCount} ${
                     totalItemsCount === 1 ? 'item' : 'items'
                   }`}
@@ -470,7 +477,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                       {totalItemsCount > 9 ? '9+' : totalItemsCount}
                     </span>
                   )}
-                </Link>
+                </button>
               </div>
             )}
           </div>
