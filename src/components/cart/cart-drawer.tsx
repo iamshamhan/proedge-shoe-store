@@ -152,7 +152,7 @@ export function CartDrawer() {
 
         {/* Drawer Footer (Subtotal & Actions) */}
         {items.length > 0 && (
-          <div className="p-6 border-t border-black/[0.06] dark:border-white/[0.08] bg-[#f5f5f7]/80 dark:bg-black/40 space-y-4">
+          <div className="p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] border-t border-black/[0.06] dark:border-white/[0.08] bg-[#f5f5f7]/80 dark:bg-black/40 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-[#6e6e73] dark:text-[#86868b]">
                 Subtotal

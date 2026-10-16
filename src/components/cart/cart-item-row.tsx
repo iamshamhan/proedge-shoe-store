@@ -53,9 +53,9 @@ export function CartItemRow({ item }: CartItemRowProps) {
               type="button"
               onClick={() => updateQuantity(item.id, item.quantity - 1)}
               aria-label="Decrease quantity"
-              className="w-6 h-6 rounded-full flex items-center justify-center text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors"
+              className="w-7 h-7 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors active:scale-95"
             >
-              <Minus className="w-3 h-3" />
+              <Minus className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
             </button>
             <span className="w-8 text-center text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
               {item.quantity}
@@ -66,9 +66,9 @@ export function CartItemRow({ item }: CartItemRowProps) {
               disabled={isAtMaxStock}
               title={isAtMaxStock ? `Max available stock (${item.maxStock}) reached` : 'Increase quantity'}
               aria-label="Increase quantity"
-              className="w-6 h-6 rounded-full flex items-center justify-center text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-7 h-7 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
             </button>
           </div>
 
@@ -85,7 +85,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
         type="button"
         onClick={() => removeItem(item.id)}
         aria-label="Remove item"
-        className="p-2 text-[#86868b] hover:text-rose-600 dark:hover:text-rose-400 rounded-full hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors shrink-0"
+        className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-[#86868b] hover:text-rose-600 dark:hover:text-rose-400 rounded-full hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors shrink-0"
       >
         <Trash2 className="w-4 h-4" />
       </button>

@@ -1,11 +1,11 @@
-
 import { test, expect } from "@playwright/test";
 
 test.describe("Cache Invalidation", () => {
   test("Admin product mutation invalidates storefront cache", async ({ page }) => {
     // 1. Identify a test product on storefront
     await page.goto("/shop");
-    const firstProductLink = page.locator("a.font-bold[href^=\"/product/\"]").first();
+    await page.waitForSelector("a[href^=\"/product/\"]");
+    const firstProductLink = page.locator("a[href^=\"/product/\"]").first();
     const productTitle = await firstProductLink.textContent();
     const productUrl = await firstProductLink.getAttribute("href");
     
@@ -53,4 +53,3 @@ test.describe("Cache Invalidation", () => {
     }
   });
 });
-

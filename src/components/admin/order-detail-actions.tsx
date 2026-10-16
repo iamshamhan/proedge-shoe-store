@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CheckCircle2, XCircle, Edit3, AlertCircle, ShoppingBag } from 'lucide-react';
+import { CheckCircle2, XCircle, Edit3, AlertCircle } from 'lucide-react';
 import { OrderCompleteModal } from './order-complete-modal';
 import { OrderCancelButton } from './order-cancel-button';
 

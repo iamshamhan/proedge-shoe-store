@@ -509,11 +509,11 @@ export function Header({ categories: propCategories }: HeaderProps) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
-                  className="w-full pl-11 pr-24 py-2.5 bg-[#f5f5f7] dark:bg-black/60 border border-black/[0.08] dark:border-white/[0.1] rounded-full text-sm text-[#1d1d1f] dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full pl-11 pr-24 py-2.5 bg-[#f5f5f7] dark:bg-black/60 border border-black/[0.08] dark:border-white/[0.1] rounded-full text-base sm:text-sm text-[#1d1d1f] dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
                 <button
                   type="submit"
-                  className="absolute right-1.5 px-4 py-1.5 bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f] text-xs font-semibold rounded-full hover:opacity-90 transition-opacity"
+                  className="absolute right-1.5 px-4 py-1.5 bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f] text-xs font-semibold rounded-full hover:opacity-90 transition-opacity min-h-[36px]"
                 >
                   Search
                 </button>
@@ -534,7 +534,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
           />
 
           {/* Drawer Content */}
-          <div className="relative w-full max-w-xs sm:max-w-sm bg-white/95 dark:bg-[#1d1d1f]/95 apple-glass h-full shadow-2xl flex flex-col z-10 p-5 overflow-y-auto overflow-x-hidden transition-colors border-r border-black/[0.06] dark:border-white/[0.08]">
+          <div className="relative w-full max-w-xs sm:max-w-sm bg-white/95 dark:bg-[#1d1d1f]/95 apple-glass h-full shadow-2xl flex flex-col z-10 p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] overflow-y-auto overflow-x-hidden transition-colors border-r border-black/[0.06] dark:border-white/[0.08]">
             {/* Drawer Header with Logo & Close Button */}
             <div className="flex items-center justify-between pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
               <Link

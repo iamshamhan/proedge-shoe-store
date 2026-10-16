@@ -87,6 +87,8 @@ export function SizeSelector({
             <button
               key={String(size)}
               type="button"
+              data-testid="size-btn"
+              data-size={String(size)}
               disabled={soldOut}
               onClick={() => onSelectSize(size)}
               title={soldOut ? `${size} is out of stock` : undefined}

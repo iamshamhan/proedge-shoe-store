@@ -72,18 +72,18 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
             </div>
 
             {/* Hero Stats */}
-            <div className="pt-8 border-t border-black/[0.06] dark:border-white/[0.08] grid grid-cols-3 gap-4 text-center lg:text-left">
+            <div className="pt-8 border-t border-black/[0.06] dark:border-white/[0.08] grid grid-cols-3 gap-2 sm:gap-4 text-center lg:text-left">
               <div>
-                <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">100%</p>
-                <p className="text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5">Authentic Quality</p>
+                <p className="text-lg sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">100%</p>
+                <p className="text-[11px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5">Authentic Quality</p>
               </div>
               <div>
-                <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">Islandwide</p>
-                <p className="text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5">Express Delivery</p>
+                <p className="text-lg sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white truncate">Islandwide</p>
+                <p className="text-[11px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5">Express Delivery</p>
               </div>
               <div>
-                <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">24/7</p>
-                <p className="text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5">WhatsApp Concierge</p>
+                <p className="text-lg sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">24/7</p>
+                <p className="text-[11px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5">WhatsApp Concierge</p>
               </div>
             </div>
 

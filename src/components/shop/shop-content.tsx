@@ -696,18 +696,18 @@ export function ShopContent({
               </div>
             </div>
 
-            <div className="mt-auto pt-4 border-t border-black/[0.06] dark:border-white/[0.08] flex gap-2">
+            <div className="mt-auto pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-black/[0.06] dark:border-white/[0.08] flex gap-2">
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="flex-1 py-2.5 border border-black/[0.1] dark:border-white/[0.14] rounded-full text-sm font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
+                className="flex-1 py-3 min-h-[44px] border border-black/[0.1] dark:border-white/[0.14] rounded-full text-sm font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
               >
                 Reset
               </button>
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(false)}
-                className="flex-1 py-2.5 bg-[#1d1d1f] dark:bg-amber-500 text-white dark:text-zinc-950 rounded-full text-sm font-semibold hover:bg-amber-500 dark:hover:bg-amber-400 transition-colors soft-shadow"
+                className="flex-1 py-3 min-h-[44px] bg-[#1d1d1f] dark:bg-amber-500 text-white dark:text-zinc-950 rounded-full text-sm font-semibold hover:bg-amber-500 dark:hover:bg-amber-400 transition-colors soft-shadow"
               >
                 Apply
               </button>

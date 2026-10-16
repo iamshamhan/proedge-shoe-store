@@ -48,7 +48,7 @@ const INITIAL_FORM: CheckoutFormState = {
 type FormErrors = Partial<Record<keyof CheckoutFormState, string>>;
 
 const inputClasses =
-  'w-full px-4 py-3.5 bg-[#f5f5f7] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.12] rounded-2xl text-sm text-[#1d1d1f] dark:text-[#f5f5f7] placeholder:text-[#86868b] focus:bg-white dark:focus:bg-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all';
+  'w-full px-4 py-3.5 bg-[#f5f5f7] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.12] rounded-2xl text-base sm:text-sm text-[#1d1d1f] dark:text-[#f5f5f7] placeholder:text-[#86868b] focus:bg-white dark:focus:bg-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all';
 
 export function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();

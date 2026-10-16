@@ -418,7 +418,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* Sticky Mobile Bottom Add-to-Bag Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden bg-white/85 dark:bg-[#1d1d1f]/85 apple-glass border-t border-black/[0.06] dark:border-white/[0.08] px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
+      <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden bg-white/90 dark:bg-[#1d1d1f]/90 apple-glass border-t border-black/[0.06] dark:border-white/[0.08] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 shadow-2xl">
         <div className="min-w-0">
           <p className="text-xs font-medium text-[#6e6e73] dark:text-[#86868b] truncate">
             {selectedSize
@@ -434,7 +434,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           type="button"
           onClick={handleAddToCart}
           disabled={currentStock <= 0}
-          className={`px-6 py-3 rounded-full font-semibold text-sm tracking-tight flex items-center gap-2 shrink-0 transition-all shadow-md disabled:opacity-50 ${
+          className={`px-6 py-3 rounded-full font-semibold text-sm tracking-tight flex items-center justify-center gap-2 shrink-0 transition-all shadow-md min-h-[44px] disabled:opacity-50 ${
             isAdded
               ? 'bg-emerald-600 text-white'
               : 'bg-[#1d1d1f] dark:bg-amber-500 text-white dark:text-zinc-950'

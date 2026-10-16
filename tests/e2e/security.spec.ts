@@ -1,4 +1,3 @@
-
 import { test, expect } from "@playwright/test";
 
 test.describe("Security Boundaries", () => {
@@ -6,26 +5,26 @@ test.describe("Security Boundaries", () => {
     await page.goto("/shop");
     await page.waitForSelector("a[href^=\"/product/\"]");
     await page.locator("a[href^=\"/product/\"]").first().click();
-    
-    const addToCartBtn = page.getByRole("button", { name: /Add to Cart/i });
-    await expect(addToCartBtn).toBeVisible();
+    await expect(page).toHaveURL(/\/product\//);
 
     const sizeSelector = page.getByTestId("size-selector");
     if (await sizeSelector.count() > 0) {
-      const sizeButtons = sizeSelector.locator("button:not([disabled])");
-      await sizeButtons.first().waitFor({ state: "visible", timeout: 2000 }).catch(() => {});
-      if (await sizeButtons.count() > 0) {
-        await sizeButtons.first().click();
-      }
+      const sizeBtn = page.locator('[data-testid="size-btn"]:not([disabled])').first();
+      await sizeBtn.waitFor({ state: "visible", timeout: 5000 });
+      await sizeBtn.click();
     }
-    
+
+    const addToCartBtn = page.getByRole("button", { name: /Add to (Bag|Cart)/i }).first();
+    await expect(addToCartBtn).toBeVisible();
     await addToCartBtn.click();
-    await expect(page.getByRole("link", { name: /Shopping cart/i })).toContainText(/([1-9])/);
-    
+
+    // Confirm item is in cart
+    await expect(page.getByRole("dialog", { name: /Shopping cart/i })).toBeVisible();
+
     await page.goto("/cart");
-    const checkoutBtn = page.getByRole("link", { name: /Checkout/i });
+    const checkoutBtn = page.getByRole("link", { name: /Check\s?out/i });
     await expect(checkoutBtn).toBeVisible();
-    
+
     await page.evaluate(() => {
       const cartStr = localStorage.getItem("proedge-cart");
       if (cartStr) {
@@ -36,18 +35,17 @@ test.describe("Security Boundaries", () => {
         }
       }
     });
-    
+
     await page.reload();
     await page.goto("/checkout");
-    
+
     await page.getByRole("textbox", { name: /Full Name/i }).fill("Hacker");
     await page.getByRole("textbox", { name: /Phone/i }).first().fill("0771234567");
     await page.getByRole("textbox", { name: /Address/i }).first().fill("123 Hack Street");
-    
+
     const placeOrderBtn = page.getByRole("button", { name: /Place Order/i });
     await placeOrderBtn.click();
-    
+
     await page.waitForTimeout(2000);
   });
 });
-

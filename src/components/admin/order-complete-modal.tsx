@@ -654,7 +654,7 @@ export function OrderCompleteModal({
           <button
             type="button"
             onClick={handleConfirmSale}
-            disabled={isPending || loadingItems || selectedItems.length === 0}
+            disabled={isPending || loadingItems || selectedItems.length === 0 || hasInsufficientStock}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50 shadow-xs"
           >
             {isPending ? (

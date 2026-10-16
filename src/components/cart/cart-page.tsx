@@ -219,7 +219,7 @@ export function CartPage() {
                 href="/checkout"
                 className="w-full py-4 bg-[#1d1d1f] dark:bg-amber-500 text-white dark:text-zinc-950 font-semibold text-[15px] tracking-tight rounded-full hover:bg-amber-500 dark:hover:bg-amber-400 hover:text-zinc-950 transition-all flex items-center justify-center gap-2 soft-shadow"
               >
-                <span>Check Out</span>
+                <span>Checkout</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
