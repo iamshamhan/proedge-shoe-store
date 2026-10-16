@@ -213,24 +213,24 @@ export function ShopContent({
           handleSelectCategory('all');
           onSelectAfter?.();
         }}
-        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-between ${
+        className={`w-full text-left px-3.5 py-2 rounded-full text-xs font-semibold tracking-tight transition-all flex items-center justify-between ${
           selectedCategory === 'all'
-            ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-black shadow-sm'
-            : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] shadow-xs'
+            : 'text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
         }`}
       >
         <span className="flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-amber-500 dark:text-zinc-950" />
+          <Layers className="w-3.5 h-3.5 text-amber-500" />
           <span>All Products</span>
         </span>
         {selectedCategory === 'all' && (
-          <Check className="w-3.5 h-3.5 text-amber-400 dark:text-zinc-950" />
+          <Check className="w-3.5 h-3.5 text-amber-400 dark:text-amber-600" />
         )}
       </button>
 
       {/* Parent Sports & Subcategories */}
       <div className="pt-2 space-y-1">
-        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 px-2 block mb-1">
+        <span className="text-[11px] font-semibold text-[#86868b] px-2 block mb-1">
           Sports &amp; Departments
         </span>
 
@@ -244,9 +244,9 @@ export function ShopContent({
           return (
             <div
               key={sport.id}
-              className={`rounded-xl border transition-all ${
+              className={`rounded-2xl border transition-all ${
                 isSportSelected || hasSelectedChild
-                  ? 'border-amber-400/40 bg-amber-50/20 dark:border-amber-500/30 dark:bg-amber-950/10'
+                  ? 'border-black/[0.08] bg-[#f5f5f7]/70 dark:border-white/[0.1] dark:bg-white/[0.03]'
                   : 'border-transparent'
               }`}
             >
@@ -258,15 +258,15 @@ export function ShopContent({
                     handleSelectCategory(sport.slug);
                     onSelectAfter?.();
                   }}
-                  className={`flex-1 text-left px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-between rounded-lg ${
+                  className={`flex-1 text-left px-3.5 py-2 text-xs font-semibold tracking-tight transition-colors flex items-center justify-between rounded-full ${
                     isSportSelected
-                      ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-black'
-                      : 'text-zinc-800 dark:text-zinc-200 hover:text-amber-600 dark:hover:text-amber-400'
+                      ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f]'
+                      : 'text-[#1d1d1f] dark:text-[#f5f5f7] hover:text-amber-600 dark:hover:text-amber-400'
                   }`}
                 >
                   <span>{sport.name}</span>
                   {isSportSelected && (
-                    <Check className="w-3.5 h-3.5 text-amber-400 dark:text-zinc-950" />
+                    <Check className="w-3.5 h-3.5 text-amber-400 dark:text-amber-600" />
                   )}
                 </button>
 
@@ -277,7 +277,7 @@ export function ShopContent({
                     onClick={() => toggleSportAccordion(sport.slug)}
                     aria-label={`Toggle ${sport.name} subcategories`}
                     aria-expanded={isExpanded}
-                    className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                    className="p-2 text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                   >
                     <ChevronDown
                       className={`w-3.5 h-3.5 transition-transform duration-200 ${
@@ -290,7 +290,7 @@ export function ShopContent({
 
               {/* Child Subcategories List */}
               {hasChildren && isExpanded && (
-                <div className="pl-3 pr-1 py-1 space-y-0.5 border-l-2 border-amber-400/40 dark:border-amber-500/30 ml-3 my-1">
+                <div className="pl-3 pr-1.5 py-1 space-y-0.5 border-l border-black/[0.1] dark:border-white/[0.12] ml-3.5 my-1">
                   {sport.children!.map((child) => {
                     const isChildSelected = selectedCategory === child.slug;
 
@@ -302,10 +302,10 @@ export function ShopContent({
                           handleSelectCategory(child.slug);
                           onSelectAfter?.();
                         }}
-                        className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all flex items-center justify-between ${
+                        className={`w-full text-left px-3 py-1.5 rounded-full text-xs font-medium tracking-tight transition-all flex items-center justify-between ${
                           isChildSelected
-                            ? 'bg-amber-500 text-zinc-950 font-black'
-                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white'
+                            ? 'bg-amber-500 text-zinc-950 font-semibold'
+                            : 'text-[#6e6e73] dark:text-[#86868b] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:text-[#1d1d1f] dark:hover:text-white'
                         }`}
                       >
                         <span className="truncate">{child.name}</span>
@@ -321,8 +321,8 @@ export function ShopContent({
       </div>
 
       {/* Legacy Fallback Categories for Storefront Continuity */}
-      <div className="pt-4 mt-2 border-t border-zinc-100 dark:border-zinc-800/80">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 px-2 block mb-1">
+      <div className="pt-4 mt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
+        <span className="text-[11px] font-semibold text-[#86868b] px-2 block mb-1">
           Classic Shoe Lines
         </span>
         <div className="space-y-0.5">
@@ -341,14 +341,14 @@ export function ShopContent({
                   handleSelectCategory(legacy.slug);
                   onSelectAfter?.();
                 }}
-                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center justify-between ${
+                className={`w-full text-left px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center justify-between ${
                   isSelected
-                    ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold'
-                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] font-semibold'
+                    : 'text-[#6e6e73] dark:text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                 }`}
               >
                 <span>{legacy.label}</span>
-                {isSelected && <Check className="w-3 h-3 text-amber-400 dark:text-zinc-950" />}
+                {isSelected && <Check className="w-3 h-3 text-amber-400 dark:text-amber-600" />}
               </button>
             );
           })}
@@ -358,17 +358,17 @@ export function ShopContent({
   );
 
   return (
-    <div className="py-10 sm:py-16 bg-zinc-50 dark:bg-zinc-950 min-h-screen transition-colors duration-200">
+    <div className="py-10 sm:py-16 bg-[#f5f5f7] dark:bg-[#000000] min-h-screen transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Title Section */}
-        <div className="mb-8 border-b border-zinc-200 dark:border-zinc-800 pb-8">
-          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest block mb-1">
+        <div className="mb-8 border-b border-black/[0.06] dark:border-white/[0.08] pb-8">
+          <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 block mb-1.5">
             PROEDGE Catalog
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-zinc-900 dark:text-white tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] tracking-[-0.025em]">
             {pageTitle}
           </h1>
-          <p className="mt-3 text-zinc-500 dark:text-zinc-400 text-sm sm:text-base max-w-2xl leading-relaxed">
+          <p className="mt-3 text-[#6e6e73] dark:text-[#86868b] text-sm sm:text-base max-w-2xl leading-relaxed">
             {pageSubtitle}
           </p>
         </div>
@@ -377,7 +377,7 @@ export function ShopContent({
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8">
           {/* Search Input Bar */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-3 w-4 h-4 text-zinc-400" />
+            <Search className="absolute left-3.5 top-3 w-4 h-4 text-[#86868b]" />
             <label htmlFor="shop-search" className="sr-only">
               Filter by name or style
             </label>
@@ -387,14 +387,14 @@ export function ShopContent({
               placeholder="Search gear, boots, balls, bags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-full text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-amber-500 transition-all"
+              className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-[#1d1d1f] border border-black/[0.08] dark:border-white/[0.12] rounded-full text-sm text-[#1d1d1f] dark:text-[#f5f5f7] placeholder:text-[#86868b] focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all soft-shadow"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
                 aria-label="Clear search"
-                className="absolute right-3 top-3 text-zinc-400 hover:text-zinc-700 dark:hover:text-white"
+                className="absolute right-3 top-3 text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -406,7 +406,7 @@ export function ShopContent({
             <button
               type="button"
               onClick={() => setIsMobileFilterOpen(true)}
-              className="lg:hidden px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-full text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="lg:hidden px-4 py-2.5 bg-white dark:bg-[#1d1d1f] border border-black/[0.08] dark:border-white/[0.12] rounded-full text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors soft-shadow"
             >
               <SlidersHorizontal className="w-4 h-4 text-amber-500" />
               <span>Filters</span>
@@ -417,14 +417,14 @@ export function ShopContent({
 
             {/* Sort Selector */}
             <div className="relative flex items-center">
-              <span className="hidden sm:inline-block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mr-2">
+              <span className="hidden sm:inline-block text-xs font-medium text-[#6e6e73] dark:text-[#86868b] mr-2">
                 Sort:
               </span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
                 aria-label="Sort products"
-                className="px-3.5 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-full text-xs font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-amber-500 cursor-pointer"
+                className="px-4 py-2.5 bg-white dark:bg-[#1d1d1f] border border-black/[0.08] dark:border-white/[0.12] rounded-full text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer soft-shadow"
               >
                 {SORT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -439,9 +439,9 @@ export function ShopContent({
         {/* Main Catalog Layout (Sidebar + Product Grid) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Desktop Filter Sidebar */}
-          <div className="hidden lg:block space-y-6 bg-white dark:bg-zinc-900 p-6 rounded-[32px] border border-zinc-200 dark:border-zinc-800 soft-shadow h-fit transition-colors sticky top-24">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+          <div className="hidden lg:block space-y-6 bg-white dark:bg-[#1d1d1f] p-6 rounded-[28px] border border-black/[0.05] dark:border-white/[0.08] soft-shadow h-fit transition-colors sticky top-24">
+            <div className="flex items-center justify-between pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+              <h3 className="text-sm font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7] flex items-center gap-2">
                 <Filter className="w-4 h-4 text-amber-500" />
                 <span>Filter Catalog</span>
               </h3>
@@ -449,7 +449,7 @@ export function ShopContent({
                 <button
                   type="button"
                   onClick={handleClearFilters}
-                  className="text-xs text-amber-600 dark:text-amber-400 font-bold hover:underline"
+                  className="text-xs text-amber-600 dark:text-amber-400 font-semibold hover:underline"
                 >
                   Reset All
                 </button>
@@ -458,15 +458,15 @@ export function ShopContent({
 
             {/* Category Filter Tree */}
             <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+              <h4 className="text-xs font-semibold text-[#6e6e73] dark:text-[#86868b]">
                 Department
               </h4>
               {renderCategoryTree()}
             </div>
 
             {/* Price Range Filter */}
-            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
-              <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+            <div className="pt-4 border-t border-black/[0.06] dark:border-white/[0.08] space-y-2">
+              <h4 className="text-xs font-semibold text-[#6e6e73] dark:text-[#86868b]">
                 Price Range (LKR)
               </h4>
               <div className="space-y-1">
@@ -477,14 +477,14 @@ export function ShopContent({
                       key={range.key}
                       type="button"
                       onClick={() => setPriceRange(range.key)}
-                      className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center justify-between ${
+                      className={`w-full text-left px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center justify-between ${
                         active
-                          ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold'
-                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white'
+                          ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] font-semibold'
+                          : 'text-[#6e6e73] dark:text-[#86868b] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:text-[#1d1d1f] dark:hover:text-white'
                       }`}
                     >
                       <span>{range.label}</span>
-                      {active && <Check className="w-3.5 h-3.5 text-amber-400 dark:text-zinc-950" />}
+                      {active && <Check className="w-3.5 h-3.5 text-amber-400 dark:text-amber-600" />}
                     </button>
                   );
                 })}
@@ -492,31 +492,31 @@ export function ShopContent({
             </div>
 
             {/* Availability & Deals Toggles */}
-            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
-              <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+            <div className="pt-4 border-t border-black/[0.06] dark:border-white/[0.08] space-y-3">
+              <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">
                 <input
                   type="checkbox"
                   checked={inStockOnly}
                   onChange={(e) => setInStockOnly(e.target.checked)}
-                  className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 focus:ring-zinc-900 dark:focus:ring-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950"
+                  className="w-4 h-4 rounded text-[#1d1d1f] dark:text-amber-500 focus:ring-amber-500 border-black/20 dark:border-white/20"
                 />
                 <span>In Stock Only</span>
               </label>
 
-              <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+              <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">
                 <input
                   type="checkbox"
                   checked={onSaleOnly}
                   onChange={(e) => setOnSaleOnly(e.target.checked)}
-                  className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 focus:ring-zinc-900 dark:focus:ring-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950"
+                  className="w-4 h-4 rounded text-[#1d1d1f] dark:text-amber-500 focus:ring-amber-500 border-black/20 dark:border-white/20"
                 />
                 <span>On Sale / Discounted</span>
               </label>
             </div>
 
             {/* Store Information Card */}
-            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 dark:text-zinc-400 space-y-1">
-              <p className="font-bold text-zinc-800 dark:text-zinc-200">All prices in LKR</p>
+            <div className="pt-4 border-t border-black/[0.06] dark:border-white/[0.08] text-xs text-[#6e6e73] dark:text-[#86868b] space-y-1">
+              <p className="font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">All prices in LKR</p>
               <p>Islandwide courier shipping available across Sri Lanka.</p>
             </div>
           </div>
@@ -524,13 +524,13 @@ export function ShopContent({
           {/* Product Grid Area */}
           <div className="lg:col-span-3 space-y-4">
             {/* Active filter pills & count bar */}
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500 dark:text-zinc-400 font-medium px-1">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#6e6e73] dark:text-[#86868b] font-medium px-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-bold text-zinc-700 dark:text-zinc-300">
+                <span className="font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
                   Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
                 </span>
                 {selectedCategory !== 'all' && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 rounded-full font-bold uppercase text-[10px]">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 text-amber-800 dark:text-amber-300 rounded-full font-semibold text-xs">
                     <span>{selectedCategoryLabel}</span>
                     <button
                       type="button"
@@ -543,7 +543,7 @@ export function ShopContent({
                   </span>
                 )}
                 {priceRange !== 'all' && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-full font-bold uppercase text-[10px]">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/[0.06] dark:bg-white/[0.08] text-[#1d1d1f] dark:text-[#f5f5f7] rounded-full font-semibold text-xs">
                     <span>{PRICE_RANGE_OPTIONS.find((r) => r.key === priceRange)?.label}</span>
                     <button
                       type="button"
@@ -556,7 +556,7 @@ export function ShopContent({
                   </span>
                 )}
                 {onSaleOnly && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 rounded-full font-bold uppercase text-[10px]">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/15 text-rose-700 dark:text-rose-300 rounded-full font-semibold text-xs">
                     <span>On Sale</span>
                     <button
                       type="button"
@@ -569,7 +569,7 @@ export function ShopContent({
                   </span>
                 )}
                 {inStockOnly && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 rounded-full font-bold uppercase text-[10px]">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 rounded-full font-semibold text-xs">
                     <span>In Stock</span>
                     <button
                       type="button"
@@ -582,7 +582,7 @@ export function ShopContent({
                   </span>
                 )}
                 {searchQuery && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-full font-bold text-[10px]">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/[0.06] dark:bg-white/[0.08] text-[#1d1d1f] dark:text-[#f5f5f7] rounded-full font-semibold text-xs">
                     <span>&ldquo;{searchQuery}&rdquo;</span>
                     <button
                       type="button"
@@ -600,7 +600,7 @@ export function ShopContent({
                 <button
                   type="button"
                   onClick={handleClearFilters}
-                  className="text-amber-600 dark:text-amber-400 font-bold hover:underline"
+                  className="text-amber-600 dark:text-amber-400 font-semibold hover:underline"
                 >
                   Clear All
                 </button>
@@ -617,15 +617,15 @@ export function ShopContent({
         <div className="fixed inset-0 z-50 lg:hidden flex">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setIsMobileFilterOpen(false)}
             aria-hidden="true"
           />
 
           {/* Modal Panel */}
-          <div className="relative w-full max-w-xs sm:max-w-sm bg-white dark:bg-zinc-900 h-full shadow-2xl flex flex-col z-10 p-6 overflow-y-auto transition-colors">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+          <div className="relative w-full max-w-xs sm:max-w-sm bg-white/95 dark:bg-[#1d1d1f]/95 apple-glass h-full shadow-2xl flex flex-col z-10 p-6 overflow-y-auto transition-colors">
+            <div className="flex items-center justify-between pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+              <h3 className="text-sm font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] flex items-center gap-2">
                 <Filter className="w-4 h-4 text-amber-500" />
                 <span>Filter Products</span>
               </h3>
@@ -633,22 +633,22 @@ export function ShopContent({
                 type="button"
                 onClick={() => setIsMobileFilterOpen(false)}
                 aria-label="Close filters"
-                className="p-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                className="p-2 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[#6e6e73] hover:text-[#1d1d1f] dark:hover:text-white"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="py-6 space-y-6 flex-1 overflow-y-auto">
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                <h4 className="text-xs font-semibold text-[#6e6e73] dark:text-[#86868b]">
                   Select Department
                 </h4>
                 {renderCategoryTree(() => setIsMobileFilterOpen(false))}
               </div>
 
-              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
-                <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+              <div className="pt-4 border-t border-black/[0.06] dark:border-white/[0.08] space-y-2">
+                <h4 className="text-xs font-semibold text-[#6e6e73] dark:text-[#86868b]">
                   Price Range (LKR)
                 </h4>
                 <div className="space-y-1">
@@ -659,55 +659,55 @@ export function ShopContent({
                         key={range.key}
                         type="button"
                         onClick={() => setPriceRange(range.key)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-between ${
+                        className={`w-full text-left px-3.5 py-2 rounded-full text-xs font-medium transition-colors flex items-center justify-between ${
                           active
-                            ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold'
-                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                            ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] font-semibold'
+                            : 'text-[#6e6e73] dark:text-[#86868b] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                         }`}
                       >
                         <span>{range.label}</span>
-                        {active && <Check className="w-3.5 h-3.5 text-amber-400 dark:text-zinc-950" />}
+                        {active && <Check className="w-3.5 h-3.5 text-amber-400 dark:text-amber-600" />}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
-                <label className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200 cursor-pointer">
+              <div className="pt-4 border-t border-black/[0.06] dark:border-white/[0.08] space-y-3">
+                <label className="flex items-center gap-2 text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={inStockOnly}
                     onChange={(e) => setInStockOnly(e.target.checked)}
-                    className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950 focus:ring-zinc-900 dark:focus:ring-amber-500"
+                    className="w-4 h-4 rounded text-[#1d1d1f] dark:text-amber-500 border-black/20 dark:border-white/20 focus:ring-amber-500"
                   />
                   <span>In Stock Only</span>
                 </label>
 
-                <label className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={onSaleOnly}
                     onChange={(e) => setOnSaleOnly(e.target.checked)}
-                    className="w-4 h-4 rounded text-zinc-900 dark:text-amber-500 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-950 focus:ring-zinc-900 dark:focus:ring-amber-500"
+                    className="w-4 h-4 rounded text-[#1d1d1f] dark:text-amber-500 border-black/20 dark:border-white/20 focus:ring-amber-500"
                   />
                   <span>On Sale / Discounted</span>
                 </label>
               </div>
             </div>
 
-            <div className="mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
+            <div className="mt-auto pt-4 border-t border-black/[0.06] dark:border-white/[0.08] flex gap-2">
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="flex-1 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-full text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="flex-1 py-2.5 border border-black/[0.1] dark:border-white/[0.14] rounded-full text-sm font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
               >
                 Reset
               </button>
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(false)}
-                className="flex-1 py-2.5 bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 rounded-full text-sm font-bold hover:bg-amber-600 dark:hover:bg-amber-400 transition-colors soft-shadow"
+                className="flex-1 py-2.5 bg-[#1d1d1f] dark:bg-amber-500 text-white dark:text-zinc-950 rounded-full text-sm font-semibold hover:bg-amber-500 dark:hover:bg-amber-400 transition-colors soft-shadow"
               >
                 Apply
               </button>

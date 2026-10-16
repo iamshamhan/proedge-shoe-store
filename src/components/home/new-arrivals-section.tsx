@@ -9,12 +9,12 @@ export async function NewArrivalsSection() {
   const settings = await getStoreSettings();
 
   return (
-    <section className="py-16 sm:py-24 bg-white dark:bg-zinc-900/40 border-t border-zinc-200 dark:border-zinc-800 transition-colors">
+    <section className="py-16 sm:py-24 bg-white dark:bg-[#0a0a0c] border-t border-black/[0.06] dark:border-white/[0.08] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Fresh Drops"
-          title={settings.newArrivalsTitle || 'New Arrivals'}
-          subtitle={settings.newArrivalsSubtitle || 'Just released designs with improved sole ergonomics and cutting-edge material tech.'}
+          eyebrow="The Latest"
+          title={settings.newArrivalsTitle || 'New Arrivals.'}
+          subtitle={settings.newArrivalsSubtitle || 'Just-released designs with improved sole ergonomics and next-generation material tech.'}
           linkText="View New Drops"
           linkHref="/shop?sort=newest"
         />

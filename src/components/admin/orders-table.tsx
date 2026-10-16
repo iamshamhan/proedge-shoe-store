@@ -205,64 +205,64 @@ export function OrdersTable({ initialOrders }: Props) {
     <div className="space-y-6">
       {/* Overview Stat Cards (2x2 on mobile, 4-col on desktop) */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3.5 sm:p-5 shadow-xs">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+        <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-4 sm:p-5 soft-shadow">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f5f5f7] dark:bg-white/[0.06] text-[#1d1d1f] dark:text-[#f5f5f7]">
               <Package className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white truncate">
+              <p className="text-xl sm:text-2xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7] truncate">
                 {stats.total}
               </p>
-              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 truncate">
+              <p className="text-xs font-medium text-[#6e6e73] dark:text-[#86868b] truncate">
                 Inquiries
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20 p-3.5 sm:p-5 shadow-xs">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
+        <div className="rounded-[24px] border border-amber-300/60 dark:border-amber-800/50 bg-white dark:bg-[#1d1d1f] p-4 sm:p-5 soft-shadow">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
               <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 truncate">
+              <p className="text-xl sm:text-2xl font-semibold tracking-tight text-amber-600 dark:text-amber-400 truncate">
                 {stats.pending}
               </p>
-              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 truncate">
+              <p className="text-xs font-medium text-[#6e6e73] dark:text-[#86868b] truncate">
                 Pending WA
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 p-3.5 sm:p-5 shadow-xs">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+        <div className="rounded-[24px] border border-emerald-300/60 dark:border-emerald-800/50 bg-white dark:bg-[#1d1d1f] p-4 sm:p-5 soft-shadow">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 truncate">
+              <p className="text-xl sm:text-2xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 truncate">
                 {stats.confirmed}
               </p>
-              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 truncate">
+              <p className="text-xs font-medium text-[#6e6e73] dark:text-[#86868b] truncate">
                 Confirmed
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3.5 sm:p-5 shadow-xs">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+        <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-4 sm:p-5 soft-shadow">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f5f5f7] dark:bg-white/[0.06] text-[#86868b]">
               <XCircle className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl sm:text-2xl font-black text-zinc-500 dark:text-zinc-400 truncate">
+              <p className="text-xl sm:text-2xl font-semibold tracking-tight text-[#6e6e73] dark:text-[#86868b] truncate">
                 {stats.cancelled}
               </p>
-              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400 truncate">
+              <p className="text-xs font-medium text-[#86868b] truncate">
                 Cancelled
               </p>
             </div>
@@ -271,26 +271,26 @@ export function OrdersTable({ initialOrders }: Props) {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm space-y-4">
+      <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-4 sm:p-5 soft-shadow space-y-4">
         {/* Status Pills */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-zinc-100 dark:border-zinc-800 pb-3 overflow-x-auto">
+        <div className="flex flex-wrap items-center gap-2 border-b border-black/[0.06] dark:border-white/[0.08] pb-3.5 overflow-x-auto">
           {statusTabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setStatusFilter(tab.id)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-tight transition-colors ${
                 statusFilter === tab.id
-                  ? 'bg-zinc-900 text-white dark:bg-amber-500 dark:text-zinc-950'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                  ? 'bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f]'
+                  : 'bg-[#f5f5f7] dark:bg-white/[0.06] text-[#6e6e73] dark:text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white'
               }`}
             >
               <span>{tab.label}</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
                   statusFilter === tab.id
-                    ? 'bg-white/20 text-white dark:bg-zinc-950/20 dark:text-zinc-950'
-                    : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
+                    ? 'bg-white/20 text-white dark:bg-black/15 dark:text-[#1d1d1f]'
+                    : 'bg-black/[0.06] dark:bg-white/[0.1] text-[#1d1d1f] dark:text-[#f5f5f7]'
                 }`}
               >
                 {tab.count}
@@ -302,13 +302,13 @@ export function OrdersTable({ initialOrders }: Props) {
         {/* Search & Quick Actions Toolbar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#86868b]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by order number, customer name, phone, or city..."
-              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 pl-10 pr-4 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+              className="w-full rounded-full border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] pl-10 pr-4 py-2.5 text-sm text-[#1d1d1f] dark:text-[#f5f5f7] placeholder:text-[#86868b] outline-none focus:bg-white dark:focus:bg-[#1d1d1f] focus:ring-2 focus:ring-amber-500 transition-all"
             />
           </div>
 
@@ -317,7 +317,7 @@ export function OrdersTable({ initialOrders }: Props) {
               type="button"
               onClick={handleExportCsv}
               disabled={filteredOrders.length === 0}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3.5 py-2.5 text-xs font-bold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-40"
+              className="inline-flex items-center justify-center gap-1.5 rounded-full border border-black/[0.08] dark:border-white/[0.12] bg-white dark:bg-[#1d1d1f] px-4 py-2.5 text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors disabled:opacity-40"
               title="Export filtered orders to CSV"
             >
               <Download className="w-3.5 h-3.5" />
@@ -327,7 +327,7 @@ export function OrdersTable({ initialOrders }: Props) {
             <button
               type="button"
               onClick={() => setIsManualModalOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors shadow-xs"
+              className="inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-400 px-4 py-2.5 text-xs font-semibold tracking-tight text-zinc-950 transition-colors soft-shadow"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>New Walk-In Order</span>
@@ -337,9 +337,9 @@ export function OrdersTable({ initialOrders }: Props) {
       </div>
 
       {/* Orders List / Table */}
-      <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
+      <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] soft-shadow overflow-hidden">
         {/* Mobile View: Dedicated Touch Cards (< md) */}
-        <div className="divide-y divide-zinc-100 dark:divide-zinc-800 md:hidden">
+        <div className="divide-y divide-black/[0.06] dark:divide-white/[0.08] md:hidden">
           {filteredOrders.map((order) => {
             const waLink = getWhatsAppLink(order);
 
@@ -350,13 +350,13 @@ export function OrdersTable({ initialOrders }: Props) {
                   <div>
                     <Link
                       href={`/admin/orders/${order.id}`}
-                      className="font-mono text-sm font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1.5"
+                      className="font-mono text-sm font-semibold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1.5"
                     >
                       <span>{order.order_number}</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                      <ExternalLink className="w-3.5 h-3.5 text-[#86868b]" />
                     </Link>
-                    <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 mt-0.5">
-                      <Calendar className="w-3 h-3 text-zinc-400" />
+                    <div className="flex items-center gap-1.5 text-[11px] text-[#86868b] mt-0.5">
+                      <Calendar className="w-3 h-3 text-[#86868b]" />
                       <span>{formatDate(order.created_at)}</span>
                       {order.item_count ? (
                         <>
@@ -375,21 +375,21 @@ export function OrdersTable({ initialOrders }: Props) {
                 </div>
 
                 {/* Customer Details & Amount Box */}
-                <div className="flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-800/50 p-3 border border-zinc-100 dark:border-zinc-800/80">
+                <div className="flex items-center justify-between rounded-2xl bg-[#f5f5f7] dark:bg-white/[0.04] p-3.5 border border-black/[0.05] dark:border-white/[0.08]">
                   <div className="min-w-0 pr-2">
-                    <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
+                    <p className="text-sm font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] truncate">
                       {order.customer_name}
                     </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                    <p className="text-xs text-[#6e6e73] dark:text-[#86868b] truncate">
                       {order.city} · <a href={`tel:${order.phone}`} className="hover:underline">{order.phone}</a>
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-black text-zinc-900 dark:text-white">
+                    <p className="text-sm font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
                       {formatLKR(order.total)}
                     </p>
                     {order.delivery_fee > 0 ? (
-                      <p className="text-[10px] text-zinc-400">
+                      <p className="text-[10px] text-[#86868b]">
                         +{formatLKR(order.delivery_fee)} del.
                       </p>
                     ) : (
@@ -407,7 +407,7 @@ export function OrdersTable({ initialOrders }: Props) {
                       type="button"
                       onClick={() => setSelectedForCompletion(order)}
                       title="Confirm WhatsApp Sale"
-                      className="flex-1 min-w-[100px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 py-2 px-3 text-xs font-black uppercase tracking-wider text-white shadow-xs transition-colors"
+                      className="flex-1 min-w-[100px] inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 py-2 px-3.5 text-xs font-semibold text-white shadow-xs transition-colors"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
                       <span>Done</span>
@@ -419,7 +419,7 @@ export function OrdersTable({ initialOrders }: Props) {
                       type="button"
                       onClick={() => setSelectedForCompletion(order)}
                       title="Adjust items"
-                      className="flex-1 min-w-[80px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 py-2 px-3 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-colors"
+                      className="flex-1 min-w-[80px] inline-flex items-center justify-center gap-1.5 rounded-full border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 py-2 px-3.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-colors"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Adjust</span>
@@ -431,7 +431,7 @@ export function OrdersTable({ initialOrders }: Props) {
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Message customer on WhatsApp"
-                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 py-2 px-3 text-xs font-bold text-white transition-colors shadow-xs"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 py-2 px-3.5 text-xs font-semibold text-white transition-colors shadow-xs"
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
                     <span>WhatsApp</span>
@@ -449,7 +449,7 @@ export function OrdersTable({ initialOrders }: Props) {
                   <Link
                     href={`/admin/orders/${order.id}`}
                     title="View order details"
-                    className="inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-200 dark:border-zinc-700 py-2 px-2.5 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                    className="inline-flex items-center justify-center gap-1 rounded-full border border-black/[0.08] dark:border-white/[0.12] py-2 px-3 text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </Link>
@@ -466,8 +466,8 @@ export function OrdersTable({ initialOrders }: Props) {
 
         {/* Desktop View: Full Data Table (visible on md+) */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-400">
-            <thead className="bg-zinc-50 dark:bg-zinc-900/80 text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100 border-b border-zinc-200 dark:border-zinc-800">
+          <table className="w-full text-left text-sm text-[#6e6e73] dark:text-[#86868b]">
+            <thead className="bg-[#f5f5f7] dark:bg-white/[0.03] text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] border-b border-black/[0.06] dark:border-white/[0.08]">
               <tr>
                 <th className="px-6 py-4">Order #</th>
                 <th className="px-6 py-4">Date</th>
@@ -477,17 +477,17 @@ export function OrdersTable({ initialOrders }: Props) {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
               {filteredOrders.map((order) => {
                 const waLink = getWhatsAppLink(order);
 
                 return (
                   <tr
                     key={order.id}
-                    className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+                    className="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
                   >
                     {/* Order # */}
-                    <td className="px-6 py-4 font-bold text-zinc-900 dark:text-white">
+                    <td className="px-6 py-4 font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
                       <Link
                         href={`/admin/orders/${order.id}`}
                         className="font-mono text-sm text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1.5"
@@ -495,7 +495,7 @@ export function OrdersTable({ initialOrders }: Props) {
                         <span>{order.order_number}</span>
                       </Link>
                       {order.item_count ? (
-                        <p className="text-[11px] font-normal text-zinc-400">
+                        <p className="text-[11px] font-normal text-[#86868b]">
                           {order.item_count} {order.item_count === 1 ? 'item' : 'items'}
                         </p>
                       ) : null}
@@ -503,8 +503,8 @@ export function OrdersTable({ initialOrders }: Props) {
 
                     {/* Date */}
                     <td className="px-6 py-4 text-xs whitespace-nowrap">
-                      <div className="flex items-center gap-1.5 text-zinc-500">
-                        <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                      <div className="flex items-center gap-1.5 text-[#6e6e73] dark:text-[#86868b]">
+                        <Calendar className="w-3.5 h-3.5 text-[#86868b]" />
                         <span>{formatDate(order.created_at)}</span>
                       </div>
                     </td>
@@ -512,20 +512,20 @@ export function OrdersTable({ initialOrders }: Props) {
                     {/* Customer Info */}
                     <td className="px-6 py-4">
                       <div>
-                        <p className="font-bold text-zinc-900 dark:text-white">
+                        <p className="font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
                           {order.customer_name}
                         </p>
-                        <p className="text-xs text-zinc-400">
+                        <p className="text-xs text-[#86868b]">
                           {order.city} · {order.phone}
                         </p>
                       </div>
                     </td>
 
                     {/* Total Amount */}
-                    <td className="px-6 py-4 font-bold text-zinc-900 dark:text-white whitespace-nowrap">
+                    <td className="px-6 py-4 font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] whitespace-nowrap">
                       <p>{formatLKR(order.total)}</p>
                       {order.delivery_fee > 0 ? (
-                        <p className="text-[10px] font-normal text-zinc-400">
+                        <p className="text-[10px] font-normal text-[#86868b]">
                           Incl. {formatLKR(order.delivery_fee)} delivery
                         </p>
                       ) : (
@@ -553,7 +553,7 @@ export function OrdersTable({ initialOrders }: Props) {
                               type="button"
                               onClick={() => setSelectedForCompletion(order)}
                               title="Confirm WhatsApp Sale (Pick purchased items & deduct stock)"
-                              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white transition-colors shadow-xs"
+                              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 px-3.5 py-1.5 text-xs font-semibold tracking-tight text-white transition-colors shadow-xs"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
                               <span>Done</span>
@@ -575,7 +575,7 @@ export function OrdersTable({ initialOrders }: Props) {
                               type="button"
                               onClick={() => setSelectedForCompletion(order)}
                               title="Adjust items for this confirmed sale"
-                              className="inline-flex items-center gap-1 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/30 px-2.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-colors"
+                              className="inline-flex items-center gap-1 rounded-full border border-emerald-300 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-colors"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               <span className="hidden sm:inline">Adjust</span>
@@ -596,7 +596,7 @@ export function OrdersTable({ initialOrders }: Props) {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Message customer on WhatsApp"
-                          className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-2.5 py-1.5 text-xs font-bold text-white transition-colors shadow-xs"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors shadow-xs"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
                           <span className="hidden md:inline">WhatsApp</span>
@@ -606,7 +606,7 @@ export function OrdersTable({ initialOrders }: Props) {
                         <Link
                           href={`/admin/orders/${order.id}`}
                           title="View order details"
-                          className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 dark:border-zinc-800 px-2.5 py-1.5 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                          className="inline-flex items-center gap-1 rounded-full border border-black/[0.08] dark:border-white/[0.12] px-3 py-1.5 text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           <span className="hidden md:inline">Details</span>

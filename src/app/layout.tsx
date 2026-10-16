@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter, Geist_Mono } from 'next/font/google';
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -17,9 +17,10 @@ import { ThemeProvider } from '@/context/theme-context';
 import { getStoreSettings } from '@/lib/settings';
 import { getCategoriesHierarchy } from '@/lib/supabase/products';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const interSans = Inter({
+  variable: '--font-apple-sans',
   subsets: ['latin'],
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
@@ -79,7 +80,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`light ${geistSans.variable} ${geistMono.variable} h-full antialiased selection:bg-amber-500 selection:text-zinc-950`}
+      className={`light ${interSans.variable} ${geistMono.variable} h-full antialiased selection:bg-amber-500/20 selection:text-amber-600 dark:selection:bg-amber-400/25 dark:selection:text-amber-300`}
       suppressHydrationWarning
     >
       <head>
@@ -89,7 +90,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-200">
+      <body className="min-h-full flex flex-col bg-[#f5f5f7] text-[#1d1d1f] dark:bg-[#000000] dark:text-[#f5f5f7] transition-colors duration-300">
         <ThemeProvider>
           <SettingsProvider settings={settings}>
             <CartProvider>

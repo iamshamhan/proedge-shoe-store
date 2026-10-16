@@ -66,12 +66,12 @@ export default async function CategoriesAdminPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 dark:bg-zinc-800 text-amber-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#1d1d1f] dark:bg-white/[0.08] text-amber-500 soft-shadow">
             <FolderTree className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-zinc-900 dark:text-white">Categories</h1>
-            <p className="text-sm text-zinc-400 dark:text-zinc-500">
+            <h1 className="text-2xl font-semibold tracking-[-0.025em] text-[#1d1d1f] dark:text-[#f5f5f7]">Categories</h1>
+            <p className="text-sm text-[#6e6e73] dark:text-[#86868b]">
               {mainCategories.length} main {mainCategories.length === 1 ? 'category' : 'categories'} ·{' '}
               {categories.length - mainCategories.length} subcategories
             </p>
@@ -79,20 +79,20 @@ export default async function CategoriesAdminPage() {
         </div>
         <Link
           href="/admin/categories/new"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-500 px-5 py-2.5 text-xs font-semibold tracking-tight text-zinc-950 transition-colors hover:bg-amber-400 soft-shadow"
         >
           <Plus className="h-4 w-4" />
           New Main Category
         </Link>
       </div>
 
-      <div className="flex gap-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="flex gap-3 rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-4 sm:p-5 text-sm text-[#6e6e73] dark:text-[#86868b] soft-shadow">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
         <ul className="space-y-1 leading-relaxed">
           <li>
-            <strong className="text-zinc-900 dark:text-zinc-200">Main categories</strong> (e.g. Football) appear as the
+            <strong className="text-[#1d1d1f] dark:text-[#f5f5f7]">Main categories</strong> (e.g. Football) appear as the
             boxes on the homepage and in the menu. Products are filed under a{' '}
-            <strong className="text-zinc-900 dark:text-zinc-200">subcategory</strong> (e.g. Football Boots).
+            <strong className="text-[#1d1d1f] dark:text-[#f5f5f7]">subcategory</strong> (e.g. Football Boots).
           </li>
           <li>
             Use the arrows to change the order shown on the website. A category can only be deleted when it has no
@@ -102,7 +102,7 @@ export default async function CategoriesAdminPage() {
       </div>
 
       {mainCategories.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 p-10 text-center text-sm text-zinc-500">
+        <div className="rounded-[24px] border border-dashed border-black/15 dark:border-white/15 p-10 text-center text-sm text-[#6e6e73]">
           No categories yet. Create your first main category to get started.
         </div>
       ) : (
@@ -116,26 +116,26 @@ export default async function CategoriesAdminPage() {
             return (
               <section
                 key={main.id}
-                className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm"
+                className="overflow-hidden rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] soft-shadow"
               >
                 {/* Main category header */}
-                <div className="flex flex-col gap-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 border-b border-black/[0.05] dark:border-white/[0.08] bg-[#f5f5f7]/70 dark:bg-white/[0.03] p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex min-w-0 items-center gap-3">
                     {main.image_url ? (
-                      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
+                      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-zinc-100">
                         <Image src={main.image_url} alt={main.name} fill sizes="44px" className="object-cover" unoptimized />
                       </div>
                     ) : (
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-[10px] text-zinc-400 dark:bg-zinc-800">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] text-[10px] text-[#86868b] dark:bg-white/[0.06]">
                         No image
                       </div>
                     )}
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="truncate text-base font-black text-zinc-900 dark:text-white">{main.name}</h2>
+                        <h2 className="truncate text-base font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">{main.name}</h2>
                         <ProductCount count={totalProducts} />
                       </div>
-                      <p className="truncate text-xs text-zinc-400">
+                      <p className="truncate text-xs text-[#86868b]">
                         /{main.slug} · {children.length} {children.length === 1 ? 'subcategory' : 'subcategories'}
                       </p>
                     </div>
@@ -145,21 +145,21 @@ export default async function CategoriesAdminPage() {
                     <Link
                       href={`/shop?category=${main.slug}`}
                       target="_blank"
-                      className="inline-flex items-center gap-1 text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-[#6e6e73] hover:text-[#1d1d1f] dark:hover:text-white"
                     >
                       <ExternalLink className="h-3 w-3" />
                       View
                     </Link>
                     <Link
                       href={`/admin/categories/new?parent=${main.id}`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 dark:border-zinc-700 px-2.5 py-1.5 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      className="inline-flex items-center gap-1 rounded-full border border-black/[0.08] dark:border-white/[0.12] bg-white dark:bg-[#1d1d1f] px-3 py-1.5 text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.04] dark:hover:bg-white/[0.08]"
                     >
                       <Plus className="h-3 w-3" />
                       Subcategory
                     </Link>
                     <Link
                       href={`/admin/categories/${main.id}`}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
                     >
                       <Edit2 className="h-3 w-3" />
                       Edit

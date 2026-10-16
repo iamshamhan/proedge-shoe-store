@@ -234,28 +234,28 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {/* Brand & Stock Status */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
+          <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
             {product.brand} • {product.categoryName || product.category}
           </span>
 
           {/* Stock Badge */}
           {currentStock <= 0 ? (
-            <span className="px-2.5 py-1 text-xs font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 rounded-md">
+            <span className="px-3 py-1 text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full">
               Out of Stock
             </span>
           ) : currentStock <= 3 ? (
-            <span className="px-2.5 py-1 text-xs font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 rounded-md">
+            <span className="px-3 py-1 text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-400 rounded-full">
               Only {currentStock} Left
             </span>
           ) : (
-            <span className="px-2.5 py-1 text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 rounded-md">
+            <span className="px-3 py-1 text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 rounded-full">
               In Stock
             </span>
           )}
         </div>
 
         <div className="flex items-start justify-between gap-3">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-900 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-[#1d1d1f] dark:text-[#f5f5f7]">
             {product.name}
           </h1>
 
@@ -270,7 +270,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
               className={`p-2.5 rounded-full border transition-all ${
                 wishlisted
                   ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-400 text-amber-500'
-                  : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:border-amber-500'
+                  : 'bg-white dark:bg-[#1d1d1f] border-black/[0.08] dark:border-white/[0.12] text-[#6e6e73] dark:text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white'
               }`}
             >
               <Heart className={`w-4 h-4 ${wishlisted ? 'fill-amber-500 text-amber-500' : ''}`} />
@@ -280,7 +280,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
               onClick={handleShare}
               aria-label="Share product"
               title={linkCopied ? 'Link copied!' : 'Share product'}
-              className="p-2.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:border-amber-500 transition-all relative"
+              className="p-2.5 rounded-full bg-white dark:bg-[#1d1d1f] border border-black/[0.08] dark:border-white/[0.12] text-[#6e6e73] dark:text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white transition-all relative"
             >
               {linkCopied ? (
                 <Check className="w-4 h-4 text-emerald-500" />
@@ -293,24 +293,24 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* Pricing Display */}
-      <div className="p-5 bg-zinc-100/80 dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 flex flex-wrap items-baseline gap-3 soft-shadow">
-        <span className="text-3xl font-black text-zinc-900 dark:text-white">
+      <div className="p-5 bg-white dark:bg-[#1d1d1f] rounded-[28px] border border-black/[0.05] dark:border-white/[0.08] flex flex-wrap items-baseline gap-3 soft-shadow">
+        <span className="text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">
           {formatLKR(product.price)}
         </span>
         {product.compareAtPrice && product.compareAtPrice > product.price && (
-          <span className="text-base text-zinc-400 dark:text-zinc-500 line-through font-medium">
+          <span className="text-base text-[#86868b] line-through font-normal">
             {formatLKR(product.compareAtPrice)}
           </span>
         )}
         {discountPercent > 0 && (
-          <span className="px-2.5 py-0.5 text-xs font-black uppercase bg-amber-500 text-zinc-950 rounded-md">
+          <span className="px-3 py-0.5 text-xs font-semibold bg-amber-500 text-zinc-950 rounded-full">
             Save {discountPercent}%
           </span>
         )}
       </div>
 
       {/* Description */}
-      <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
+      <p className="text-[15px] text-[#6e6e73] dark:text-[#86868b] leading-relaxed">
         {product.description}
       </p>
 
@@ -369,23 +369,23 @@ export function ProductInfo({ product }: ProductInfoProps) {
           type="button"
           onClick={handleAddToCart}
           disabled={currentStock <= 0}
-          className={`w-full py-4 font-bold text-sm rounded-full transition-all flex items-center justify-center gap-2 soft-shadow focus:outline-none focus-visible:ring-2 disabled:opacity-50 min-h-[44px] ${
+          className={`w-full py-4 font-semibold text-[15px] tracking-tight rounded-full transition-all flex items-center justify-center gap-2 soft-shadow focus:outline-none focus-visible:ring-2 disabled:opacity-50 min-h-[48px] ${
             isAdded
               ? 'bg-emerald-600 text-white'
-              : 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500'
+              : 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] hover:bg-amber-500 dark:hover:bg-amber-400 hover:text-zinc-950 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500'
           }`}
         >
           {isAdded ? (
             <>
               <Check className="w-5 h-5 text-white" />
-              <span>Added to Cart!</span>
+              <span>Added to Bag</span>
             </>
           ) : currentStock <= 0 ? (
             <span>Sold Out</span>
           ) : (
             <>
               <ShoppingBag className="w-5 h-5" />
-              <span>Add to Cart</span>
+              <span>Add to Bag</span>
             </>
           )}
         </button>
@@ -394,7 +394,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           type="button"
           onClick={handleBuyNow}
           disabled={currentStock <= 0}
-          className="w-full py-4 bg-amber-500 text-zinc-950 font-bold text-sm rounded-full hover:bg-amber-400 transition-all flex items-center justify-center gap-2 soft-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 disabled:opacity-50 min-h-[44px]"
+          className="w-full py-4 bg-amber-500 text-zinc-950 font-semibold text-[15px] tracking-tight rounded-full hover:bg-amber-400 transition-all flex items-center justify-center gap-2 soft-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 disabled:opacity-50 min-h-[48px]"
         >
           <Zap className="w-5 h-5" />
           <span>{currentStock <= 0 ? 'Out of Stock' : 'Buy Now'}</span>
@@ -402,7 +402,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* Trust Badges */}
-      <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 grid grid-cols-2 gap-3 text-xs text-zinc-600 dark:text-zinc-400 font-medium">
+      <div className="pt-4 border-t border-black/[0.06] dark:border-white/[0.08] grid grid-cols-2 gap-3 text-xs text-[#6e6e73] dark:text-[#86868b] font-medium">
         <div className="flex items-center gap-2">
           <Truck className="w-4 h-4 text-amber-500 shrink-0" />
           <span>Islandwide Delivery</span>
@@ -418,14 +418,14 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* Sticky Mobile Bottom Add-to-Bag Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
+      <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden bg-white/85 dark:bg-[#1d1d1f]/85 apple-glass border-t border-black/[0.06] dark:border-white/[0.08] px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
         <div className="min-w-0">
-          <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 truncate">
+          <p className="text-xs font-medium text-[#6e6e73] dark:text-[#86868b] truncate">
             {selectedSize
               ? `${product.sizeSystem && product.sizeSystem !== 'Custom' ? `${product.sizeSystem} ` : ''}${selectedSize} • ${selectedColor}`
               : 'Select size above'}
           </p>
-          <p className="text-base font-black text-zinc-900 dark:text-white">
+          <p className="text-base font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
             {formatLKR(product.price * effectiveQuantity)}
           </p>
         </div>
@@ -434,10 +434,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
           type="button"
           onClick={handleAddToCart}
           disabled={currentStock <= 0}
-          className={`px-6 py-3 rounded-full font-black text-xs uppercase tracking-wider flex items-center gap-2 shrink-0 transition-all shadow-md disabled:opacity-50 ${
+          className={`px-6 py-3 rounded-full font-semibold text-sm tracking-tight flex items-center gap-2 shrink-0 transition-all shadow-md disabled:opacity-50 ${
             isAdded
               ? 'bg-emerald-600 text-white'
-              : 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950'
+              : 'bg-[#1d1d1f] dark:bg-amber-500 text-white dark:text-zinc-950'
           }`}
         >
           {isAdded ? (

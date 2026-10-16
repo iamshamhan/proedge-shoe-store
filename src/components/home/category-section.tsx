@@ -77,19 +77,19 @@ export function CategorySection({ categories }: CategorySectionProps) {
     <section className="py-16 sm:py-24 bg-background transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Engineered For Every Athlete"
-          title="Shop By Sport & Discipline"
-          subtitle="Precision-built performance footwear, apparel, and training equipment across all primary sporting disciplines."
+          eyebrow="Engineered for every athlete"
+          title="Shop by Sport."
+          subtitle="Precision-built performance footwear, apparel, and training equipment across every primary sporting discipline."
           linkText="View Full Catalog"
           linkHref="/shop"
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {displayCategories.map((item) => (
             <Link
               key={item.slug}
               href={item.href}
-              className="group relative h-80 sm:h-96 rounded-[32px] overflow-hidden border border-border/50 soft-shadow hover:-translate-y-1 transition-all duration-300 flex flex-col justify-end p-6 sm:p-8"
+              className="group relative h-80 sm:h-96 rounded-[28px] overflow-hidden border border-black/[0.05] dark:border-white/[0.08] soft-shadow hover:-translate-y-1 transition-all duration-500 flex flex-col justify-end p-6 sm:p-7"
               style={{ position: 'relative' }}
             >
               {/* Background Image */}
@@ -102,27 +102,28 @@ export function CategorySection({ categories }: CategorySectionProps) {
               />
 
               {/* Semantic Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/45 to-transparent transition-opacity" />
-              <div className="absolute inset-0 bg-accent/0 group-hover:bg-accent/10 transition-colors duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent transition-opacity" />
 
               {/* Category Info */}
               <div className="relative z-10 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 uppercase tracking-widest">
+                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-400 tracking-tight">
                   <Trophy className="w-3.5 h-3.5" />
                   <span>{item.subtitle}</span>
                 </div>
 
-                <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                <h3 className="text-2xl sm:text-[26px] font-semibold text-white tracking-[-0.02em] leading-tight">
                   {item.name}
                 </h3>
 
-                <p className="text-sm text-zinc-300 line-clamp-1 sm:line-clamp-none font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-zinc-300 line-clamp-2 font-normal leading-relaxed">
                   {item.tagline}
                 </p>
 
-                <div className="pt-2 flex items-center text-xs font-bold text-white group-hover:text-amber-400 transition-colors">
-                  <span>Explore Department</span>
-                  <ArrowRight className="w-4 h-4 ml-1.5 motion-safe:group-hover:translate-x-1.5 transition-transform" />
+                <div className="pt-2">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 group-hover:bg-white group-hover:text-[#1d1d1f] apple-glass text-xs font-semibold text-white transition-all">
+                    <span>Explore</span>
+                    <ArrowRight className="w-3.5 h-3.5 motion-safe:group-hover:translate-x-0.5 transition-transform" />
+                  </span>
                 </div>
               </div>
             </Link>
