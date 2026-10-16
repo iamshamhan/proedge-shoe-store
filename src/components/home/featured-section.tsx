@@ -9,12 +9,12 @@ export async function FeaturedSection() {
   const settings = await getStoreSettings();
 
   return (
-    <section className="py-16 sm:py-24 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-colors">
+    <section className="py-16 sm:py-24 bg-[#f5f5f7] dark:bg-[#000000] border-t border-black/[0.06] dark:border-white/[0.08] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Top Picks"
-          title={settings.saleSectionTitle || 'Special Offers'}
-          subtitle={settings.saleSectionSubtitle || 'Explore our top discounted sneakers and gear.'}
+          eyebrow="Featured Collection"
+          title={settings.saleSectionTitle || 'Special Offers.'}
+          subtitle={settings.saleSectionSubtitle || 'Explore our top discounted sneakers and performance gear.'}
           linkText="Browse All"
           linkHref="/sale"
         />

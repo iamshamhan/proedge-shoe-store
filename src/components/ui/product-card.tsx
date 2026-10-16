@@ -88,21 +88,21 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const secondaryImage = product.images && product.images.length > 1 ? product.images[1] : null;
 
   return (
-    <div className="group cursor-pointer relative bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:border-zinc-300 dark:hover:border-zinc-700">
-      {/* Badges Overlay */}
-      <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5 items-start">
+    <div className="group cursor-pointer relative bg-white dark:bg-[#1d1d1f] rounded-[28px] border border-black/[0.05] dark:border-white/[0.08] overflow-hidden flex flex-col transition-all duration-500 soft-shadow hover:shadow-[0_16px_40px_-8px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_16px_40px_-8px_rgba(0,0,0,0.75)] hover:-translate-y-1">
+      {/* Badges Overlay (Apple Pill Badges) */}
+      <div className="absolute top-3.5 left-3.5 z-20 flex flex-col gap-1.5 items-start">
         {discountPercent > 0 && (
-          <span className="px-2.5 py-1 text-[11px] font-black tracking-wider uppercase bg-amber-500 text-zinc-950 rounded-md shadow-xs">
-            -{discountPercent}% OFF
+          <span className="px-3 py-1 text-[11px] font-semibold tracking-tight bg-amber-500 text-zinc-950 rounded-full shadow-xs">
+            Save {discountPercent}%
           </span>
         )}
         {product.newArrival && discountPercent === 0 && (
-          <span className="px-2.5 py-1 text-[11px] font-black tracking-wider uppercase bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 rounded-md shadow-xs font-black">
-            NEW
+          <span className="px-3 py-1 text-[11px] font-semibold tracking-tight bg-[#1d1d1f]/90 dark:bg-white/90 apple-glass text-white dark:text-[#1d1d1f] rounded-full shadow-xs">
+            New
           </span>
         )}
         {!isOutOfStock && product.stock <= 5 && (
-          <span className="px-2 py-0.5 text-[10px] font-extrabold tracking-wider uppercase bg-rose-600 text-white rounded-md shadow-xs">
+          <span className="px-2.5 py-0.5 text-[10px] font-semibold tracking-tight bg-rose-600/90 apple-glass text-white rounded-full shadow-xs">
             Only {product.stock} left
           </span>
         )}
@@ -117,11 +117,11 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         }}
         aria-pressed={wishlisted}
         aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-        className="absolute top-3 right-3 z-20 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer rounded-full bg-white/90 dark:bg-zinc-950/80 backdrop-blur-xs text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-zinc-900 shadow-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500"
+        className="absolute top-3 right-3 z-20 p-2.5 min-h-[42px] min-w-[42px] flex items-center justify-center cursor-pointer rounded-full bg-white/85 dark:bg-black/60 apple-glass text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-zinc-900 shadow-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
       >
         <Heart
           className={`w-4 h-4 transition-colors ${
-            wishlisted ? 'fill-amber-500 text-amber-500' : 'text-zinc-600 dark:text-zinc-400'
+            wishlisted ? 'fill-amber-500 text-amber-500' : 'text-zinc-600 dark:text-zinc-300'
           }`}
         />
       </button>
@@ -130,7 +130,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       <Link
         href={`/product/${product.slug}`}
         aria-label={`View ${product.name}`}
-        className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800/60 overflow-hidden block after:absolute after:inset-0 after:z-10"
+        className="relative aspect-square w-full bg-[#f5f5f7] dark:bg-zinc-900/70 overflow-hidden block after:absolute after:inset-0 after:z-10"
         style={{ position: 'relative' }}
       >
         <Image
@@ -139,7 +139,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           fill
           priority={priority}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className={`object-cover object-center motion-safe:group-hover:scale-105 transition-all duration-500 ease-out ${
+          className={`object-cover object-center motion-safe:group-hover:scale-105 transition-all duration-700 ease-out ${
             secondaryImage ? 'group-hover:opacity-0' : ''
           } ${isOutOfStock ? 'opacity-50 saturate-50' : ''}`}
         />
@@ -149,16 +149,16 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             alt={`${product.name} alternate view`}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className={`object-cover object-center opacity-0 group-hover:opacity-100 motion-safe:group-hover:scale-105 transition-all duration-500 ease-out ${
+            className={`object-cover object-center opacity-0 group-hover:opacity-100 motion-safe:group-hover:scale-105 transition-all duration-700 ease-out ${
               isOutOfStock ? 'saturate-50' : ''
             }`}
           />
         )}
 
         {isOutOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/50 z-10">
-            <span className="px-3 py-1.5 flex items-center gap-1.5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white text-xs font-black uppercase tracking-wider rounded-lg shadow-md">
-              <PackageX className="w-4 h-4" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/45 apple-glass z-10">
+            <span className="px-3.5 py-1.5 flex items-center gap-1.5 bg-white/95 dark:bg-[#1d1d1f] text-[#1d1d1f] dark:text-white text-xs font-semibold tracking-tight rounded-full shadow-md">
+              <PackageX className="w-3.5 h-3.5" />
               Out of Stock
             </span>
           </div>
@@ -166,10 +166,10 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       </Link>
 
       {/* Product Content Details */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+      <div className="p-5 flex-1 flex flex-col justify-between space-y-3.5">
         <div>
           {/* Brand & Category */}
-          <div className="flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-500 font-semibold tracking-wider uppercase mb-1">
+          <div className="flex items-center justify-between text-xs text-[#6e6e73] dark:text-[#86868b] font-medium tracking-tight mb-1">
             <span>{product.brand}</span>
             <span className="capitalize truncate max-w-[140px] text-right">
               {product.categoryName || product.category.replace(/-/g, ' ')}
@@ -179,15 +179,15 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           {/* Product Name */}
           <Link
             href={`/product/${product.slug}`}
-            className="font-bold text-base text-zinc-900 dark:text-white line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors block "
+            className="font-semibold text-base text-[#1d1d1f] dark:text-white tracking-tight line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors block"
           >
             {product.name}
           </Link>
 
-          {/* Interactive Size Quick-Select Strip */}
+          {/* Interactive Size Quick-Select Strip (Pill Selector) */}
           {!isOutOfStock && product.sizes.length > 0 && (
-            <div className="mt-2.5 flex items-center gap-1 overflow-x-auto py-0.5 no-scrollbar relative z-20">
-              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold tracking-wider uppercase mr-1 shrink-0">
+            <div className="mt-3 flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar relative z-20">
+              <span className="text-[11px] text-[#6e6e73] dark:text-[#86868b] font-medium mr-0.5 shrink-0">
                 {product.sizeSystem && product.sizeSystem !== 'Custom' ? product.sizeSystem : 'Size'}:
               </span>
               {product.sizes.map((size) => {
@@ -204,12 +204,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                       if (available) setSelectedQuickSize(size);
                     }}
                     title={available ? `Select size ${size}` : `Size ${size} out of stock`}
-                    className={`px-1.5 py-0.5 text-[10px] font-bold rounded-xs shrink-0 transition-colors ${
+                    className={`px-2 py-0.5 text-[11px] font-medium rounded-full shrink-0 transition-all ${
                       !available
-                        ? 'bg-zinc-100/60 dark:bg-zinc-800/40 text-zinc-300 dark:text-zinc-600 line-through cursor-not-allowed'
+                        ? 'bg-black/[0.03] dark:bg-white/[0.04] text-zinc-300 dark:text-zinc-600 line-through cursor-not-allowed'
                         : isSelected
-                          ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950'
-                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                          ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] font-semibold'
+                          : 'bg-[#f5f5f7] dark:bg-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-black/[0.08] dark:hover:bg-white/[0.14]'
                     }`}
                   >
                     {size}
@@ -220,14 +220,14 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           )}
         </div>
 
-        {/* Pricing & Add to Cart */}
-        <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-2 relative z-20">
+        {/* Pricing & Apple Pill Add Button */}
+        <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.07] flex items-center justify-between gap-2 relative z-20">
           <div>
-            <span className="font-extrabold text-base sm:text-lg text-zinc-900 dark:text-white block">
+            <span className="font-semibold text-base sm:text-[17px] tracking-tight text-[#1d1d1f] dark:text-white block">
               {formatLKR(product.price)}
             </span>
             {product.compareAtPrice && product.compareAtPrice > product.price && (
-              <span className="text-xs text-zinc-400 dark:text-zinc-500 line-through block font-medium">
+              <span className="text-xs text-[#6e6e73] dark:text-[#86868b] line-through block font-normal">
                 {formatLKR(product.compareAtPrice)}
               </span>
             )}
@@ -237,12 +237,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             type="button"
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-amber-500 disabled:cursor-not-allowed ${
+            className={`px-4 py-2 text-xs font-semibold tracking-tight rounded-full transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:cursor-not-allowed ${
               isAdded
                 ? 'bg-emerald-600 text-white'
                 : isOutOfStock
-                  ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-600'
-                  : 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-zinc-950'
+                  ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600'
+                  : 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] hover:bg-amber-500 hover:text-zinc-950 dark:hover:bg-amber-400 dark:hover:text-zinc-950'
             }`}
           >
             {isAdded ? (
@@ -253,7 +253,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             ) : (
               <>
                 <ShoppingBag className="w-3.5 h-3.5" />
-                <span>Add</span>
+                <span>Buy</span>
               </>
             )}
           </button>

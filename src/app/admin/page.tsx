@@ -139,12 +139,12 @@ export default async function AdminPage() {
       {/* Dashboard Title & Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 dark:bg-zinc-800 text-amber-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#1d1d1f] dark:bg-white/[0.08] text-amber-500 soft-shadow">
             <LayoutDashboard className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-zinc-900 dark:text-white">Admin Dashboard</h1>
-            <p className="text-sm text-zinc-400 dark:text-zinc-500">
+            <h1 className="text-2xl font-semibold tracking-[-0.025em] text-[#1d1d1f] dark:text-[#f5f5f7]">Admin Dashboard</h1>
+            <p className="text-sm text-[#6e6e73] dark:text-[#86868b]">
               Live sales, WhatsApp order queue, and inventory health
             </p>
           </div>
@@ -153,21 +153,21 @@ export default async function AdminPage() {
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <Link
             href="/admin/orders"
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-200 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-full border border-black/[0.08] dark:border-white/[0.12] bg-white dark:bg-[#1d1d1f] px-4 py-2.5 text-xs font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06] soft-shadow"
           >
             <ClipboardList className="h-4 w-4 text-amber-500" />
             <span>Orders</span>
           </Link>
           <Link
             href="/admin/categories"
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-200 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-full border border-black/[0.08] dark:border-white/[0.12] bg-white dark:bg-[#1d1d1f] px-4 py-2.5 text-xs font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06] soft-shadow"
           >
             <FolderTree className="h-4 w-4 text-amber-500" />
             <span>Categories</span>
           </Link>
           <Link
             href="/admin/products/new"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 px-4 sm:px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500 px-5 py-2.5 text-xs font-semibold tracking-tight text-zinc-950 transition-colors hover:bg-amber-400 soft-shadow"
           >
             <Plus className="h-4 w-4" />
             <span>Add Product</span>
@@ -180,42 +180,42 @@ export default async function AdminPage() {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className={`rounded-2xl border bg-white dark:bg-zinc-900 p-3.5 sm:p-5 shadow-xs ${
+            className={`rounded-[24px] border bg-white dark:bg-[#1d1d1f] p-4 sm:p-5 soft-shadow ${
               stat.highlight
-                ? 'border-amber-300 dark:border-amber-800/80'
-                : 'border-zinc-200 dark:border-zinc-800'
+                ? 'border-amber-400/70 dark:border-amber-600/60'
+                : 'border-black/[0.05] dark:border-white/[0.08]'
             }`}
           >
             <div className="flex items-center justify-between mb-2.5 sm:mb-3">
               <div
-                className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl ${
+                className={`flex h-9 w-9 items-center justify-center rounded-full ${
                   stat.highlight
-                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                    : 'bg-[#f5f5f7] dark:bg-white/[0.06] text-[#6e6e73] dark:text-[#86868b]'
                 }`}
               >
                 <stat.icon className="h-4 w-4" />
               </div>
               {stat.highlight && (
-                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold bg-amber-500/15 text-amber-800 dark:text-amber-300 px-2.5 py-0.5 rounded-full">
                   Action
                 </span>
               )}
             </div>
             <p
-              className={`text-xl sm:text-2xl font-black truncate ${
+              className={`text-xl sm:text-2xl font-semibold tracking-tight truncate ${
                 stat.highlight
                   ? 'text-amber-600 dark:text-amber-400'
-                  : 'text-zinc-900 dark:text-white'
+                  : 'text-[#1d1d1f] dark:text-[#f5f5f7]'
               }`}
             >
               {stat.value}
             </p>
-            <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 truncate">
+            <p className="mt-0.5 sm:mt-1 text-xs font-semibold text-[#6e6e73] dark:text-[#86868b] truncate">
               {stat.label}
             </p>
             {stat.sub && (
-              <p className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate mt-0.5">
+              <p className="text-[11px] text-[#86868b] truncate mt-0.5">
                 {stat.sub}
               </p>
             )}
@@ -225,17 +225,17 @@ export default async function AdminPage() {
 
       {/* Low Stock / Out of Stock Inventory Alert Banner */}
       {lowStockVariants && lowStockVariants.length > 0 && (
-        <div className="rounded-2xl border border-amber-300/80 dark:border-amber-800/70 bg-amber-50/50 dark:bg-amber-950/20 p-5 sm:p-6 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-amber-200/70 dark:border-amber-800/50">
+        <div className="rounded-[24px] border border-amber-300/70 dark:border-amber-800/60 bg-white dark:bg-[#1d1d1f] p-5 sm:p-6 soft-shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-              <h2 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
+              <h2 className="text-sm font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">
                 Inventory Restock Alerts ({lowStockVariants.length})
               </h2>
             </div>
             <Link
               href="/admin/products"
-              className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
+              className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
             >
               <span>Manage All Inventory</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -255,21 +255,21 @@ export default async function AdminPage() {
                 <Link
                   key={v.id}
                   href={`/admin/products/${v.product_id}`}
-                  className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3.5 flex items-center justify-between gap-3 hover:border-amber-500 dark:hover:border-amber-500 transition-colors"
+                  className="group rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-[#f5f5f7] dark:bg-white/[0.03] p-3.5 flex items-center justify-between gap-3 hover:border-amber-500 dark:hover:border-amber-500 transition-colors"
                 >
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-zinc-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    <p className="text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                       {prod?.name ?? 'Product'}
                     </p>
-                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
+                    <p className="text-[11px] text-[#6e6e73] dark:text-[#86868b] mt-0.5 truncate">
                       {v.colour} · {sizeLabel}
                     </p>
                   </div>
                   <span
-                    className={`shrink-0 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                    className={`shrink-0 px-2.5 py-1 rounded-full text-[10px] font-semibold ${
                       isOut
-                        ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
-                        : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                        ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                        : 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
                     }`}
                   >
                     {isOut ? '0 Left' : `${v.stock} Left`}

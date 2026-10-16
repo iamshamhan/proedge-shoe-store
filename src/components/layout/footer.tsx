@@ -57,45 +57,45 @@ export function Footer({ categories: propCategories }: FooterProps) {
   }
 
   return (
-    <footer className="bg-zinc-950 text-zinc-300 border-t border-zinc-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-zinc-800">
+    <footer className="bg-[#f5f5f7] dark:bg-[#000000] text-[#6e6e73] dark:text-[#86868b] border-t border-black/[0.08] dark:border-white/[0.08] transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-10 border-b border-black/[0.08] dark:border-white/[0.08]">
           
           {/* Brand Column (5 cols) */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="lg:col-span-5 space-y-3.5">
             <Link href="/" className="inline-flex items-center gap-1.5 focus:outline-none">
-              <span className="bg-white text-zinc-950 font-black text-2xl px-2.5 py-1 tracking-wider uppercase rounded-xs">
+              <span className="bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f] font-bold text-lg px-2.5 py-0.5 tracking-tight rounded-lg">
                 {logoPrefix}
               </span>
               {logoSuffix && (
-                <span className="font-black text-2xl tracking-widest text-white uppercase">
+                <span className="font-semibold text-lg tracking-tight text-[#1d1d1f] dark:text-white">
                   {logoSuffix}
                 </span>
               )}
             </Link>
             
-            <p className="text-zinc-400 text-sm leading-relaxed max-w-sm">
-              {normalizedBrand} designs high-performance athletic and lifestyle footwear engineered for durability, comfort, and uncompromising street style.
+            <p className="text-[#6e6e73] dark:text-[#86868b] text-xs sm:text-[13px] leading-relaxed max-w-sm">
+              {normalizedBrand} crafts high-performance athletic footwear and sporting equipment engineered for durability, comfort, and precision.
             </p>
-            <p className="text-amber-500 text-xs font-semibold uppercase tracking-wider">
-              {bannerTagline || 'Built for Your Next Step.'}
+            <p className="text-amber-600 dark:text-amber-400 text-xs font-semibold tracking-tight">
+              {bannerTagline || 'Built for your next step.'}
             </p>
 
             {/* Social & WhatsApp Buttons */}
-            <div className="flex items-center space-x-3 pt-2">
+            <div className="flex items-center space-x-2.5 pt-1">
               <a
                 href={whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp Support"
-                className="w-9 h-9 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-300 hover:text-amber-500 hover:bg-zinc-800 transition-colors"
+                className="w-9 h-9 rounded-full bg-black/[0.05] dark:bg-white/[0.08] flex items-center justify-center text-[#1d1d1f] dark:text-zinc-300 hover:bg-amber-500 hover:text-zinc-950 transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
               </a>
               <Link
                 href="/"
                 aria-label="Official Website"
-                className="w-9 h-9 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-300 hover:text-amber-500 hover:bg-zinc-800 transition-colors"
+                className="w-9 h-9 rounded-full bg-black/[0.05] dark:bg-white/[0.08] flex items-center justify-center text-[#1d1d1f] dark:text-zinc-300 hover:bg-amber-500 hover:text-zinc-950 transition-colors"
               >
                 <Globe className="w-4 h-4" />
               </Link>
@@ -107,7 +107,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
                   }
                 }}
                 aria-label="Share Store"
-                className="w-9 h-9 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-300 hover:text-amber-500 hover:bg-zinc-800 transition-colors"
+                className="w-9 h-9 rounded-full bg-black/[0.05] dark:bg-white/[0.08] flex items-center justify-center text-[#1d1d1f] dark:text-zinc-300 hover:bg-amber-500 hover:text-zinc-950 transition-colors"
               >
                 <Share2 className="w-4 h-4" />
               </button>
@@ -115,33 +115,33 @@ export function Footer({ categories: propCategories }: FooterProps) {
           </div>
 
           {/* Shop Collections Links (4 cols) */}
-          <div className="lg:col-span-4 space-y-4">
-            <h3 className="text-white text-xs font-bold uppercase tracking-wider">Shop Collections</h3>
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
+          <div className="lg:col-span-4 space-y-3">
+            <h3 className="text-[#1d1d1f] dark:text-white text-xs font-semibold tracking-tight">Shop &amp; Explore</h3>
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:text-[13px]">
               {sports.map((sport) => (
                 <li key={sport.id}>
                   <Link
                     href={`/shop?category=${sport.slug}`}
-                    className="hover:text-amber-400 transition-colors"
+                    className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors"
                   >
                     {sport.name}
                   </Link>
                 </li>
               ))}
               <li>
-                <Link href="/shop" className="hover:text-amber-400 transition-colors">
+                <Link href="/shop" className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
                   All Products
                 </Link>
               </li>
               <li>
                 <Link
                   href="/sale"
-                  className="text-amber-400 hover:text-amber-300 transition-colors font-medium flex items-center gap-1.5"
+                  className="text-amber-600 dark:text-amber-400 hover:underline transition-colors font-medium flex items-center gap-1.5"
                 >
-                  <span>Sale Offers</span>
+                  <span>Special Offers</span>
                   {saleEnabled !== false && (
-                    <span className="text-[10px] font-black bg-amber-500 text-zinc-950 px-1.5 py-0.2 rounded-full">
-                      {saleDiscountPercent ?? 30}%
+                    <span className="text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 px-2 py-0.2 rounded-full">
+                      -{saleDiscountPercent ?? 30}%
                     </span>
                   )}
                 </Link>
@@ -150,9 +150,9 @@ export function Footer({ categories: propCategories }: FooterProps) {
           </div>
 
           {/* Get In Touch (3 cols) - Editable in Admin */}
-          <div className="lg:col-span-3 space-y-4">
-            <h3 className="text-white text-xs font-bold uppercase tracking-wider">Get In Touch</h3>
-            <ul className="space-y-3 text-sm text-zinc-400">
+          <div className="lg:col-span-3 space-y-3">
+            <h3 className="text-[#1d1d1f] dark:text-white text-xs font-semibold tracking-tight">Contact Concierge</h3>
+            <ul className="space-y-2.5 text-xs sm:text-[13px]">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <span className="leading-snug">{cleanAddress}</span>
@@ -161,7 +161,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
                 <Phone className="w-4 h-4 text-amber-500 shrink-0" />
                 <a
                   href={`tel:${cleanPhone.replace(/\s+/g, '')}`}
-                  className="hover:text-amber-400 transition-colors"
+                  className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors"
                 >
                   {cleanPhone}
                 </a>
@@ -170,7 +170,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
                 <Mail className="w-4 h-4 text-amber-500 shrink-0" />
                 <a
                   href={`mailto:${cleanEmail}`}
-                  className="hover:text-amber-400 transition-colors break-all"
+                  className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors break-all"
                 >
                   {cleanEmail}
                 </a>
@@ -180,25 +180,22 @@ export function Footer({ categories: propCategories }: FooterProps) {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-          <p>&copy; {new Date().getFullYear()} {normalizedBrand} Footwear. All rights reserved.</p>
-          <div className="flex items-center space-x-6">
-            <Link href="/policies" className="hover:text-zinc-400 transition-colors">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#6e6e73] dark:text-[#86868b] gap-4">
+          <p>Copyright &copy; {new Date().getFullYear()} {normalizedBrand}. All rights reserved.</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <Link href="/policies" className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
               Store Policies
             </Link>
-            <Link href="/terms" className="hover:text-zinc-400 transition-colors">
-              Terms of Service
+            <Link href="/terms" className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
+              Terms of Use
             </Link>
-            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">
+            <Link href="/privacy" className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/shop" className="hover:text-zinc-400 transition-colors">
-              Footwear Catalog
+            <Link href="/shop" className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
+              Catalog
             </Link>
-            <Link href="/sale" className="hover:text-zinc-400 transition-colors">
-              Special Deals
-            </Link>
-            <span className="text-zinc-600">Sri Lanka Courier Delivery</span>
+            <span className="text-zinc-400 dark:text-zinc-600">Sri Lanka</span>
           </div>
         </div>
       </div>

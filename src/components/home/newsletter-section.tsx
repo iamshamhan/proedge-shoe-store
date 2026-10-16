@@ -18,30 +18,31 @@ export function NewsletterSection() {
   };
 
   return (
-    <section className="py-16 sm:py-24 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-colors">
+    <section className="py-16 sm:py-24 bg-white dark:bg-[#0a0a0c] border-t border-black/[0.06] dark:border-white/[0.08] transition-colors">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 sm:p-12 shadow-sm">
-          <div className="w-12 h-12 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="bg-[#f5f5f7] dark:bg-[#1d1d1f] border border-black/[0.05] dark:border-white/[0.08] rounded-[32px] p-8 sm:p-14 soft-shadow">
+          <div className="w-12 h-12 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-5">
             <MessageCircle className="w-6 h-6" />
           </div>
 
-          <h2 className="text-2xl sm:text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
-            Need help with your order?
+          <h2 className="text-2xl sm:text-4xl font-semibold text-[#1d1d1f] dark:text-white tracking-[-0.025em]">
+            Need help choosing the right fit?
           </h2>
-          <p className="mt-3 text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
-            Got doubts about sizing, bulk orders, or custom team kits? Reach out to us directly on WhatsApp for instant support.
+          <p className="mt-3 text-sm sm:text-base text-[#6e6e73] dark:text-[#86868b] max-w-md mx-auto leading-relaxed">
+            Chat one-on-one with a PROEDGE specialist on WhatsApp for sizing advice, availability, or team orders.
           </p>
 
           <div className="mt-8">
             <button
+              type="button"
               onClick={handleWhatsApp}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#25D366] text-white text-sm font-bold rounded-xl hover:bg-[#128C7E] transition-colors shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#25D366]/30 min-h-[44px]"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-[#25D366] text-white text-sm font-semibold tracking-tight rounded-full hover:bg-[#1ebd5a] active:scale-[0.98] transition-all shadow-md focus:outline-none focus:ring-4 focus:ring-[#25D366]/30 min-h-[44px]"
             >
-              <MessageCircle className="w-5 h-5" />
-              <span>Chat on WhatsApp</span>
+              <MessageCircle className="w-4 h-4" />
+              <span>Chat with a Specialist</span>
             </button>
-            <p className="mt-3 text-xs font-medium text-zinc-400 dark:text-zinc-500">
-              {whatsappNumber || 'Available 24/7'}
+            <p className="mt-3 text-xs font-medium text-[#6e6e73] dark:text-[#86868b]">
+              {whatsappNumber || 'Available 24/7 on WhatsApp'}
             </p>
           </div>
         </div>

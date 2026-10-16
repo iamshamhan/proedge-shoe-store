@@ -52,16 +52,16 @@ export function SizeSelector({
   const isOnlyOneSize = sizes.length === 1 && (sizes[0] === 'One Size' || sizes[0] === 'Standard');
 
   return (
-    <div className="space-y-2.5" data-testid="size-selector">
+    <div className="space-y-3" data-testid="size-selector">
       <div className="flex items-center justify-between gap-2">
-        <label className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-1.5">
+        <label className="text-sm font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7] flex items-center gap-1">
           <span>{labelText}</span>
           {!isOnlyOneSize && <span className="text-rose-500">*</span>}
         </label>
 
         <div className="flex items-center gap-3">
           {selectedSize && (
-            <span className="text-xs text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold">
               Selected: {isCustom ? '' : `${sizeSystem} `}{selectedSize}
             </span>
           )}
@@ -69,7 +69,7 @@ export function SizeSelector({
             <button
               type="button"
               onClick={() => setIsGuideOpen(true)}
-              className="inline-flex items-center gap-1 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 underline underline-offset-4 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-xs font-medium text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.08] dark:hover:bg-white/[0.14] transition-colors"
             >
               <Ruler className="w-3.5 h-3.5 text-amber-500" />
               <span>Size Guide</span>
@@ -78,7 +78,7 @@ export function SizeSelector({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
         {sizes.map((size) => {
           const isSelected = String(selectedSize) === String(size);
           const soldOut = isOutOfStock ? isOutOfStock(size) : false;
@@ -90,12 +90,12 @@ export function SizeSelector({
               disabled={soldOut}
               onClick={() => onSelectSize(size)}
               title={soldOut ? `${size} is out of stock` : undefined}
-              className={`py-3 min-h-[44px] text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl border-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+              className={`py-3 min-h-[44px] text-xs sm:text-sm font-semibold tracking-tight rounded-2xl border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 soldOut
-                  ? 'opacity-40 border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800/40 text-zinc-400 line-through cursor-not-allowed'
+                  ? 'opacity-40 border-black/[0.05] dark:border-white/[0.06] bg-black/[0.02] dark:bg-white/[0.03] text-[#86868b] line-through cursor-not-allowed'
                   : isSelected
-                  ? 'bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 border-zinc-900 dark:border-amber-500 shadow-md ring-2 ring-amber-500/50'
-                  : 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/80'
+                  ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] border-[#1d1d1f] dark:border-white shadow-sm ring-2 ring-amber-500/40'
+                  : 'bg-white dark:bg-[#1d1d1f] text-[#1d1d1f] dark:text-[#f5f5f7] border-black/[0.08] dark:border-white/[0.12] hover:border-black/25 dark:hover:border-white/30'
               }`}
             >
               {size}
@@ -105,15 +105,15 @@ export function SizeSelector({
       </div>
 
       {hasError && !selectedSize && !isOnlyOneSize && (
-        <p role="alert" className="text-xs font-bold text-rose-600 pt-1">
-          Please select a size or option before adding to cart.
+        <p role="alert" className="text-xs font-medium text-rose-600 pt-1">
+          Please select a size or option before adding to bag.
         </p>
       )}
 
       {/* Interactive Size Guide Modal */}
       {isGuideOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-in fade-in duration-150"
           role="dialog"
           aria-modal="true"
           aria-labelledby="size-guide-title"
@@ -123,15 +123,15 @@ export function SizeSelector({
             onClick={() => setIsGuideOpen(false)}
             aria-hidden="true"
           />
-          <div className="relative z-10 w-full max-w-2xl max-h-[88vh] overflow-y-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6">
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-4">
+          <div className="relative z-10 w-full max-w-2xl max-h-[88vh] overflow-y-auto bg-white/95 dark:bg-[#1d1d1f]/95 apple-glass border border-black/[0.08] dark:border-white/[0.12] rounded-[32px] shadow-2xl p-6 sm:p-8 space-y-6">
+            <div className="flex items-start justify-between gap-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-4">
               <div>
-                <span className="text-[11px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">
+                <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 block">
                   PROEDGE Fit Reference
                 </span>
                 <h2
                   id="size-guide-title"
-                  className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tight mt-0.5"
+                  className="text-xl sm:text-2xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] tracking-[-0.02em] mt-0.5"
                 >
                   {isApparel ? 'Apparel Size Chart' : 'Footwear & Gear Size Guide'}
                 </h2>
@@ -140,7 +140,7 @@ export function SizeSelector({
                 type="button"
                 onClick={() => setIsGuideOpen(false)}
                 aria-label="Close size guide"
-                className="p-2 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="p-2 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-[#6e6e73] hover:text-[#1d1d1f] dark:hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -148,12 +148,12 @@ export function SizeSelector({
 
             {!isApparel && (
               <div className="space-y-3">
-                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                <h3 className="text-xs font-semibold text-[#6e6e73] dark:text-[#86868b]">
                   International Footwear Conversion
                 </h3>
-                <div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-zinc-800">
+                <div className="overflow-x-auto rounded-2xl border border-black/[0.06] dark:border-white/[0.08]">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-300 uppercase font-black">
+                    <thead className="bg-[#f5f5f7] dark:bg-white/[0.05] text-[#6e6e73] dark:text-[#86868b] font-semibold">
                       <tr>
                         <th className="py-3 px-3.5">EU</th>
                         <th className="py-3 px-3.5">UK</th>
@@ -163,7 +163,7 @@ export function SizeSelector({
                         <th className="py-3 px-3.5 text-right">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
                       {FOOTWEAR_SIZE_CHART.map((row) => {
                         const matchKey =
                           sizeSystem === 'UK'
@@ -181,20 +181,20 @@ export function SizeSelector({
                             key={row.eu}
                             className={`transition-colors ${
                               isCurrent
-                                ? 'bg-amber-50 dark:bg-amber-950/30 font-bold'
-                                : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/40'
+                                ? 'bg-amber-50/70 dark:bg-amber-950/30 font-semibold'
+                                : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
                             }`}
                           >
-                            <td className="py-2.5 px-3.5 font-black text-zinc-900 dark:text-white">
+                            <td className="py-2.5 px-3.5 font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
                               {row.eu}
                             </td>
-                            <td className="py-2.5 px-3.5 text-zinc-700 dark:text-zinc-300">
+                            <td className="py-2.5 px-3.5 text-[#6e6e73] dark:text-[#86868b]">
                               {row.uk}
                             </td>
-                            <td className="py-2.5 px-3.5 text-zinc-700 dark:text-zinc-300">
+                            <td className="py-2.5 px-3.5 text-[#6e6e73] dark:text-[#86868b]">
                               {row.usMen}
                             </td>
-                            <td className="py-2.5 px-3.5 text-zinc-700 dark:text-zinc-300">
+                            <td className="py-2.5 px-3.5 text-[#6e6e73] dark:text-[#86868b]">
                               {row.usWomen}
                             </td>
                             <td className="py-2.5 px-3.5 font-semibold text-amber-600 dark:text-amber-400">
@@ -210,17 +210,17 @@ export function SizeSelector({
                                     onSelectSize(matchingSize);
                                     setIsGuideOpen(false);
                                   }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-900 dark:bg-amber-500 text-white dark:text-zinc-950 text-[10px] font-black uppercase tracking-wider hover:bg-amber-500 dark:hover:bg-amber-400 transition-colors"
+                                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] text-[11px] font-semibold hover:bg-amber-500 hover:text-zinc-950 dark:hover:bg-amber-400 transition-colors"
                                 >
                                   {isCurrent && <Check className="w-3 h-3" />}
                                   <span>{isCurrent ? 'Selected' : 'Select'}</span>
                                 </button>
                               ) : existsInProduct && soldOut ? (
-                                <span className="text-[10px] font-bold uppercase text-rose-500">
+                                <span className="text-[11px] font-medium text-rose-500">
                                   Sold Out
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-zinc-400">—</span>
+                                <span className="text-[11px] text-[#86868b]">—</span>
                               )}
                             </td>
                           </tr>
@@ -233,12 +233,12 @@ export function SizeSelector({
             )}
 
             <div className="space-y-3">
-              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+              <h3 className="text-xs font-semibold text-[#6e6e73] dark:text-[#86868b]">
                 Apparel &amp; Jersey Reference
               </h3>
-              <div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-zinc-800">
+              <div className="overflow-x-auto rounded-2xl border border-black/[0.06] dark:border-white/[0.08]">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-300 uppercase font-black">
+                  <thead className="bg-[#f5f5f7] dark:bg-white/[0.05] text-[#6e6e73] dark:text-[#86868b] font-semibold">
                     <tr>
                       <th className="py-2.5 px-3.5">Size</th>
                       <th className="py-2.5 px-3.5">Chest</th>
@@ -246,15 +246,15 @@ export function SizeSelector({
                       <th className="py-2.5 px-3.5">Cut</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                  <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
                     {APPAREL_SIZE_CHART.map((row) => (
                       <tr key={row.size}>
-                        <td className="py-2 px-3.5 font-black text-zinc-900 dark:text-white">
+                        <td className="py-2 px-3.5 font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
                           {row.size}
                         </td>
-                        <td className="py-2 px-3.5 text-zinc-700 dark:text-zinc-300">{row.chest}</td>
-                        <td className="py-2 px-3.5 text-zinc-700 dark:text-zinc-300">{row.waist}</td>
-                        <td className="py-2 px-3.5 text-zinc-500 dark:text-zinc-400">{row.fit}</td>
+                        <td className="py-2 px-3.5 text-[#6e6e73] dark:text-[#86868b]">{row.chest}</td>
+                        <td className="py-2 px-3.5 text-[#6e6e73] dark:text-[#86868b]">{row.waist}</td>
+                        <td className="py-2 px-3.5 text-[#6e6e73] dark:text-[#86868b]">{row.fit}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -263,8 +263,8 @@ export function SizeSelector({
             </div>
 
             {/* How to Measure Guide */}
-            <div className="rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 p-4 space-y-2 text-xs text-zinc-600 dark:text-zinc-300">
-              <p className="font-black uppercase tracking-wider text-zinc-900 dark:text-white">
+            <div className="rounded-2xl bg-[#f5f5f7] dark:bg-white/[0.04] border border-black/[0.05] dark:border-white/[0.08] p-4 space-y-2 text-xs text-[#6e6e73] dark:text-[#86868b]">
+              <p className="font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
                 Pro Fit Tip — How to Measure Your Foot
               </p>
               <ol className="list-decimal list-inside space-y-1 leading-relaxed">

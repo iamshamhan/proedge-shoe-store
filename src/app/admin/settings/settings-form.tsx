@@ -108,16 +108,16 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6 border-b border-zinc-200 dark:border-zinc-800 pb-2">
+      <div className="inline-flex flex-wrap gap-1.5 p-1.5 rounded-full bg-white dark:bg-[#1d1d1f] border border-black/[0.06] dark:border-white/[0.08] soft-shadow">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-t-lg transition-colors ${
+            className={`px-4 py-2 text-xs font-semibold tracking-tight rounded-full transition-colors ${
               activeTab === tab.id
-                ? 'bg-zinc-100 dark:bg-zinc-900 text-amber-600 dark:text-amber-500 border-b-2 border-amber-500'
-                : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] shadow-xs'
+                : 'text-[#6e6e73] dark:text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white'
             }`}
           >
             {tab.label}
@@ -126,7 +126,7 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       </div>
 
       {message && (
-        <div className={`p-4 rounded-xl text-sm font-bold ${message.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`}>
+        <div className={`p-4 rounded-2xl text-sm font-semibold ${message.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`}>
           {message.text}
         </div>
       )}
@@ -134,52 +134,52 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       {/* STORE TAB */}
       {activeTab === 'store' && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-2">Branding & Contact</h2>
+          <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 soft-shadow">
+            <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Branding &amp; Contact</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Brand Name</label>
-                <input value={brandName} onChange={e => setBrandName(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Brand Name</label>
+                <input value={brandName} onChange={e => setBrandName(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Announcement Tagline</label>
-                <input value={bannerTagline} onChange={e => setBannerTagline(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Announcement Tagline</label>
+                <input value={bannerTagline} onChange={e => setBannerTagline(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Store Address</label>
-                <input value={contactAddress} onChange={e => setContactAddress(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Store Address</label>
+                <input value={contactAddress} onChange={e => setContactAddress(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Phone Number</label>
-                <input value={contactPhone} onChange={e => setContactPhone(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Phone Number</label>
+                <input value={contactPhone} onChange={e => setContactPhone(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">WhatsApp Number (Homepage)</label>
-                <input value={whatsappNumber} onChange={e => setWhatsappNumber(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">WhatsApp Number (Homepage)</label>
+                <input value={whatsappNumber} onChange={e => setWhatsappNumber(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Support Email</label>
-                <input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Support Email</label>
+                <input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-2">Delivery Settings</h2>
+          <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 soft-shadow">
+            <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Delivery Settings</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-semibold mb-1.5 cursor-pointer">
                   <input type="checkbox" checked={freeDeliveryEnabled} onChange={e => setFreeDeliveryEnabled(e.target.checked)} className="accent-amber-500 w-4 h-4" />
                   Enable Free Delivery
                 </label>
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Threshold (LKR)</label>
-                <input type="number" value={freeDeliveryThreshold} onChange={e => setFreeDeliveryThreshold(Number(e.target.value))} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Threshold (LKR)</label>
+                <input type="number" value={freeDeliveryThreshold} onChange={e => setFreeDeliveryThreshold(Number(e.target.value))} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Default Fee (LKR)</label>
-                <input type="number" value={defaultDeliveryFee} onChange={e => setDefaultDeliveryFee(Number(e.target.value))} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Default Fee (LKR)</label>
+                <input type="number" value={defaultDeliveryFee} onChange={e => setDefaultDeliveryFee(Number(e.target.value))} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
             </div>
           </div>
@@ -189,11 +189,11 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       {/* HOMEPAGE TAB */}
       {activeTab === 'homepage' && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-2">Hero Product</h2>
-            <p className="text-xs text-zinc-500 mb-4">Select which product is featured massively at the top of the homepage.</p>
+          <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 soft-shadow">
+            <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Hero Product</h2>
+            <p className="text-xs text-[#6e6e73] mb-4">Select which product is featured massively at the top of the homepage.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-              <select value={heroProductSlug} onChange={e => setHeroProductSlug(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm">
+              <select value={heroProductSlug} onChange={e => setHeroProductSlug(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm">
                 <option value="proedge-runner-x1">Default (PROEDGE Runner X1)</option>
                 {products.map(p => (
                   <option key={p.slug} value={p.slug}>{p.name} - {formatLKR(p.price)}</option>
@@ -201,15 +201,15 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
               </select>
 
               {products.find(p => p.slug === heroProductSlug)?.images?.[0] && (
-                <div className="flex items-center gap-3 p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/60">
-                  <div className="relative w-12 h-12 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800 shrink-0" style={{ position: 'relative' }}>
+                <div className="flex items-center gap-3 p-2.5 rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-[#f5f5f7] dark:bg-white/[0.04]">
+                  <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 shrink-0" style={{ position: 'relative' }}>
                     <Image src={products.find(p => p.slug === heroProductSlug)!.images[0]} alt="Hero" fill className="object-cover" />
                   </div>
                   <div className="min-w-0 text-xs">
-                    <p className="font-bold text-zinc-900 dark:text-white truncate">
+                    <p className="font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] truncate">
                       {products.find(p => p.slug === heroProductSlug)?.name}
                     </p>
-                    <p className="text-[11px] text-amber-500 font-bold">
+                    <p className="text-[11px] text-amber-500 font-semibold">
                       {formatLKR(products.find(p => p.slug === heroProductSlug)!.price)}
                     </p>
                   </div>
@@ -218,46 +218,46 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
             </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-2">Global Sale Banner</h2>
+          <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 soft-shadow">
+            <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Global Sale Banner</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-semibold mb-1.5 cursor-pointer">
                   <input type="checkbox" checked={saleEnabled} onChange={e => setSaleEnabled(e.target.checked)} className="accent-amber-500 w-4 h-4" />
                   Enable Sitewide Sale
                 </label>
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Sale Discount %</label>
-                <input type="number" value={saleDiscountPercent} onChange={e => setSaleDiscountPercent(Number(e.target.value))} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Sale Discount %</label>
+                <input type="number" value={saleDiscountPercent} onChange={e => setSaleDiscountPercent(Number(e.target.value))} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-2">Section: Special Offers</h2>
+          <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 soft-shadow">
+            <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Section: Special Offers</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Section Title</label>
-                <input value={saleSectionTitle} onChange={e => setSaleSectionTitle(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Section Title</label>
+                <input value={saleSectionTitle} onChange={e => setSaleSectionTitle(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Section Subtitle</label>
-                <input value={saleSectionSubtitle} onChange={e => setSaleSectionSubtitle(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Section Subtitle</label>
+                <input value={saleSectionSubtitle} onChange={e => setSaleSectionSubtitle(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-2">Section: New Arrivals</h2>
+          <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 soft-shadow">
+            <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Section: New Arrivals</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Section Title</label>
-                <input value={newArrivalsTitle} onChange={e => setNewArrivalsTitle(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Section Title</label>
+                <input value={newArrivalsTitle} onChange={e => setNewArrivalsTitle(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">Section Subtitle</label>
-                <input value={newArrivalsSubtitle} onChange={e => setNewArrivalsSubtitle(e.target.value)} className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" />
+                <label className="block text-xs font-semibold mb-1.5">Section Subtitle</label>
+                <input value={newArrivalsSubtitle} onChange={e => setNewArrivalsSubtitle(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
             </div>
           </div>
@@ -267,17 +267,17 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       {/* PROFILE TAB */}
       {activeTab === 'profile' && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 max-w-lg">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-2">Update Credentials</h2>
-            <p className="text-xs text-zinc-500 mb-4">Leave fields blank if you do not wish to change them.</p>
+          <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 max-w-lg soft-shadow">
+            <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Update Credentials</h2>
+            <p className="text-xs text-[#6e6e73] mb-4">Leave fields blank if you do not wish to change them.</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">New Email Address</label>
-                <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="Enter new email..." className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" autoComplete="off" />
+                <label className="block text-xs font-semibold mb-1.5">New Email Address</label>
+                <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="Enter new email..." className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" autoComplete="off" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1">New Password</label>
-                <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Enter new password..." className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm" autoComplete="new-password" />
+                <label className="block text-xs font-semibold mb-1.5">New Password</label>
+                <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Enter new password..." className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" autoComplete="new-password" />
               </div>
             </div>
           </div>
@@ -285,11 +285,11 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       )}
 
       {/* Submit Button */}
-      <div className="sticky bottom-0 pt-4 pb-6 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 z-10">
+      <div className="sticky bottom-0 pt-4 pb-6 bg-[#f5f5f7]/90 dark:bg-black/90 apple-glass border-t border-black/[0.06] dark:border-white/[0.08] z-10">
         <button
           type="submit"
           disabled={isPending}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3.5 text-sm font-black uppercase tracking-wider text-zinc-950 shadow-md transition-all hover:bg-amber-400 hover:shadow-lg disabled:opacity-50 disabled:shadow-none"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-4 text-sm font-semibold tracking-tight text-zinc-950 soft-shadow transition-all hover:bg-amber-400 disabled:opacity-50"
         >
           <Save className="h-5 w-5" />
           {isPending ? 'Saving Changes...' : 'Save All Settings'}

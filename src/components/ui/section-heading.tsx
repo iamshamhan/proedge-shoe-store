@@ -26,17 +26,17 @@ export function SectionHeading({
       }`}
     >
       {eyebrow && (
-        <span className="text-xs font-bold tracking-widest text-amber-600 dark:text-amber-400 uppercase mb-2">
+        <span className="text-xs font-semibold tracking-tight text-amber-600 dark:text-amber-400 mb-1.5">
           {eyebrow}
         </span>
       )}
       <div className="w-full flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
+          <h2 className="text-2xl sm:text-4xl lg:text-[40px] font-semibold text-[#1d1d1f] dark:text-white tracking-[-0.025em] leading-[1.1]">
             {title}
           </h2>
           {subtitle && (
-            <p className="mt-2 text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-2xl leading-relaxed">
+            <p className="mt-2.5 text-sm sm:text-base text-[#6e6e73] dark:text-[#86868b] max-w-2xl leading-relaxed">
               {subtitle}
             </p>
           )}
@@ -45,10 +45,10 @@ export function SectionHeading({
         {linkText && linkHref && (
           <Link
             href={linkHref}
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wide text-zinc-600 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors group shrink-0"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.14] text-xs sm:text-[13px] font-medium tracking-tight text-[#1d1d1f] dark:text-white transition-all group shrink-0"
           >
             <span>{linkText}</span>
-            <ArrowRight className="w-4 h-4 motion-safe:group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-3.5 h-3.5 text-amber-500 motion-safe:group-hover:translate-x-0.5 transition-transform" />
           </Link>
         )}
       </div>
