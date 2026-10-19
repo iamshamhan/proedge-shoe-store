@@ -88,21 +88,21 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const secondaryImage = product.images && product.images.length > 1 ? product.images[1] : null;
 
   return (
-    <div className="group cursor-pointer relative bg-white dark:bg-[#1d1d1f] rounded-[28px] border border-black/[0.05] dark:border-white/[0.08] overflow-hidden flex flex-col transition-all duration-500 soft-shadow hover:shadow-[0_16px_40px_-8px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_16px_40px_-8px_rgba(0,0,0,0.75)] hover:-translate-y-1">
+    <div className="group cursor-pointer relative bg-white dark:bg-[#1d1d1f] rounded-2xl sm:rounded-[28px] border border-black/[0.05] dark:border-white/[0.08] overflow-hidden flex flex-col transition-all duration-500 soft-shadow hover:shadow-[0_16px_40px_-8px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_16px_40px_-8px_rgba(0,0,0,0.75)] hover:-translate-y-1">
       {/* Badges Overlay (Apple Pill Badges) */}
-      <div className="absolute top-3.5 left-3.5 z-20 flex flex-col gap-1.5 items-start">
+      <div className="absolute top-2 left-2 sm:top-3.5 sm:left-3.5 z-20 flex flex-col gap-1 sm:gap-1.5 items-start pointer-events-none">
         {discountPercent > 0 && (
-          <span className="px-3 py-1 text-[11px] font-semibold tracking-tight bg-amber-500 text-zinc-950 rounded-full shadow-xs">
+          <span className="px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-[11px] font-semibold tracking-tight bg-amber-500 text-zinc-950 rounded-full shadow-xs">
             Save {discountPercent}%
           </span>
         )}
         {product.newArrival && discountPercent === 0 && (
-          <span className="px-3 py-1 text-[11px] font-semibold tracking-tight bg-[#1d1d1f]/90 dark:bg-white/90 apple-glass text-white dark:text-[#1d1d1f] rounded-full shadow-xs">
+          <span className="px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-[11px] font-semibold tracking-tight bg-[#1d1d1f]/90 dark:bg-white/90 apple-glass text-white dark:text-[#1d1d1f] rounded-full shadow-xs">
             New
           </span>
         )}
         {!isOutOfStock && product.stock <= 5 && (
-          <span className="px-2.5 py-0.5 text-[10px] font-semibold tracking-tight bg-rose-600/90 apple-glass text-white rounded-full shadow-xs">
+          <span className="px-2 py-0.5 sm:px-2.5 text-[9px] sm:text-[10px] font-semibold tracking-tight bg-rose-600/90 apple-glass text-white rounded-full shadow-xs">
             Only {product.stock} left
           </span>
         )}
@@ -117,10 +117,10 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         }}
         aria-pressed={wishlisted}
         aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-        className="absolute top-3 right-3 z-20 p-2.5 min-h-[42px] min-w-[42px] flex items-center justify-center cursor-pointer rounded-full bg-white/85 dark:bg-black/60 apple-glass text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-zinc-900 shadow-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+        className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 p-2 sm:p-2.5 min-h-[36px] min-w-[36px] sm:min-h-[42px] sm:min-w-[42px] flex items-center justify-center cursor-pointer rounded-full bg-white/85 dark:bg-black/60 apple-glass text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-zinc-900 shadow-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
       >
         <Heart
-          className={`w-4 h-4 transition-colors ${
+          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${
             wishlisted ? 'fill-amber-500 text-amber-500' : 'text-zinc-600 dark:text-zinc-300'
           }`}
         />
@@ -166,12 +166,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       </Link>
 
       {/* Product Content Details */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-3.5">
+      <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3.5">
         <div>
           {/* Brand & Category */}
-          <div className="flex items-center justify-between text-xs text-[#6e6e73] dark:text-[#86868b] font-medium tracking-tight mb-1">
-            <span>{product.brand}</span>
-            <span className="capitalize truncate max-w-[140px] text-right">
+          <div className="flex items-center justify-between text-[10px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] font-medium tracking-tight mb-0.5 sm:mb-1">
+            <span className="truncate max-w-[65px] sm:max-w-none">{product.brand}</span>
+            <span className="capitalize truncate max-w-[70px] sm:max-w-[140px] text-right">
               {product.categoryName || product.category.replace(/-/g, ' ')}
             </span>
           </div>
@@ -179,15 +179,15 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           {/* Product Name */}
           <Link
             href={`/product/${product.slug}`}
-            className="font-semibold text-base text-[#1d1d1f] dark:text-white tracking-tight line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors block"
+            className="font-semibold text-xs sm:text-base text-[#1d1d1f] dark:text-white tracking-tight line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors block"
           >
             {product.name}
           </Link>
 
           {/* Interactive Size Quick-Select Strip (Pill Selector) */}
           {!isOutOfStock && product.sizes.length > 0 && (
-            <div className="mt-3 flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar relative z-20">
-              <span className="text-[11px] text-[#6e6e73] dark:text-[#86868b] font-medium mr-0.5 shrink-0">
+            <div className="mt-1.5 sm:mt-3 flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-0.5 no-scrollbar relative z-20">
+              <span className="text-[10px] sm:text-[11px] text-[#6e6e73] dark:text-[#86868b] font-medium mr-0.5 shrink-0 hidden xs:inline-block">
                 {product.sizeSystem && product.sizeSystem !== 'Custom' ? product.sizeSystem : 'Size'}:
               </span>
               {product.sizes.map((size) => {
@@ -204,7 +204,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                       if (available) setSelectedQuickSize(size);
                     }}
                     title={available ? `Select size ${size}` : `Size ${size} out of stock`}
-                    className={`px-2 py-0.5 text-[11px] font-medium rounded-full shrink-0 transition-all ${
+                    className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-[11px] font-medium rounded-full shrink-0 transition-all ${
                       !available
                         ? 'bg-black/[0.03] dark:bg-white/[0.04] text-zinc-300 dark:text-zinc-600 line-through cursor-not-allowed'
                         : isSelected
@@ -221,13 +221,13 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         </div>
 
         {/* Pricing & Apple Pill Add Button */}
-        <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.07] flex items-center justify-between gap-2 relative z-20">
-          <div>
-            <span className="font-semibold text-base sm:text-[17px] tracking-tight text-[#1d1d1f] dark:text-white block">
+        <div className="pt-2 sm:pt-3 border-t border-black/[0.05] dark:border-white/[0.07] flex items-center justify-between gap-1.5 sm:gap-2 relative z-20">
+          <div className="min-w-0">
+            <span className="font-semibold text-xs sm:text-[17px] tracking-tight text-[#1d1d1f] dark:text-white block truncate">
               {formatLKR(product.price)}
             </span>
             {product.compareAtPrice && product.compareAtPrice > product.price && (
-              <span className="text-xs text-[#6e6e73] dark:text-[#86868b] line-through block font-normal">
+              <span className="text-[10px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] line-through block font-normal truncate">
                 {formatLKR(product.compareAtPrice)}
               </span>
             )}
@@ -237,7 +237,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             type="button"
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`px-4 py-2 text-xs font-semibold tracking-tight rounded-full transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:cursor-not-allowed ${
+            className={`px-2.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold tracking-tight rounded-full transition-all flex items-center gap-1 sm:gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:cursor-not-allowed shrink-0 min-h-[30px] sm:min-h-0 ${
               isAdded
                 ? 'bg-emerald-600 text-white'
                 : isOutOfStock
@@ -247,12 +247,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           >
             {isAdded ? (
               <>
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span>Added</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="w-3.5 h-3.5" />
+                <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span>Buy</span>
               </>
             )}
