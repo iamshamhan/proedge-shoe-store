@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import type { Product } from '@/types/product';
 import { formatLKR } from '@/data/products';
+import { formatWhatsAppChatUrl } from '@/lib/whatsapp';
 
 interface HeroSectionProps {
   heroProduct?: Product | null;
+  whatsappNumber?: string;
 }
 
-export function HeroSection({ heroProduct }: HeroSectionProps) {
+export function HeroSection({ heroProduct, whatsappNumber }: HeroSectionProps) {
   const productName = heroProduct?.name ?? 'PROEDGE Runner X1';
   const productImage =
     heroProduct?.images?.[0] ||
@@ -81,10 +83,23 @@ export function HeroSection({ heroProduct }: HeroSectionProps) {
                 <p className="text-lg sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white truncate">Islandwide</p>
                 <p className="text-[11px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5">Express Delivery</p>
               </div>
-              <div>
-                <p className="text-lg sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">24/7</p>
-                <p className="text-[11px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5">WhatsApp Concierge</p>
-              </div>
+              <a
+                href={formatWhatsAppChatUrl(
+                  whatsappNumber,
+                  'Hello PROEDGE team! I have an inquiry about athletic footwear and sporting gear.',
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Chat with PROEDGE on WhatsApp"
+                className="group block hover:opacity-90 transition-opacity focus:outline-none"
+              >
+                <p className="text-lg sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  24/7
+                </p>
+                <p className="text-[11px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5 group-hover:underline">
+                  WhatsApp Concierge
+                </p>
+              </a>
             </div>
 
           </div>

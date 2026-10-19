@@ -368,8 +368,8 @@ export async function getFeaturedProducts(): Promise<Product[]> {
 export const getNewArrivals = cache(async (): Promise<Product[]> => {
   const db = await fetchProducts();
   // An empty real catalog must stay empty; demo data is only for a failed connection.
-  if (db) return db.filter((p) => p.newArrival).slice(0, 4);
-  return MOCK_PRODUCTS.filter((p) => p.newArrival).slice(0, 4);
+  if (db) return db.filter((p) => p.newArrival).slice(0, 8);
+  return MOCK_PRODUCTS.filter((p) => p.newArrival).slice(0, 8);
 });
 
 export const getSaleProducts = cache(async (): Promise<Product[]> => {

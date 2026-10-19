@@ -30,9 +30,9 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   saleDiscountPercent: 30,
   brandName: 'Pro Edge',
   contactAddress: '38 Attidiya Road Kawdana Dehiwala',
-  contactPhone: '0750678675',
+  contactPhone: '+94 76 387 1280',
   contactEmail: 'pro_edge@yahoo.com',
-  whatsappNumber: '0750678675',
+  whatsappNumber: '+94 76 387 1280',
   saleSectionTitle: 'Special Offers',
   saleSectionSubtitle: 'Explore our top discounted sneakers and gear.',
   newArrivalsTitle: 'New Arrivals',
@@ -113,9 +113,15 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
           : DEFAULT_STORE_SETTINGS.saleDiscountPercent,
       brandName: row.brand_name?.trim() || DEFAULT_STORE_SETTINGS.brandName,
       contactAddress: row.contact_address?.trim() || DEFAULT_STORE_SETTINGS.contactAddress,
-      contactPhone: row.contact_phone?.trim() || DEFAULT_STORE_SETTINGS.contactPhone,
+      contactPhone:
+        row.contact_phone && row.contact_phone.replace(/\s+/g, '') !== '+94112345678'
+          ? row.contact_phone.trim()
+          : DEFAULT_STORE_SETTINGS.contactPhone,
       contactEmail: row.contact_email?.trim() || DEFAULT_STORE_SETTINGS.contactEmail,
-      whatsappNumber: row.whatsapp_number?.trim() || DEFAULT_STORE_SETTINGS.whatsappNumber,
+      whatsappNumber:
+        row.whatsapp_number && row.whatsapp_number.replace(/\s+/g, '') !== '+94771234567'
+          ? row.whatsapp_number.trim()
+          : DEFAULT_STORE_SETTINGS.whatsappNumber,
       saleSectionTitle: row.sale_section_title?.trim() || DEFAULT_STORE_SETTINGS.saleSectionTitle,
       saleSectionSubtitle: row.sale_section_subtitle?.trim() || DEFAULT_STORE_SETTINGS.saleSectionSubtitle,
       newArrivalsTitle: row.new_arrivals_title?.trim() || DEFAULT_STORE_SETTINGS.newArrivalsTitle,

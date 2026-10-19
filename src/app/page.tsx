@@ -18,7 +18,7 @@ export default async function Home() {
 
   return (
     <>
-      <HeroSection heroProduct={heroProduct} />
+      <HeroSection heroProduct={heroProduct} whatsappNumber={settings.whatsappNumber} />
       <CategorySection categories={categories} />
       <FeaturedSection />
       <NewArrivalsSection />

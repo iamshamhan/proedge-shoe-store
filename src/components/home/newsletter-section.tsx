@@ -3,18 +3,17 @@
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
 import { useStoreSettings } from '@/context/settings-context';
+import { formatWhatsAppChatUrl } from '@/lib/whatsapp';
 
 export function NewsletterSection() {
   const { whatsappNumber } = useStoreSettings();
 
   const handleWhatsApp = () => {
-    if (!whatsappNumber) return;
-    let cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
-    if (cleanNumber.length === 10 && cleanNumber.startsWith('0')) {
-      cleanNumber = '94' + cleanNumber.substring(1);
-    }
-    const message = encodeURIComponent('Hello PROEDGE team! I have an inquiry.');
-    window.open("https://wa.me/" + cleanNumber + "?text=" + message, '_blank');
+    const url = formatWhatsAppChatUrl(
+      whatsappNumber,
+      'Hello PROEDGE team! I would like some advice on sizing and gear.',
+    );
+    window.open(url, '_blank');
   };
 
   return (
@@ -42,7 +41,7 @@ export function NewsletterSection() {
               <span>Chat with a Specialist</span>
             </button>
             <p className="mt-3 text-xs font-medium text-[#6e6e73] dark:text-[#86868b]">
-              {whatsappNumber || 'Available 24/7 on WhatsApp'}
+              {whatsappNumber || '+94 76 387 1280'} • Available 24/7 on WhatsApp
             </p>
           </div>
         </div>

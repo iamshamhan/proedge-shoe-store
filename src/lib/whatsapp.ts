@@ -86,11 +86,26 @@ export function generateWhatsAppOrderLink(params: GenerateWhatsAppOrderParams): 
   // Default to a fallback number if storePhone is missing or invalid
   const rawPhone = params.storePhone || STORE_CONFIG.whatsappNumber;
   let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
-  
   // if no country code is found and it's a Sri Lankan local format (e.g. 077), prefix +94
   if (cleanPhone.length === 10 && cleanPhone.startsWith('0')) {
     cleanPhone = '94' + cleanPhone.substring(1);
+  } else if (cleanPhone.length === 9) {
+    cleanPhone = '94' + cleanPhone;
   }
   
   return `https://wa.me/${cleanPhone}?text=${encodedText}`;
+}
+
+export function formatWhatsAppChatUrl(phone?: string, text?: string): string {
+  const rawPhone = phone || STORE_CONFIG.whatsappNumber || '94763871280';
+  let clean = rawPhone.replace(/[^0-9]/g, '');
+
+  if (clean.length === 10 && clean.startsWith('0')) {
+    clean = '94' + clean.substring(1);
+  } else if (clean.length === 9) {
+    clean = '94' + clean;
+  }
+
+  const encodedText = encodeURIComponent(text || 'Hello PROEDGE team! I have an inquiry.');
+  return `https://wa.me/${clean}?text=${encodedText}`;
 }

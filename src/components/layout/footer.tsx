@@ -48,12 +48,14 @@ export function Footer({ categories: propCategories }: FooterProps) {
     logoSuffix = '';
   }
 
-  const cleanPhone = contactPhone || '0750678675';
+  const cleanPhone = contactPhone || '+94 76 387 1280';
   const cleanEmail = contactEmail || 'pro_edge@yahoo.com';
   const cleanAddress = contactAddress || '38 Attidiya Road Kawdana Dehiwala';
   let whatsappNumber = (storeWhatsappNumber || cleanPhone).replace(/[^0-9]/g, '');
   if (whatsappNumber.length === 10 && whatsappNumber.startsWith('0')) {
     whatsappNumber = '94' + whatsappNumber.substring(1);
+  } else if (whatsappNumber.length === 9) {
+    whatsappNumber = '94' + whatsappNumber;
   }
 
   return (

@@ -19,7 +19,7 @@ export async function FeaturedSection() {
           linkHref="/sale"
         />
 
-        <ProductGrid products={saleProducts} />
+        <ProductGrid products={saleProducts.slice(0, 8)} />
       </div>
     </section>
   );

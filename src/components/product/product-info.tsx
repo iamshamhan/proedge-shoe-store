@@ -20,7 +20,7 @@ import {
   Heart,
   Share2,
 } from 'lucide-react';
-import { STORE_CONFIG } from '@/lib/config';
+import { formatWhatsAppChatUrl } from '@/lib/whatsapp';
 
 interface ProductInfoProps {
   product: Product;
@@ -411,10 +411,20 @@ export function ProductInfo({ product }: ProductInfoProps) {
           <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
           <span>7-Day Returns (T&amp;C apply)</span>
         </div>
-        <div className="flex items-center gap-2 col-span-2 pt-1">
-          <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>WhatsApp support: {whatsappNumber || STORE_CONFIG.whatsappNumber}</span>
-        </div>
+        <a
+          href={formatWhatsAppChatUrl(
+            whatsappNumber,
+            `Hello PROEDGE team! I have a question about ${product.name} (Rs. ${product.price.toLocaleString()}). Could you assist me?`
+          )}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 col-span-2 pt-1 text-xs text-[#6e6e73] dark:text-[#86868b] hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group cursor-pointer"
+        >
+          <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <span>
+            WhatsApp support: <span className="font-semibold underline decoration-emerald-500/40 group-hover:decoration-emerald-500">{whatsappNumber || '+94 76 387 1280'}</span>
+          </span>
+        </a>
       </div>
 
       {/* Sticky Mobile Bottom Add-to-Bag Bar */}

@@ -290,7 +290,13 @@ export function ProductForm({ categories, defaultCategoryId, product }: ProductF
                 type="number"
                 min={1}
                 value={compareAtPrice}
-                onChange={(e) => setCompareAtPrice(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setCompareAtPrice(val);
+                  if (val && price && Number(val) > Number(price)) {
+                    setIsOnSale(true);
+                  }
+                }}
                 placeholder="e.g. 10500"
                 className={inputClass}
               />
@@ -298,51 +304,68 @@ export function ProductForm({ categories, defaultCategoryId, product }: ProductF
           </div>
           {isOnSale && !compareAtPrice && (
             <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
-              Set a compare-at price to show the original price next to the discounted one.
+              Tip: Set a compare-at price to show the original price crossed out next to the discounted one.
             </p>
           )}
         </section>
 
         <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
-          <h2 className="mb-4 text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
-            Status &amp; Flags
-          </h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 px-4 py-3 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
+          <div className="mb-4 border-b border-zinc-200 dark:border-zinc-800 pb-3">
+            <h2 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white">
+              Storefront Visibility & Placement Flags
+            </h2>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              Choose exactly where this product is showcased on the homepage and across catalog sections.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 p-3.5 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
               <input
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
-                className="h-4 w-4 accent-amber-500"
+                className="h-4 w-4 mt-0.5 accent-amber-500"
               />
-              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200">Active</span>
+              <div>
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 block">Active</span>
+                <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block mt-0.5">Visible to customers in store</span>
+              </div>
             </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 px-4 py-3 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 p-3.5 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
               <input
                 type="checkbox"
                 checked={featured}
                 onChange={(e) => setFeatured(e.target.checked)}
-                className="h-4 w-4 accent-amber-500"
+                className="h-4 w-4 mt-0.5 accent-amber-500"
               />
-              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200">Featured</span>
+              <div>
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 block">Featured</span>
+                <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block mt-0.5">Recommended model</span>
+              </div>
             </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 px-4 py-3 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 p-3.5 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
               <input
                 type="checkbox"
                 checked={isNewArrival}
                 onChange={(e) => setIsNewArrival(e.target.checked)}
-                className="h-4 w-4 accent-amber-500"
+                className="h-4 w-4 mt-0.5 accent-amber-500"
               />
-              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200">New Arrival</span>
+              <div>
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 block">New Arrival</span>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium block mt-0.5">Homepage &ldquo;New Arrivals&rdquo;</span>
+              </div>
             </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 px-4 py-3 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 p-3.5 transition-colors hover:border-amber-500 dark:hover:border-amber-500">
               <input
                 type="checkbox"
                 checked={isOnSale}
                 onChange={(e) => setIsOnSale(e.target.checked)}
-                className="h-4 w-4 accent-amber-500"
+                className="h-4 w-4 mt-0.5 accent-amber-500"
               />
-              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200">On Sale</span>
+              <div>
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 block">Special Offer / Sale</span>
+                <span className="text-[11px] text-rose-600 dark:text-rose-400 font-medium block mt-0.5">Homepage &ldquo;Special Offers&rdquo; &amp; /sale</span>
+              </div>
             </label>
           </div>
         </section>

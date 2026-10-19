@@ -27,6 +27,12 @@ test.describe("Mobile-First Viewport Tests (iPhone 14/15 390x844)", () => {
     await expect(closeBtn).toBeVisible();
     await closeBtn.click();
     await expect(page.getByText("Explore All Gear")).toBeHidden();
+
+    // 3. Verify Floating WhatsApp Button is visible on mobile and links to +94 76 387 1280
+    const whatsappBtn = page.getByRole("link", { name: /Chat with PROEDGE team on WhatsApp/i });
+    await expect(whatsappBtn).toBeVisible();
+    const href = await whatsappBtn.getAttribute("href");
+    expect(href).toContain("wa.me/94763871280");
   });
 
   test("Mobile shop catalog filters and displays items cleanly", async ({ page }) => {

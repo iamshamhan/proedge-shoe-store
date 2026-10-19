@@ -23,9 +23,9 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
   const [brandName, setBrandName] = useState(initialSettings.brandName || 'Pro Edge');
   const [bannerTagline, setBannerTagline] = useState(initialSettings.bannerTagline || 'Built for Your Next Step');
   const [contactAddress, setContactAddress] = useState(initialSettings.contactAddress || '38 Attidiya Road Kawdana Dehiwala');
-  const [contactPhone, setContactPhone] = useState(initialSettings.contactPhone || '0750678675');
+  const [contactPhone, setContactPhone] = useState(initialSettings.contactPhone || '+94 76 387 1280');
   const [contactEmail, setContactEmail] = useState(initialSettings.contactEmail || 'pro_edge@yahoo.com');
-  const [whatsappNumber, setWhatsappNumber] = useState(initialSettings.whatsappNumber || '0750678675');
+  const [whatsappNumber, setWhatsappNumber] = useState(initialSettings.whatsappNumber || '+94 76 387 1280');
 
   // Delivery
   const [freeDeliveryEnabled, setFreeDeliveryEnabled] = useState(initialSettings.freeDeliveryEnabled);
@@ -150,15 +150,18 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
                 <input value={contactAddress} onChange={e => setContactAddress(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1.5">Phone Number</label>
-                <input value={contactPhone} onChange={e => setContactPhone(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
+                <label className="block text-xs font-semibold mb-1">Direct Call Phone Number</label>
+                <p className="text-[11px] text-[#6e6e73] dark:text-[#86868b] mb-1.5">Displayed in footer and contact concierge for voice calls.</p>
+                <input value={contactPhone} onChange={e => setContactPhone(e.target.value)} placeholder="+94 76 387 1280" className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1.5">WhatsApp Number (Homepage)</label>
-                <input value={whatsappNumber} onChange={e => setWhatsappNumber(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
+                <label className="block text-xs font-semibold mb-1">WhatsApp Business Number</label>
+                <p className="text-[11px] text-[#6e6e73] dark:text-[#86868b] mb-1.5">Used for the floating WhatsApp button, homepage concierge, product questions, and customer checkout orders.</p>
+                <input value={whatsappNumber} onChange={e => setWhatsappNumber(e.target.value)} placeholder="+94 76 387 1280" className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1.5">Support Email</label>
+                <label className="block text-xs font-semibold mb-1">Support Email</label>
+                <p className="text-[11px] text-[#6e6e73] dark:text-[#86868b] mb-1.5">Customer service email shown in footer and order confirmations.</p>
                 <input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
             </div>
