@@ -15,6 +15,7 @@ export interface CustomerOrderDetails {
 
 export interface OrderCartItem {
   name: string;
+  sku?: string | null;
   size: number | string;
   sizeSystem?: string;
   color: string;
@@ -48,7 +49,8 @@ export function generateWhatsAppOrderMessage({
 
   items.forEach((item, index) => {
     const sizeDisplay = item.sizeSystem && item.sizeSystem !== 'Custom' ? `${item.sizeSystem} ${item.size}` : `${item.size}`;
-    message += `${index + 1}. *${item.name}*\n`;
+    const skuDisplay = item.sku ? ` [${item.sku}]` : '';
+    message += `${index + 1}. *${item.name}*${skuDisplay}\n`;
     message += `   Size: ${sizeDisplay}\n`;
     message += `   Colour: ${item.color}\n`;
     message += `   Quantity: ${item.quantity}\n`;
@@ -66,6 +68,9 @@ export function generateWhatsAppOrderMessage({
   message += `Phone: ${customer.phone}\n`;
   if (customer.whatsapp) {
     message += `WhatsApp: ${customer.whatsapp}\n`;
+  }
+  if (customer.email) {
+    message += `Email: ${customer.email}\n`;
   }
   message += `Address: ${customer.address}\n`;
   message += `City: ${customer.city}\n`;
