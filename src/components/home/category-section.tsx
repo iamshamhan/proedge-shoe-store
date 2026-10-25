@@ -98,7 +98,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
                 alt={item.name}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover object-center motion-safe:group-hover:scale-105 transition-transform duration-700 ease-out"
+                className="object-cover object-center motion-safe:group-hover:scale-105 mix-blend-multiply dark:mix-blend-screen dark:brightness-90 transition-transform duration-700 ease-out"
               />
 
               {/* Semantic Gradient Overlay */}
