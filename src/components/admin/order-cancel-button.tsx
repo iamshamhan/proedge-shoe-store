@@ -8,6 +8,7 @@ import { ConfirmDialog } from './confirm-dialog';
 
 type Props = {
   orderId: string;
+  revision: number;
   orderNumber: string;
   currentStatus: string;
   redirectToList?: boolean;
@@ -16,6 +17,7 @@ type Props = {
 
 export function OrderCancelButton({
   orderId,
+  revision,
   orderNumber,
   currentStatus,
   redirectToList = false,
@@ -26,14 +28,14 @@ export function OrderCancelButton({
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (currentStatus === 'cancelled') {
+  if (['cancelled', 'shipped', 'delivered'].includes(currentStatus)) {
     return null;
   }
 
   const handleCancel = () => {
     setError(null);
     startTransition(async () => {
-      const res = await cancelOrderInquiry(orderId);
+      const res = await cancelOrderInquiry(orderId, revision);
       if ('error' in res) {
         setError(res.error);
       } else {

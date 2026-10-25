@@ -58,7 +58,7 @@ export default async function AdminOrderDetailPage({
     .eq('order_id', id);
 
   const getWhatsAppLink = () => {
-    let clean = order.phone.replace(/[^0-9]/g, '');
+    let clean = (order.whatsapp || order.phone).replace(/[^0-9]/g, '');
     if (clean.length === 10 && clean.startsWith('0')) {
       clean = '94' + clean.substring(1);
     }
@@ -130,6 +130,7 @@ export default async function AdminOrderDetailPage({
           </a>
 
           <OrderDeleteButton
+            revision={order.revision}
             orderId={order.id}
             orderNumber={order.order_number}
             redirectToList={true}
@@ -276,6 +277,7 @@ export default async function AdminOrderDetailPage({
             </h2>
             <div className="pt-1">
               <OrderStatusSelect
+                revision={order.revision}
                 orderId={order.id}
                 currentStatus={order.status}
                 size="md"

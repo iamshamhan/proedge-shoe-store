@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/types/product';
+import { resolveProductVariant } from '@/lib/product-variants';
 import { formatLKR } from '@/data/products';
 import { SizeSelector } from '@/components/product/size-selector';
 import { ColorSelector } from '@/components/product/color-selector';
@@ -47,12 +48,16 @@ export function ProductInfo({ product }: ProductInfoProps) {
     return product.colors && product.colors.length > 0 ? product.colors : ['Standard'];
   }, [variants, product.colors]);
 
+  const availableSystems = [...new Set(variants.map(v => v.sizeSystem ?? product.sizeSystem ?? 'Custom'))];
+  const [selectedSystem, setSelectedSystem] = useState(product.sizeSystem ?? availableSystems[0] ?? 'Custom');
+
   // Derive available sizes from variants list (or fallback to product.sizes)
   const availableSizes = useMemo(() => {
     if (variants.length > 0) {
       const unique = [
         ...new Set(
           variants
+            .filter(v => (v.sizeSystem ?? product.sizeSystem ?? 'Custom') === selectedSystem)
             .map((v) => (v.sizeValue ? String(v.sizeValue) : v.size ? String(v.size) : ''))
             .filter(Boolean),
         ),
@@ -67,7 +72,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       }
     }
     return (product.sizes ?? []).map(String);
-  }, [variants, product.sizes]);
+  }, [variants, product.sizes, product.sizeSystem, selectedSystem]);
 
   // Initial state: Auto-select if there is exactly one size (e.g. "One Size" or "Size 5")
   const autoSelectSize = availableSizes.length === 1 ? availableSizes[0] : null;
@@ -85,30 +90,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
     if (!selectedSize && availableSizes.length > 0) return null;
     const targetSize = String(selectedSize || (availableSizes.length === 0 ? 'One Size' : ''));
 
-    // Look for exact match (colour + sizeValue + sizeSystem)
-    let match = variants.find(
-      (v) =>
-        v.colour === selectedColor &&
-        (v.sizeValue === targetSize || String(v.size) === targetSize) &&
-        (!product.sizeSystem || v.sizeSystem === product.sizeSystem),
-    );
-
-    // Fallback without sizeSystem restriction
-    if (!match) {
-      match = variants.find(
-        (v) =>
-          v.colour === selectedColor &&
-          (v.sizeValue === targetSize || String(v.size) === targetSize),
-      );
-    }
-
-    // Fallback if product has only 1 variant
-    if (!match && variants.length === 1) {
-      match = variants[0];
-    }
-
-    return match ?? null;
-  }, [variants, selectedColor, selectedSize, availableSizes, product.sizeSystem]);
+    return resolveProductVariant(variants, selectedColor, selectedSystem, targetSize, product.sizeSystem);
+  }, [variants, selectedColor, selectedSize, availableSizes, selectedSystem, product.sizeSystem]);
 
   // Exact stock determination based on selected variant
   const currentStock = useMemo(() => {
@@ -130,12 +113,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const checkSizeOutOfStock = (sizeVal: number | string) => {
     if (variants.length === 0) return false;
     const sStr = String(sizeVal);
-    const v = variants.find(
-      (item) =>
-        item.colour === selectedColor &&
-        (item.sizeValue === sStr || String(item.size) === sStr),
-    );
-    return v ? v.stock <= 0 : false;
+    const v = resolveProductVariant(variants, selectedColor, selectedSystem, sStr, product.sizeSystem);
+    return !v || v.stock <= 0;
   };
 
   const discountPercent =
@@ -143,7 +122,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
       : 0;
 
-  const requiresSizeSelection = availableSizes.length > 1;
+  const requiresSizeSelection = availableSizes.length > 0;
 
   const handleAddToCart = () => {
     if (requiresSizeSelection && !selectedSize) {
@@ -154,7 +133,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
     }
     setValidationError(false);
 
-    if (currentStock <= 0) return;
+    if (currentStock <= 0 || (variants.length > 0 && !resolvedVariant)) return;
 
     const finalSize = selectedSize || (availableSizes.length > 0 ? availableSizes[0] : 'One Size');
     const finalSizeSystem = resolvedVariant?.sizeSystem || product.sizeSystem || 'Custom';
@@ -187,7 +166,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
     }
     setValidationError(false);
 
-    if (currentStock <= 0) return;
+    if (currentStock <= 0 || (variants.length > 0 && !resolvedVariant)) return;
 
     const finalSize = selectedSize || (availableSizes.length > 0 ? availableSizes[0] : 'One Size');
     const finalSizeSystem = resolvedVariant?.sizeSystem || product.sizeSystem || 'Custom';
@@ -341,12 +320,26 @@ export function ProductInfo({ product }: ProductInfoProps) {
         />
       )}
 
+      {availableSystems.length > 1 && (
+        <div className="space-y-2">
+          <label htmlFor="size-system" className="text-sm font-semibold">Size system</label>
+          <select id="size-system" value={selectedSystem}
+            className="w-full rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900 dark:bg-zinc-900 dark:text-white"
+            onChange={event => {
+              setSelectedSystem(event.target.value as typeof selectedSystem);
+              setSelectedSize(null);
+              setValidationError(false);
+            }}>
+            {availableSystems.map(system => <option key={system} value={system}>{system}</option>)}
+          </select>
+        </div>
+      )}
       {/* Size Selector */}
       {availableSizes.length > 0 && (
         <SizeSelector
           sizes={availableSizes}
           selectedSize={selectedSize}
-          sizeSystem={resolvedVariant?.sizeSystem || product.sizeSystem}
+          sizeSystem={selectedSystem}
           onSelectSize={(s) => {
             setSelectedSize(s);
             setValidationError(false);
@@ -432,7 +425,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <div className="min-w-0">
           <p className="text-xs font-medium text-[#6e6e73] dark:text-[#86868b] truncate">
             {selectedSize
-              ? `${product.sizeSystem && product.sizeSystem !== 'Custom' ? `${product.sizeSystem} ` : ''}${selectedSize} • ${selectedColor}`
+              ? `${selectedSystem !== 'Custom' ? `${selectedSystem} ` : ''}${selectedSize} • ${selectedColor}`
               : 'Select size above'}
           </p>
           <p className="text-base font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">

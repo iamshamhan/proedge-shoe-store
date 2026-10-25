@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     ".agents/**",
     ".next/**",
+    ".next-verify/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

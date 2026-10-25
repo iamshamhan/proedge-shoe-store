@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Inter, Geist_Mono } from 'next/font/google';
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -17,17 +16,6 @@ import { SettingsProvider } from '@/context/settings-context';
 import { ThemeProvider } from '@/context/theme-context';
 import { getStoreSettings } from '@/lib/settings';
 import { getCategoriesHierarchy } from '@/lib/supabase/products';
-
-const interSans = Inter({
-  variable: '--font-apple-sans',
-  subsets: ['latin'],
-  display: 'swap',
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 const siteUrl = getSiteUrl();
 
@@ -81,7 +69,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`light ${interSans.variable} ${geistMono.variable} h-full antialiased selection:bg-amber-500/20 selection:text-amber-600 dark:selection:bg-amber-400/25 dark:selection:text-amber-300`}
+      className="light h-full antialiased selection:bg-amber-500/20 selection:text-amber-600 dark:selection:bg-amber-400/25 dark:selection:text-amber-300"
       suppressHydrationWarning
     >
       <head>

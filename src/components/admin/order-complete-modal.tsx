@@ -65,6 +65,7 @@ export function OrderCompleteModal({
   const [isPending, startTransition] = useTransition();
 
   const [loadingItems, setLoadingItems] = useState(true);
+  const [revision, setRevision] = useState<number | null>(null);
   const [items, setItems] = useState<OrderItemRowState[]>([]);
   const [deliveryFee, setDeliveryFee] = useState(initialDeliveryFee);
   const [adminNotes, setAdminNotes] = useState(initialNotes || '');
@@ -83,6 +84,8 @@ export function OrderCompleteModal({
 
     let isMounted = true;
     setLoadingItems(true);
+    setRevision(null);
+    setItems([]);
     setError(null);
     setDeliveryFee(initialDeliveryFee);
     setAdminNotes(initialNotes || '');
@@ -99,6 +102,9 @@ export function OrderCompleteModal({
         if ('error' in itemsRes) {
           setError(itemsRes.error);
         } else {
+          setRevision(itemsRes.revision);
+          setDeliveryFee(itemsRes.deliveryFee);
+          setAdminNotes(itemsRes.notes || '');
           setItems(
             itemsRes.items.map((it: OrderItemWithStock) => ({
               tempId: it.id,
@@ -236,6 +242,7 @@ export function OrderCompleteModal({
 
   const handleConfirmSale = () => {
     setError(null);
+    if (revision === null) return;
     if (selectedItems.length === 0) {
       setError('Please select at least one item that was actually purchased.');
       return;
@@ -258,7 +265,8 @@ export function OrderCompleteModal({
         orderId,
         payload,
         deliveryFee,
-        adminNotes
+        adminNotes,
+        revision
       );
 
       if ('error' in res) {
@@ -654,7 +662,7 @@ export function OrderCompleteModal({
           <button
             type="button"
             onClick={handleConfirmSale}
-            disabled={isPending || loadingItems || selectedItems.length === 0 || hasInsufficientStock}
+            disabled={isPending || loadingItems || revision === null || selectedItems.length === 0 || hasInsufficientStock}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50 shadow-xs"
           >
             {isPending ? (

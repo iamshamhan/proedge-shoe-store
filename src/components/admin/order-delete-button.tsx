@@ -8,12 +8,14 @@ import { ConfirmDialog } from './confirm-dialog';
 
 type Props = {
   orderId: string;
+  revision: number;
   orderNumber: string;
   redirectToList?: boolean;
 };
 
 export function OrderDeleteButton({
   orderId,
+  revision,
   orderNumber,
   redirectToList = false,
 }: Props) {
@@ -25,7 +27,7 @@ export function OrderDeleteButton({
   const handleDelete = () => {
     setError(null);
     startTransition(async () => {
-      const res = await deleteOrder(orderId);
+      const res = await deleteOrder(orderId, revision);
       if ('error' in res) {
         setError(res.error);
       } else {

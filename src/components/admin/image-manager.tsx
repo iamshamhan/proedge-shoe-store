@@ -141,7 +141,7 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
   const handleDelete = useCallback(async () => {
     if (!targetDelete) return;
     setDeleting(true);
-    const result = await removeProductImage(targetDelete.id, targetDelete.url);
+    const result = await removeProductImage(targetDelete.id);
     setDeleting(false);
     if ('error' in result) {
       setError(result.error);

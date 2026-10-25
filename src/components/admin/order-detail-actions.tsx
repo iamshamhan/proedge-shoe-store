@@ -8,6 +8,7 @@ import { OrderCancelButton } from './order-cancel-button';
 interface Props {
   order: {
     id: string;
+    revision: number;
     order_number: string;
     customer_name: string;
     delivery_fee: number;
@@ -45,6 +46,7 @@ export function OrderDetailActions({ order }: Props) {
 
             <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full sm:w-auto">
               <OrderCancelButton
+                revision={order.revision}
                 orderId={order.id}
                 orderNumber={order.order_number}
                 currentStatus={order.status}
@@ -92,6 +94,7 @@ export function OrderDetailActions({ order }: Props) {
               </button>
 
               <OrderCancelButton
+                revision={order.revision}
                 orderId={order.id}
                 orderNumber={order.order_number}
                 currentStatus={order.status}

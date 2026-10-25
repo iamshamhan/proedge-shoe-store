@@ -23,9 +23,11 @@ import { ManualOrderModal } from './manual-order-modal';
 
 export interface AdminOrderSummary {
   id: string;
+  revision: number;
   order_number: string;
   customer_name: string;
   phone: string;
+  whatsapp?: string | null;
   email?: string | null;
   address: string;
   city: string;
@@ -82,7 +84,7 @@ export function OrdersTable({ initialOrders }: Props) {
   }, [initialOrders]);
 
   const getWhatsAppLink = (order: AdminOrderSummary) => {
-    let clean = order.phone.replace(/[^0-9]/g, '');
+    let clean = (order.whatsapp || order.phone).replace(/[^0-9]/g, '');
     if (clean.length === 10 && clean.startsWith('0')) {
       clean = '94' + clean.substring(1);
     }
@@ -101,7 +103,8 @@ export function OrdersTable({ initialOrders }: Props) {
   const handleExportCsv = () => {
     if (filteredOrders.length === 0) return;
     const escapeCsv = (val: unknown) => {
-      const str = String(val ?? '').replace(/"/g, '""');
+      const raw = String(val ?? '');
+      const str = (/^[=+@\-\t\r]/.test(raw) ? "'" + raw : raw).replace(/"/g, '""');
       return `"${str}"`;
     };
 
@@ -368,6 +371,7 @@ export function OrdersTable({ initialOrders }: Props) {
                   </div>
 
                   <OrderStatusSelect
+                    revision={order.revision}
                     orderId={order.id}
                     currentStatus={order.status}
                     size="sm"
@@ -439,6 +443,7 @@ export function OrdersTable({ initialOrders }: Props) {
 
                   {(order.status === 'pending' || order.status === 'confirmed') && (
                     <OrderCancelButton
+                      revision={order.revision}
                       orderId={order.id}
                       orderNumber={order.order_number}
                       currentStatus={order.status}
@@ -455,6 +460,7 @@ export function OrdersTable({ initialOrders }: Props) {
                   </Link>
 
                   <OrderDeleteButton
+                    revision={order.revision}
                     orderId={order.id}
                     orderNumber={order.order_number}
                   />
@@ -538,6 +544,7 @@ export function OrdersTable({ initialOrders }: Props) {
                     {/* Status Dropdown */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <OrderStatusSelect
+                        revision={order.revision}
                         orderId={order.id}
                         currentStatus={order.status}
                       />
@@ -561,6 +568,7 @@ export function OrdersTable({ initialOrders }: Props) {
 
                             {/* Cancel Inquiry button (No stock change) */}
                             <OrderCancelButton
+                              revision={order.revision}
                               orderId={order.id}
                               orderNumber={order.order_number}
                               currentStatus={order.status}
@@ -582,6 +590,7 @@ export function OrdersTable({ initialOrders }: Props) {
                             </button>
 
                             <OrderCancelButton
+                              revision={order.revision}
                               orderId={order.id}
                               orderNumber={order.order_number}
                               currentStatus={order.status}
@@ -614,6 +623,7 @@ export function OrdersTable({ initialOrders }: Props) {
 
                         {/* Delete button */}
                         <OrderDeleteButton
+                          revision={order.revision}
                           orderId={order.id}
                           orderNumber={order.order_number}
                         />

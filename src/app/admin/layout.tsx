@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 
+// Admin pages depend on authenticated request state and must never be prerendered.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };

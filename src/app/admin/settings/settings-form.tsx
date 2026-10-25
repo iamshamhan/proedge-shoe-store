@@ -52,6 +52,7 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
     setMessage(null);
 
     startTransition(async () => {
+      try {
       // 1. Save general settings
       const res = await updateStoreSettings({
         brand_name: brandName.trim(),
@@ -71,6 +72,11 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
         new_arrivals_title: newArrivalsTitle.trim(),
         new_arrivals_subtitle: newArrivalsSubtitle.trim(),
       });
+
+      if ('error' in res) {
+        setMessage({ type: 'error', text: res.error });
+        return;
+      }
 
       // 2. Save Profile Settings if changed
       let profileRes: { success?: boolean; error?: string } = { success: true };
@@ -95,6 +101,9 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
           type: 'error',
           text: (res as { error?: string }).error || profileRes.error || 'Failed to save settings.',
         });
+      }
+      } catch {
+        setMessage({ type: 'error', text: 'Connection interrupted. Reload settings before retrying.' });
       }
     });
   };
@@ -223,15 +232,16 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
 
           <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 soft-shadow">
             <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Global Sale Banner</h2>
+            <p className="mb-4 text-xs text-zinc-500">This controls the promotion banner only. Set each product’s actual selling price in its product editor; checkout charges that price.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="flex items-center gap-2 text-xs font-semibold mb-1.5 cursor-pointer">
                   <input type="checkbox" checked={saleEnabled} onChange={e => setSaleEnabled(e.target.checked)} className="accent-amber-500 w-4 h-4" />
-                  Enable Sitewide Sale
+                  Show Sale Promotion
                 </label>
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1.5">Sale Discount %</label>
+                <label className="block text-xs font-semibold mb-1.5">Advertised Maximum Discount %</label>
                 <input type="number" value={saleDiscountPercent} onChange={e => setSaleDiscountPercent(Number(e.target.value))} className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] px-3.5 py-2.5 text-sm" />
               </div>
             </div>

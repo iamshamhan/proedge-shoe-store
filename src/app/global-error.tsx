@@ -1,17 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Geist, Geist_Mono } from 'next/font/google';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export default function GlobalError({
   error,
@@ -25,7 +14,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en">
       <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 antialiased">
         <div className="flex flex-1 items-center justify-center p-6">
           <div className="w-full max-w-md text-center">

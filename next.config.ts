@@ -26,6 +26,8 @@ const cspHeader = `
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Bound prerender concurrency so large-core build hosts do not flood the catalog API.
+  experimental: { cpus: 2 },
   images: {
     remotePatterns: [
       {

@@ -21,6 +21,7 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { signOut } from './actions';
 import { formatLKR } from '@/data/products';
 import { OrderStatusBadge } from '@/components/admin/order-status-badge';
+import { readAllRows } from '@/lib/supabase/read-all';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +69,7 @@ export default async function AdminPage() {
     { count: orderCount },
     { count: pendingOrderCount },
     { data: recentOrders },
-    { data: confirmedOrders },
+    confirmedOrders,
     { data: lowStockVariants },
   ] = await Promise.all([
     supabase.from('products').select('id', { count: 'exact', head: true }),
@@ -85,10 +86,11 @@ export default async function AdminPage() {
       .select('id, order_number, customer_name, phone, city, total, status, created_at')
       .order('created_at', { ascending: false })
       .limit(5),
-    supabase
+    readAllRows((from, to) => supabase
       .from('orders')
       .select('total')
-      .in('status', ['confirmed', 'processing', 'shipped', 'delivered']),
+      .in('status', ['confirmed', 'processing', 'ready_to_ship', 'shipped', 'delivered'])
+      .order('id').range(from, to)),
     supabase
       .from('product_variants')
       .select('id, product_id, colour, size, size_system, size_value, stock, products!inner(id, name, slug, is_active)')
@@ -107,7 +109,7 @@ export default async function AdminPage() {
     {
       label: 'Confirmed Sales',
       value: formatLKR(confirmedRevenue),
-      sub: `${(confirmedOrders ?? []).length} completed orders`,
+      sub: `${confirmedOrders.length} confirmed orders`,
       icon: Banknote,
       highlight: false,
     },

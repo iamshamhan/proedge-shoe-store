@@ -4,6 +4,7 @@ import { getAuthUser } from '@/lib/auth/admin';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { OrdersTable, type AdminOrderSummary } from '@/components/admin/orders-table';
 import { ClipboardList } from 'lucide-react';
+import { readAllRows } from '@/lib/supabase/read-all';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,14 +19,14 @@ export default async function AdminOrdersPage() {
   const supabase = await getSupabaseServer();
 
   // Fetch orders and item counts
-  const [{ data: rawOrders }, { data: orderItemCounts }] = await Promise.all([
-    supabase
+  const [rawOrders, orderItemCounts] = await Promise.all([
+    readAllRows((from, to) => supabase
       .from('orders')
       .select('*')
-      .order('created_at', { ascending: false }),
-    supabase
+      .order('created_at', { ascending: false }).order('id').range(from, to)),
+    readAllRows((from, to) => supabase
       .from('order_items')
-      .select('order_id, quantity'),
+      .select('order_id, quantity').order('id').range(from, to)),
   ]);
 
   const countMap = new Map<string, number>();
@@ -38,12 +39,14 @@ export default async function AdminOrdersPage() {
 
   const orders: AdminOrderSummary[] = (rawOrders ?? []).map((o) => ({
     id: o.id,
+    revision: o.revision,
     order_number: o.order_number,
     customer_name: o.customer_name,
     phone: o.phone,
+    whatsapp: o.whatsapp,
     email: o.email,
     address: o.address,
-    city: o.city,
+    city: o.city ?? '',
     postal_code: o.postal_code,
     delivery_fee: o.delivery_fee,
     subtotal: o.subtotal,

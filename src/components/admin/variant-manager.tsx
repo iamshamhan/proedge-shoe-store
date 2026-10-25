@@ -164,14 +164,20 @@ export function VariantManager({ productId, variants: initialVariants }: Variant
     async (variant: Variant, nextStock: number) => {
       setError(null);
       setBusy(variant.id);
-      const result = await updateVariantStock(variant.id, nextStock);
-      setBusy(null);
-      if ('error' in result) {
-        setError(result.error);
-        return;
+      try {
+        const result = await updateVariantStock(variant.id, nextStock, variant.stock);
+        if ('error' in result) {
+          setError(result.error);
+          router.refresh();
+          return;
+        }
+        setVariants((prev) => prev.map((v) => (v.id === variant.id ? { ...v, stock: nextStock } : v)));
+        router.refresh();
+      } catch {
+        setError('Could not save stock. Refresh the product before retrying.');
+      } finally {
+        setBusy(null);
       }
-      setVariants((prev) => prev.map((v) => (v.id === variant.id ? { ...v, stock: nextStock } : v)));
-      router.refresh();
     },
     [router],
   );

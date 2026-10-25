@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PROEDGE storefront and admin
 
-## Getting Started
+Next.js App Router storefront with Supabase catalog, admin order management and WhatsApp checkout inquiries.
 
-First, run the development server:
+## Local development
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Use Node.js 24 and npm. Run `npm ci`, copy `.env.example` to `.env.local`, configure your Supabase URL/public key and canonical site URL, then run `npm run dev`.
+
+Never commit `.env.local`, admin credentials or service-role keys. Admin access is checked using the authenticated user's trusted `app_metadata.is_admin` claim and database RLS.
+
+## Order and inventory rules
+
+- Checkout creates an inquiry at current database product prices. It does not reserve stock.
+- Confirming a sale reserves stock through transactional admin RPCs. Repeated confirmation does not reserve twice.
+- Cancelling an unfulfilled sale restores reserved stock once. Shipped/delivered orders cannot be cancelled here; deleting delivered history does not restore inventory.
+- Order revisions reject stale edits. Stock adjustments compare the value the administrator originally loaded.
+- Request IDs make retries of the same inquiry idempotent. Database throttling is present; verified bot protection is not configured.
+- Sale campaign text is descriptive. Set product prices explicitly to offer discounts.
+
+## Checks
+
+```sh
+npm run test:unit
+npm run lint
+npx tsc --noEmit --incremental false
+npm run build
+npm run test:e2e
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The production build reads Supabase catalog/settings; it requires network access and correct environment configuration. Prerender concurrency is capped at two workers.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Playwright starts a production server on port 3005. Checkout UI tests intercept submissions and never create live orders. The cache mutation test is disabled unless `E2E_MUTATIONS_ALLOWED=true`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `E2E_PRODUCT_ID` and `E2E_PRODUCT_SLUG` identify a dedicated test fixture. Do not opt in against real merchandise.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Database and release
 
-## Learn More
+See [database workflow](docs/database.md), [repair status](REVIEW_AND_FIXES.md), and the historical [handover](PROEDGE_COMPLETE_HANDOVER.md). Apply reviewed additive migrations before deploying code that calls their RPCs. A push to `main` can trigger the connected Vercel production deployment; verify its status separately.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Product duplication runs atomically and creates an inactive copy. Image URLs can be shared between copies. Deleting an image reference or a product therefore retains physical storage objects; any future orphan cleanup must account for all references and concurrent uploads.

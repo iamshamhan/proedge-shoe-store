@@ -12,11 +12,11 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ heroProduct, whatsappNumber }: HeroSectionProps) {
-  const productName = heroProduct?.name ?? 'PROEDGE Runner X1';
+  const productName = heroProduct?.name ?? 'Explore the collection';
   const productImage =
     heroProduct?.images?.[0] ||
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop';
-  const productPrice = heroProduct?.price ? formatLKR(heroProduct.price) : 'Rs. 24,500';
+    '/product-placeholder.svg';
+  const productPrice = heroProduct ? formatLKR(heroProduct.price) : 'Browse products';
   const productBadge = heroProduct?.sport
     ? `${heroProduct.sport} Spotlight`
     : heroProduct?.category

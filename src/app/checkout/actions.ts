@@ -1,6 +1,5 @@
 'use server';
 
-import { revalidatePath } from "next/cache";
 import { getSupabaseServer } from '@/lib/supabase/server';
 import type { ValidatedOrder } from '@/types/order';
 
@@ -15,6 +14,7 @@ export type CheckoutItemInput = {
 };
 
 export type CheckoutCustomerInput = {
+  requestId?: string;
   fullName: string;
   phone: string;
   whatsapp?: string;
@@ -29,8 +29,12 @@ const PHONE_RE = /^0[0-9]{9}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_QTY = 99;
 const MAX_ITEMS = 30;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SIZE_SYSTEMS = ['EU', 'UK', 'US', 'Custom'];
 
 function mapOrderError(message: string): string {
+  if (message.includes('ERR_RATE_LIMIT')) return 'Too many order inquiries. Please wait an hour or contact us on WhatsApp.';
+  if (message.includes('ERR_REQUEST_CHANGED')) return 'This request changed. Refresh checkout before trying again.';
   if (message.includes('ERR_INSUFFICIENT_STOCK')) {
     return 'Sorry, one or more items no longer have enough stock. Please adjust your order and try again.';
   }
@@ -46,7 +50,7 @@ function mapOrderError(message: string): string {
   if (message.includes('ERR_CUSTOMER_INVALID')) {
     return 'Please complete all required delivery fields.';
   }
-  return 'We could not place your order right now. [Details: ' + message + ']';
+  return 'We could not place your order right now. Please try again.';
 }
 
 export async function placeOrder(
@@ -54,6 +58,17 @@ export async function placeOrder(
   items: CheckoutItemInput[],
 ): Promise<{ success: true; order: ValidatedOrder } | { success: false; error: string }> {
   // ---- Server-side validation (the client is never trusted) ----
+  if (!customer || typeof customer !== 'object') return { success: false, error: 'Invalid customer details.' };
+  const limits = { fullName: 200, phone: 20, whatsapp: 20, email: 254, address: 1000, city: 100, postalCode: 20, notes: 4000 };
+  for (const [key, limit] of Object.entries(limits)) {
+    const value = customer[key as keyof CheckoutCustomerInput];
+    if (value !== undefined && (typeof value !== 'string' || value.length > limit)) {
+      return { success: false, error: 'Please check the delivery details and field lengths.' };
+    }
+  }
+  if (customer.requestId !== undefined && (typeof customer.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customer.requestId))) {
+    return { success: false, error: 'Invalid checkout request. Please refresh the page.' };
+  }
   const fullName = (customer?.fullName ?? '').trim();
   const phone = (customer?.phone ?? '').trim();
   const whatsapp = (customer?.whatsapp ?? '').trim() || undefined;
@@ -79,24 +94,41 @@ export async function placeOrder(
   if (!Array.isArray(items) || items.length === 0 || items.length > MAX_ITEMS) {
     return { success: false, error: 'Your cart is empty or contains too many items.' };
   }
-
-  const cleanItems = items.map((it) => {
-    const qty = Math.trunc(Number(it.quantity));
-    const sizeStr = it.size !== undefined && it.size !== null ? String(it.size) : '';
-    return {
-      productId: String(it.productId ?? ''),
-      variantId: it.variantId ? String(it.variantId) : null,
-      size: sizeStr,
-      sizeSystem: it.sizeSystem ? String(it.sizeSystem) : 'EU',
-      sizeValue: it.sizeValue ? String(it.sizeValue) : sizeStr,
-      color: String(it.color ?? ''),
-      quantity: Number.isFinite(qty) && qty >= 1 && qty <= MAX_QTY ? qty : 0,
-    };
-  });
-
-  if (cleanItems.some((it) => !it.productId || it.quantity <= 0)) {
-    return { success: false, error: 'Your cart contains an invalid item.' };
+  if (items.some(it => !it || typeof it !== 'object' || !Number.isInteger(it.quantity))) {
+    return { success: false, error: 'Your cart contains an invalid quantity.' };
   }
+
+  for (const it of items) {
+    if (!it || typeof it !== 'object' || Array.isArray(it) || typeof it.productId !== 'string' || !UUID_RE.test(it.productId)
+      || (it.variantId != null && (typeof it.variantId !== 'string' || !UUID_RE.test(it.variantId)))
+      || it.quantity < 1 || it.quantity > MAX_QTY) {
+      return { success: false, error: 'Your cart contains an invalid item.' };
+    }
+    if (it.size !== undefined && !(
+      (typeof it.size === 'string' && it.size.length <= 100)
+      || (typeof it.size === 'number' && Number.isFinite(it.size) && it.size > 0)
+    )) {
+      return { success: false, error: 'Your cart contains an invalid size.' };
+    }
+    if ((it.sizeSystem !== undefined && !SIZE_SYSTEMS.includes(it.sizeSystem))
+      || (it.sizeValue !== undefined && (typeof it.sizeValue !== 'string' || it.sizeValue.length > 100))
+      || (it.color !== undefined && (typeof it.color !== 'string' || it.color.length > 200))) {
+      return { success: false, error: 'Your cart contains invalid size or colour details.' };
+    }
+    if (!it.variantId && (!(it.sizeValue?.trim() || String(it.size ?? '').trim()) || !it.color?.trim())) {
+      return { success: false, error: 'Please select a size and colour for each item.' };
+    }
+  }
+
+  const cleanItems = items.map((it) => ({
+    productId: it.productId,
+    variantId: it.variantId ?? null,
+    size: String(it.size ?? '').trim(),
+    sizeSystem: it.sizeSystem ?? 'EU',
+    sizeValue: it.sizeValue?.trim() || String(it.size ?? '').trim(),
+    color: it.color?.trim() ?? '',
+    quantity: it.quantity,
+  }));
 
   // The database does all pricing/stock/availability work. Prices, product
   // names, subtotals and totals are intentionally NOT sent from the client —
@@ -115,6 +147,7 @@ export async function placeOrder(
   );
 
   const rpcCustomer = {
+    requestId: customer.requestId ?? null,
     fullName,
     phone,
     whatsapp: whatsapp ?? null,
@@ -144,23 +177,7 @@ export async function placeOrder(
     return { success: false, error: 'We received an unexpected response from the server.' };
   }
 
-    revalidatePath("/shop", "page");
-
-  try {
-    const productIds = Array.from(new Set(cleanItems.map(i => i.productId)));
-    const { data: products } = await supabase
-      .from("products")
-      .select("slug")
-      .in("id", productIds);
-      
-    if (products) {
-      products.forEach(p => {
-        if (p.slug) revalidatePath(`/product/${p.slug}`, "page");
-      });
-    }
-  } catch (err) {
-    console.error("Failed to revalidate product paths", err);
-  }
-
+  // Inquiries do not change inventory. Return the saved receipt directly;
+  // a later catalog/cache failure must not turn a successful save into a failure.
   return { success: true, order: data as unknown as ValidatedOrder };
 }

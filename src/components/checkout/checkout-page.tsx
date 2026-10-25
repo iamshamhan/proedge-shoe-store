@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -61,6 +61,9 @@ export function CheckoutPage() {
   const [orderData, setOrderData] = useState<ValidatedOrder | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const submission = useRef<{ fingerprint: string; id: string } | null>(null);
+  const submitting = useRef(false);
+
   const deliveryFee = getDeliveryFee(subtotal, settings);
   const total = subtotal + deliveryFee;
 
@@ -97,7 +100,7 @@ export function CheckoutPage() {
     e.preventDefault();
 
     // Prevent duplicate accidental submissions.
-    if (isSubmitting || orderData) return;
+    if (submitting.current || orderData) return;
 
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -105,72 +108,84 @@ export function CheckoutPage() {
       return;
     }
 
+    submitting.current = true;
     setIsSubmitting(true);
     setSubmitError(null);
 
     // The client sends only identifiers + quantities + delivery details.
     // Prices, names, subtotals and totals are calculated by the server.
-    const result = await placeOrder(
-      {
-        fullName: form.fullName.trim(),
-        phone: form.phone.trim(),
-        whatsapp: form.whatsapp.trim() || undefined,
-        email: form.email.trim() || undefined,
-        address: form.address.trim(),
-        city: form.city.trim(),
-        postalCode: form.postalCode.trim() || undefined,
-        notes: form.notes.trim() || undefined,
-      },
-      items.map((item) => ({
-        productId: item.productId,
-        variantId: item.variantId,
-        size: item.size,
-        sizeSystem: item.sizeSystem,
-        color: item.color,
-        quantity: item.quantity,
-      })),
-    );
+    try {
+      const fingerprint = JSON.stringify({ form, items });
+      if (submission.current?.fingerprint !== fingerprint) {
+        submission.current = { fingerprint, id: crypto.randomUUID() };
+      }
+      const result = await placeOrder(
+        {
+          requestId: submission.current.id,
+          fullName: form.fullName.trim(),
+          phone: form.phone.trim(),
+          whatsapp: form.whatsapp.trim() || undefined,
+          email: form.email.trim() || undefined,
+          address: form.address.trim(),
+          city: form.city.trim(),
+          postalCode: form.postalCode.trim() || undefined,
+          notes: form.notes.trim() || undefined,
+        },
+        items.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          size: item.size,
+          sizeSystem: item.sizeSystem,
+          color: item.color,
+          quantity: item.quantity,
+        })),
+      );
 
-    if (!result.success) {
-      setSubmitError(result.error);
+      if (!result.success) {
+        setSubmitError(result.error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      const order = result.order;
+
+      // Build the WhatsApp message ONLY from server-validated order data.
+      const url = generateWhatsAppOrderLink({
+        orderNumber: order.order_number,
+        storePhone: settings.whatsappNumber || settings.contactPhone,
+        customer: {
+          fullName: order.customer.fullName,
+          phone: order.customer.phone,
+          whatsapp: order.customer.whatsapp,
+          email: order.customer.email,
+          address: order.customer.address,
+          city: order.customer.city,
+          postalCode: order.customer.postalCode,
+          notes: order.customer.notes,
+        },
+        items: order.items.map((i) => ({
+          name: i.name,
+          size: i.size_value || i.size,
+          sizeSystem: i.size_system,
+          color: i.colour,
+          quantity: i.quantity,
+          price: i.unit_price,
+        })),
+        subtotal: order.subtotal,
+        deliveryFee: order.delivery_fee,
+        total: order.total,
+      });
+
+      window.open(url, '_blank', 'noopener,noreferrer');
+      setOrderUrl(url);
+      setOrderData(order);
+      clearCart();
+    } catch {
+      setSubmitError('The connection was interrupted. Try again; the same request will not create a duplicate order.');
+    } finally {
+      submitting.current = false;
       setIsSubmitting(false);
-      return;
     }
-
-    const order = result.order;
-
-    // Build the WhatsApp message ONLY from server-validated order data.
-    const url = generateWhatsAppOrderLink({
-      orderNumber: order.order_number,
-      storePhone: settings.whatsappNumber || settings.contactPhone,
-      customer: {
-        fullName: order.customer.fullName,
-        phone: order.customer.phone,
-        whatsapp: order.customer.whatsapp,
-        email: order.customer.email,
-        address: order.customer.address,
-        city: order.customer.city,
-        postalCode: order.customer.postalCode,
-        notes: order.customer.notes,
-      },
-      items: order.items.map((i) => ({
-        name: i.name,
-        size: i.size_value || i.size,
-        sizeSystem: i.size_system,
-        color: i.colour,
-        quantity: i.quantity,
-        price: i.unit_price,
-      })),
-      subtotal: order.subtotal,
-      deliveryFee: order.delivery_fee,
-      total: order.total,
-    });
-
-    window.open(url, '_blank', 'noopener,noreferrer');
-    setOrderUrl(url);
-    setOrderData(order);
-    clearCart();
-    setIsSubmitting(false);
   };
 
   if (items.length === 0 && !orderUrl) {
@@ -215,8 +230,7 @@ export function CheckoutPage() {
             <p className="mt-3 text-[#6e6e73] dark:text-[#86868b] text-sm sm:text-base leading-relaxed">
               Your order <span className="font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">#{orderData.order_number}</span>{' '}
               was placed successfully and WhatsApp should have opened with a pre-filled
-              message. If it did not open, use the button below. Your order is confirmed
-              once you press <span className="font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">Send</span> in WhatsApp.
+              message. If it did not open, use the button below. Press <span className="font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">Send</span> in WhatsApp to contact us. Your inquiry is confirmed only after the store checks availability and agrees the sale.
             </p>
 
             <div className="mt-8 rounded-[24px] bg-[#1d1d1f] dark:bg-black border border-white/[0.08] text-[#f5f5f7] p-6 text-left space-y-3 text-sm">

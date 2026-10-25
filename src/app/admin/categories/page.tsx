@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { readAllRows } from '@/lib/supabase/read-all';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -41,13 +42,14 @@ export default async function CategoriesAdminPage() {
   if (!user?.isAdmin) redirect('/admin/login');
 
   const supabase = await getSupabaseServer();
-  const [{ data: categoryData }, { data: productRows }] = await Promise.all([
-    supabase
+  const [categoryData, productRows] = await Promise.all([
+    readAllRows<CategoryRow>((from, to) => supabase
       .from('categories')
       .select('id, name, slug, parent_id, image_url, sort_order')
       .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: true }),
-    supabase.from('products').select('category_id'),
+      .order('created_at', { ascending: true }).order('id').range(from, to)),
+    readAllRows<{ id: string; category_id: string }>((from, to) =>
+      supabase.from('products').select('id, category_id').order('id').range(from, to)),
   ]);
 
   const categories = (categoryData ?? []) as CategoryRow[];

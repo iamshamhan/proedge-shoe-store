@@ -5,6 +5,7 @@ import { Plus, Package } from 'lucide-react';
 import { getAuthUser } from '@/lib/auth/admin';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { ProductTable } from '@/components/admin/product-table';
+import { readAllRows } from '@/lib/supabase/read-all';
 
 export const metadata: Metadata = {
   title: 'Products | Admin',
@@ -15,17 +16,17 @@ export default async function AdminProductsPage() {
   if (!user?.isAdmin) redirect('/admin/login');
 
   const supabase = await getSupabaseServer();
-  const [{ data: products }, { data: categories }] = await Promise.all([
-    supabase
+  const [products, categories] = await Promise.all([
+    readAllRows((from, to) => supabase
       .from('products')
       .select(
         'id, name, slug, price, is_active, featured, is_new_arrival, is_on_sale, category_id, categories(id, slug, name, parent_id), product_images(url, sort_order), product_variants(id, stock)',
       )
-      .order('created_at', { ascending: false }),
-    supabase
+      .order('created_at', { ascending: false }).order('id').range(from, to)),
+    readAllRows((from, to) => supabase
       .from('categories')
       .select('id, slug, name, parent_id, sort_order')
-      .order('sort_order', { ascending: true }),
+      .order('sort_order', { ascending: true }).order('id').range(from, to)),
   ]);
 
   return (

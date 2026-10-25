@@ -61,15 +61,14 @@ type DbSettingsRow = {
 
 /**
  * Server-only or static fetch of store settings.
- * If Supabase is unavailable or table does not exist yet,
- * it returns DEFAULT_STORE_SETTINGS gracefully.
+ * Fail explicitly when business settings cannot be loaded; never invent delivery prices.
  */
 export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
-    return DEFAULT_STORE_SETTINGS;
+    throw new Error('Store settings are unavailable. Please try again later.');
   }
 
   try {
@@ -90,10 +89,15 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
       .maybeSingle();
 
     if (error || !data) {
-      return DEFAULT_STORE_SETTINGS;
+      throw new Error('Store settings are unavailable. Please try again later.');
     }
 
     const row = data as unknown as DbSettingsRow;
+    if (typeof row.free_delivery_enabled !== 'boolean'
+      || !Number.isFinite(row.free_delivery_threshold) || row.free_delivery_threshold < 0
+      || !Number.isFinite(row.default_delivery_fee) || row.default_delivery_fee < 0) {
+      throw new Error('Invalid delivery settings.');
+    }
     return {
       freeDeliveryEnabled: row.free_delivery_enabled ?? DEFAULT_STORE_SETTINGS.freeDeliveryEnabled,
       freeDeliveryThreshold:
@@ -129,6 +133,6 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
     };
   } catch (err) {
     console.error('Error fetching store settings:', err);
-    return DEFAULT_STORE_SETTINGS;
+    throw new Error('Store settings are unavailable. Please try again later.');
   }
 });

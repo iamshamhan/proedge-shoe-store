@@ -8,6 +8,7 @@ import { type OrderStatus, VALID_ORDER_STATUSES } from '@/types/order';
 
 type Props = {
   orderId: string;
+  revision: number;
   currentStatus: string;
   size?: 'sm' | 'md';
 };
@@ -24,6 +25,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 
 export function OrderStatusSelect({
   orderId,
+  revision,
   currentStatus,
   size = 'sm',
 }: Props) {
@@ -42,7 +44,7 @@ export function OrderStatusSelect({
     setStatus(newStatus);
 
     startTransition(async () => {
-      const res = await updateOrderStatus(orderId, newStatus as OrderStatus);
+      const res = await updateOrderStatus(orderId, newStatus as OrderStatus, revision);
       if ('error' in res) {
         setError(res.error);
         setStatus(currentStatus); // Revert on failure
@@ -62,12 +64,13 @@ export function OrderStatusSelect({
       <div className="relative inline-flex items-center">
         <select
           value={status}
-          disabled={isPending}
+          disabled={isPending || currentStatus === 'delivered'}
+          aria-label="Order status"
           onChange={(e) => handleChange(e.target.value)}
           className={`${selectClasses} ${isPending ? 'pr-8' : ''} text-zinc-900 dark:text-white cursor-pointer disabled:opacity-50`}
         >
           {VALID_ORDER_STATUSES.map((st) => (
-            <option key={st} value={st}>
+            <option key={st} value={st} disabled={currentStatus === 'shipped' && st !== 'shipped' && st !== 'delivered'}>
               {STATUS_LABELS[st]}
             </option>
           ))}

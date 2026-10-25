@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth/admin';
+import { readAllRows } from '@/lib/supabase/read-all';
 import {
   VALID_ORDER_STATUSES,
   type OrderStatus,
@@ -163,11 +164,7 @@ export async function deleteProduct(
 
   const supabase = await getSupabaseServer();
 
-  // Fetch product slug and images before deleting
-  const [{ data: prod }, { data: imgs }] = await Promise.all([
-    supabase.from('products').select('slug').eq('id', id).single(),
-    supabase.from('product_images').select('url').eq('product_id', id),
-  ]);
+  const { data: prod } = await supabase.from('products').select('slug').eq('id', id).single();
 
   const { error } = await supabase.from('products').delete().eq('id', id);
   if (error) {
@@ -180,15 +177,7 @@ export async function deleteProduct(
     return { error: error.message };
   }
 
-  // Clean up storage images after successful product deletion
-  if (imgs && imgs.length > 0) {
-    const storagePaths = imgs
-      .map((img) => img.url?.split('/product-images/')[1])
-      .filter((p): p is string => Boolean(p));
-    if (storagePaths.length > 0) {
-      await supabase.storage.from('product-images').remove(storagePaths);
-    }
-  }
+  // Image objects can be shared by duplicate products. Retain them for offline orphan cleanup.
 
   await revalidateProductPaths(prod?.slug, id);
 
@@ -253,76 +242,11 @@ export async function duplicateProduct(
 
   const supabase = await getSupabaseServer();
 
-  const { data: source, error: fetchErr } = await supabase
-    .from('products')
-    .select(
-      `
-      name, slug, description, category_id, price, compare_at_price,
-      featured, is_new_arrival, is_on_sale,
-      product_images (url, alt_text, sort_order),
-      product_variants (colour, size, size_system, size_value, stock)
-    `,
-    )
-    .eq('id', sourceId)
-    .single();
-
-  if (fetchErr || !source) {
-    return { error: fetchErr?.message || 'Source product not found.' };
-  }
-
-  const suffix = Math.random().toString(36).substring(2, 6);
-  const newName = `${source.name} (Copy)`;
-  const newSlug = `${source.slug}-copy-${suffix}`;
-
-  const { data: created, error: insertErr } = await supabase
-    .from('products')
-    .insert({
-      name: newName,
-      slug: newSlug,
-      description: source.description,
-      category_id: source.category_id,
-      price: source.price,
-      compare_at_price: source.compare_at_price,
-      featured: source.featured,
-      is_new_arrival: source.is_new_arrival,
-      is_on_sale: source.is_on_sale,
-      is_active: false, // Start inactive so admin can review before publishing
-    })
-    .select('id')
-    .single();
-
-  if (insertErr || !created) {
-    return { error: insertErr?.message || 'Failed to duplicate product.' };
-  }
-
-  // Copy images references
-  if (Array.isArray(source.product_images) && source.product_images.length > 0) {
-    await supabase.from('product_images').insert(
-      source.product_images.map((img) => ({
-        product_id: created.id,
-        url: img.url,
-        alt_text: img.alt_text,
-        sort_order: img.sort_order,
-      })),
-    );
-  }
-
-  // Copy variants
-  if (Array.isArray(source.product_variants) && source.product_variants.length > 0) {
-    await supabase.from('product_variants').insert(
-      source.product_variants.map((v) => ({
-        product_id: created.id,
-        colour: v.colour,
-        size: v.size ?? 0,
-        size_system: v.size_system || 'EU',
-        size_value: v.size_value || String(v.size ?? ''),
-        stock: v.stock,
-      })),
-    );
-  }
-
-  await revalidateProductPaths(newSlug, created.id);
-  return { id: created.id, slug: newSlug };
+  const { data, error } = await supabase.rpc('admin_duplicate_product', { p_source_id: sourceId });
+  if (error) return { error: error.message };
+  if (!data?.id || !data?.slug) return { error: 'Failed to duplicate product.' };
+  await revalidateProductPaths(data.slug, data.id);
+  return { id: data.id, slug: data.slug };
 }
 
 // ---------------------------------------------------------------------------
@@ -379,7 +303,6 @@ export async function reorderProductImages(
 
 export async function removeProductImage(
   imageId: string,
-  imageUrl: string,
 ): Promise<{ success: true } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: "Unauthorized." };
@@ -392,11 +315,7 @@ export async function removeProductImage(
     .eq('id', imageId)
     .single();
 
-  const storagePath = imageUrl.split('/product-images/')[1];
-  if (storagePath) {
-    await supabase.storage.from('product-images').remove([storagePath]);
-  }
-
+  // Remove this reference only; another product may use the same storage object.
   const { error } = await supabase.from('product_images').delete().eq('id', imageId);
   if (error) return { error: error.message };
 
@@ -425,13 +344,13 @@ export async function addProductVariant(
   if (!colour.trim()) return { error: 'Colour is required.' };
   const sizeValueStr = String(size).trim();
   if (!sizeValueStr) return { error: 'Size is required.' };
-  if (stock < 0) return { error: 'Stock cannot be negative.' };
+  if (!Number.isSafeInteger(stock) || stock < 0) return { error: 'Stock must be a non-negative integer.' };
 
   const parsedInt = parseInt(sizeValueStr, 10);
   const numericSize = !isNaN(parsedInt) ? parsedInt : 0;
 
   const supabase = await getSupabaseServer();
-  let { data, error } = await supabase
+  const { data, error } = await supabase
     .from('product_variants')
     .insert({
       product_id: productId,
@@ -443,22 +362,6 @@ export async function addProductVariant(
     })
     .select('id')
     .single();
-
-  if (error && error.message?.includes('size_system')) {
-    // Fallback for pre-migration schema
-    const fallbackRes = await supabase
-      .from('product_variants')
-      .insert({
-        product_id: productId,
-        colour: colour.trim(),
-        size: numericSize || 42,
-        stock,
-      })
-      .select('id')
-      .single();
-    data = fallbackRes.data;
-    error = fallbackRes.error;
-  }
 
   if (error) {
     if (error.code === '23505') return { error: 'A variant with this colour and size already exists.' };
@@ -499,24 +402,26 @@ export async function addProductVariantsBulk(
 
   const uniqueSizes = Array.from(new Set(sizes.map((s) => s.trim()).filter(Boolean)));
   if (uniqueSizes.length === 0) return { error: 'At least one size is required.' };
-  if (stock < 0) return { error: 'Stock cannot be negative.' };
+  if (!Number.isSafeInteger(stock) || stock < 0) return { error: 'Stock must be a non-negative integer.' };
 
   const supabase = await getSupabaseServer();
 
   // Check existing variants for this product to skip duplicates gracefully
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from('product_variants')
-    .select('colour, size, size_value')
+    .select('colour, size, size_system, size_value')
     .eq('product_id', productId);
+
+  if (existingError) return { error: existingError.message };
 
   const existingKeys = new Set(
     (existing ?? []).map(
-      (v) => `${v.colour.toLowerCase()}::${String(v.size_value || v.size).toLowerCase()}`,
+      (v) => `${v.colour.toLowerCase()}::${v.size_system}::${String(v.size_value || v.size).toLowerCase()}`,
     ),
   );
 
   const toInsert = uniqueSizes.filter(
-    (sz) => !existingKeys.has(`${cleanColour.toLowerCase()}::${sz.toLowerCase()}`),
+    (sz) => !existingKeys.has(`${cleanColour.toLowerCase()}::${sizeSystem}::${sz.toLowerCase()}`),
   );
   const skippedCount = uniqueSizes.length - toInsert.length;
 
@@ -601,11 +506,13 @@ export async function removeProductVariant(
 export async function updateVariantStock(
   variantId: string,
   stock: number,
+  expectedStock: number,
 ): Promise<{ success: true } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: "Unauthorized." };
 
-  if (stock < 0) return { error: 'Stock cannot be negative.' };
+  if (!Number.isSafeInteger(stock) || stock < 0) return { error: 'Stock must be a non-negative integer.' };
+  if (!Number.isSafeInteger(expectedStock) || expectedStock < 0) return { error: 'Refresh the product before editing stock.' };
   const supabase = await getSupabaseServer();
 
   const { data: v } = await supabase
@@ -614,8 +521,10 @@ export async function updateVariantStock(
     .eq('id', variantId)
     .single();
 
-  const { error } = await supabase.from('product_variants').update({ stock }).eq('id', variantId);
+  const { data: changed, error } = await supabase.from('product_variants').update({ stock })
+    .eq('id', variantId).eq('stock', expectedStock).select('id').maybeSingle();
   if (error) return { error: error.message };
+  if (!changed) return { error: 'Stock changed since you opened this product. Refresh and try again.' };
 
   if (v?.product_id) {
     const { data: prod } = await supabase.from('products').select('slug').eq('id', v.product_id).single();
@@ -658,17 +567,17 @@ export async function updateStoreSettings(
     return { error: 'Unauthorized: Admin privileges required.' };
   }
 
-  if (typeof input.free_delivery_threshold !== 'number' || input.free_delivery_threshold < 0) {
+  if (!Number.isFinite(input.free_delivery_threshold) || input.free_delivery_threshold < 0) {
     return { error: 'Free delivery threshold must be a positive number.' };
   }
 
-  if (typeof input.default_delivery_fee !== 'number' || input.default_delivery_fee < 0) {
+  if (!Number.isFinite(input.default_delivery_fee) || input.default_delivery_fee < 0) {
     return { error: 'Default delivery fee must be a positive number.' };
   }
 
   if (
     input.sale_discount_percent !== undefined &&
-    (typeof input.sale_discount_percent !== 'number' ||
+    (!Number.isFinite(input.sale_discount_percent) ||
       input.sale_discount_percent < 0 ||
       input.sale_discount_percent > 100)
   ) {
@@ -729,40 +638,13 @@ export async function updateStoreSettings(
   }
 
 
-  let { error } = await supabase.from('store_settings').upsert(upsertPayload);
-
-  // If newly added columns do not exist yet in Supabase, retry progressively so settings still save
-  if (
-    error &&
-    (error.code === '42703' ||
-      error.message?.includes('sale_') ||
-      error.message?.includes('new_arrivals_') ||
-      error.message?.includes('whatsapp_') ||
-      error.message?.includes('hero_product_slug') ||
-      error.message?.includes('brand_name') ||
-      error.message?.includes('contact_'))
-  ) {
-    delete upsertPayload.sale_enabled;
-    delete upsertPayload.sale_discount_percent;
-    delete upsertPayload.hero_product_slug;
-    delete upsertPayload.brand_name;
-    delete upsertPayload.contact_address;
-    delete upsertPayload.contact_phone;
-    delete upsertPayload.contact_email;
-    delete upsertPayload.whatsapp_number;
-    delete upsertPayload.sale_section_title;
-    delete upsertPayload.sale_section_subtitle;
-    delete upsertPayload.new_arrivals_title;
-    delete upsertPayload.new_arrivals_subtitle;
-    const retry = await supabase.from('store_settings').upsert(upsertPayload);
-    error = retry.error;
-  }
+  const { error } = await supabase.from('store_settings').upsert(upsertPayload);
 
   if (error) {
-    if (error.code === '42P01') {
+    if (['42P01', '42703', 'PGRST204'].includes(error.code)) {
       return {
         error:
-          'Table "store_settings" does not exist in Supabase yet. Please run the SQL file "supabase/add_settings.sql" in your Supabase SQL Editor.',
+          'Store settings schema is out of date. Apply the outstanding database migrations before saving.',
       };
     }
     return { error: error.message };
@@ -1008,349 +890,49 @@ export async function moveCategory(
 // Orders Management
 // ---------------------------------------------------------------------------
 
-export async function updateOrderStatus(
-  orderId: string,
-  newStatus: OrderStatus,
-  restoreStockOnCancel: boolean = true
-): Promise<{ success: true } | { error: string }> {
+function orderMutationError(message: string): string {
+  if (message.includes('ERR_ORDER_CHANGED')) return 'Another administrator changed this order. Refresh the page and reopen it before trying again.';
+  if (message.includes('ERR_INSUFFICIENT_STOCK')) return 'Insufficient stock. Reload the order and adjust its quantities.';
+  if (message.includes('ERR_ORDER_FULFILLED')) return 'Shipped or delivered orders cannot be edited or restocked here. Record any physical return separately.';
+  if (message.includes('ERR_CANCEL_BEFORE_DELETE')) return 'Cancel this unfulfilled order before deleting it to release its reserved stock.';
+  if (message.includes('ERR_ORDER_NOT_FOUND')) return 'Order no longer exists. Refresh the order list.';
+  if (message.includes('ERR_VARIANT_UNAVAILABLE')) return 'A selected variant no longer exists.';
+  if (message.includes('ERR_')) return 'Check the order details, quantities and prices, then try again.';
+  return 'The order could not be saved. No changes were applied. Please try again.';
+}
+
+function revalidateOrderViews(orderId?: string) {
+  revalidatePath('/', 'layout');
+  if (orderId) revalidatePath(`/admin/orders/${orderId}`);
+}
+
+export async function updateOrderStatus(orderId: string, newStatus: OrderStatus, revision: number): Promise<{ success: true } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: 'Unauthorized.' };
-
-  if (!VALID_ORDER_STATUSES.includes(newStatus)) {
-    return { error: 'Invalid order status.' };
-  }
-
+  if (!VALID_ORDER_STATUSES.includes(newStatus)) return { error: 'Invalid order status.' };
   const supabase = await getSupabaseServer();
-
-  // Get current order status
-  const { data: order, error: orderErr } = await supabase
-    .from('orders')
-    .select('id, status')
-    .eq('id', orderId)
-    .single();
-
-  if (orderErr || !order) return { error: 'Order not found.' };
-
-  const wasActive = order.status !== 'pending' && order.status !== 'cancelled';
-  const willBeActive = newStatus !== 'pending' && newStatus !== 'cancelled';
-
-  // If transitioning from a confirmed/active status back to 'cancelled' or 'pending', return stock
-  if (wasActive && !willBeActive && restoreStockOnCancel) {
-    const { data: items } = await supabase
-      .from('order_items')
-      .select('variant_id, quantity')
-      .eq('order_id', orderId);
-
-    if (items && items.length > 0) {
-      for (const item of items) {
-        if (item.variant_id && item.quantity > 0) {
-          const { data: v } = await supabase
-            .from('product_variants')
-            .select('stock')
-            .eq('id', item.variant_id)
-            .single();
-          if (v) {
-            await supabase
-              .from('product_variants')
-              .update({ stock: v.stock + item.quantity })
-              .eq('id', item.variant_id);
-          }
-        }
-      }
-    }
-  }
-
-  // If transitioning from 'pending' or 'cancelled' directly to an active status, validate & deduct stock
-  if (!wasActive && willBeActive) {
-    const { data: items } = await supabase
-      .from('order_items')
-      .select('variant_id, quantity, product_name, colour, size')
-      .eq('order_id', orderId);
-
-    if (items && items.length > 0) {
-      // Aggregate required quantities per variantId first
-      const requiredByVariant = new Map<
-        string,
-        { qty: number; label: string }
-      >();
-      for (const item of items) {
-        if (item.variant_id && item.quantity > 0) {
-          const prev = requiredByVariant.get(item.variant_id);
-          requiredByVariant.set(item.variant_id, {
-            qty: (prev?.qty ?? 0) + item.quantity,
-            label: `${item.product_name} (${item.colour}, Size ${item.size})`,
-          });
-        }
-      }
-
-      // Verify sufficient stock for every variant before deducting
-      const stockSnapshot = new Map<string, number>();
-      for (const [variantId, req] of requiredByVariant.entries()) {
-        const { data: v } = await supabase
-          .from('product_variants')
-          .select('stock')
-          .eq('id', variantId)
-          .single();
-        if (!v) {
-          return { error: `Variant no longer exists for ${req.label}.` };
-        }
-        if (v.stock < req.qty) {
-          return {
-            error: `Insufficient stock for ${req.label}: only ${v.stock} in stock, ${req.qty} needed. Use "Complete / Adjust" to modify items.`,
-          };
-        }
-        stockSnapshot.set(variantId, v.stock);
-      }
-
-      // Deduct stock
-      for (const [variantId, req] of requiredByVariant.entries()) {
-        const current = stockSnapshot.get(variantId) ?? 0;
-        await supabase
-          .from('product_variants')
-          .update({ stock: Math.max(0, current - req.qty) })
-          .eq('id', variantId);
-      }
-    }
-  }
-
-  const { error: updateErr } = await supabase
-    .from('orders')
-    .update({ status: newStatus, updated_at: new Date().toISOString() })
-    .eq('id', orderId);
-
-  if (updateErr) return { error: updateErr.message };
-
-  revalidatePath('/admin/orders');
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath('/admin/products');
-  revalidatePath('/admin');
-  revalidatePath('/shop', 'page');
+  const { error } = await supabase.rpc('admin_change_order_status_checked', { p_order_id: orderId, p_status: newStatus, p_revision: revision });
+  if (error) return { error: orderMutationError(error.message) };
+  revalidateOrderViews(orderId);
   return { success: true };
 }
 
-export async function confirmOrderSale(
-  orderId: string,
-  items: SaleItemInput[],
-  deliveryFee: number,
-  adminNotes?: string
-): Promise<{ success: true; total: number; itemCount: number } | { error: string }> {
+export async function confirmOrderSale(orderId: string, items: SaleItemInput[], deliveryFee: number, adminNotes: string | undefined, revision: number): Promise<{ success: true; total: number; itemCount: number } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: 'Unauthorized.' };
-
-  if (!items || items.length === 0) {
-    return { error: 'Please select at least one item that was purchased.' };
-  }
-
-  // Merge any duplicate variantId entries so stock validation and order_items are clean
-  const mergedMap = new Map<string, SaleItemInput>();
-  for (const rawItem of items) {
-    if (!rawItem.variantId) {
-      return { error: `Item "${rawItem.productName}" is missing a valid variant.` };
-    }
-    const existing = mergedMap.get(rawItem.variantId);
-    if (existing) {
-      existing.quantity += rawItem.quantity;
-    } else {
-      mergedMap.set(rawItem.variantId, { ...rawItem });
-    }
-  }
-  const mergedItems = Array.from(mergedMap.values());
-
+  if (!Array.isArray(items) || !items.length || !Number.isInteger(deliveryFee) || deliveryFee < 0) return { error: 'Check the items and delivery fee.' };
   const supabase = await getSupabaseServer();
-
-  // Get current order
-  const { data: order, error: orderErr } = await supabase
-    .from('orders')
-    .select('id, status, notes')
-    .eq('id', orderId)
-    .single();
-
-  if (orderErr || !order) return { error: 'Order not found.' };
-
-  // If order was already confirmed previously, restore its previously deducted stock before applying new deductions
-  if (order.status !== 'pending' && order.status !== 'cancelled') {
-    const { data: previousItems } = await supabase
-      .from('order_items')
-      .select('variant_id, quantity')
-      .eq('order_id', orderId);
-
-    if (previousItems && previousItems.length > 0) {
-      for (const prev of previousItems) {
-        if (prev.variant_id && prev.quantity > 0) {
-          const { data: v } = await supabase
-            .from('product_variants')
-            .select('stock')
-            .eq('id', prev.variant_id)
-            .single();
-          if (v) {
-            await supabase
-              .from('product_variants')
-              .update({ stock: v.stock + prev.quantity })
-              .eq('id', prev.variant_id);
-          }
-        }
-      }
-    }
-  }
-
-  // Check stock availability for all merged items
-  const variantStockMap = new Map<string, number>();
-  for (const item of mergedItems) {
-    const { data: variant, error: vErr } = await supabase
-      .from('product_variants')
-      .select('stock')
-      .eq('id', item.variantId)
-      .single();
-
-    if (vErr || !variant) {
-      return { error: `Could not verify inventory for "${item.productName}".` };
-    }
-
-    if (variant.stock < item.quantity) {
-      return {
-        error: `Insufficient stock for "${item.productName}" (${item.colour}, Size ${item.size}). Only ${variant.stock} available, but ${item.quantity} selected.`,
-      };
-    }
-    variantStockMap.set(item.variantId, variant.stock);
-  }
-
-  // Deduct stock for confirmed items
-  for (const item of mergedItems) {
-    const currentStock = variantStockMap.get(item.variantId);
-    if (currentStock !== undefined) {
-      await supabase
-        .from('product_variants')
-        .update({ stock: Math.max(0, currentStock - item.quantity) })
-        .eq('id', item.variantId);
-    }
-  }
-
-  // Replace order_items with confirmed items
-  await supabase.from('order_items').delete().eq('order_id', orderId);
-
-  const orderItemsToInsert = mergedItems.map((it) => ({
-    order_id: orderId,
-    product_id: it.productId,
-    variant_id: it.variantId,
-    product_name: it.productName,
-    colour: it.colour,
-    size: String(it.size),
-    size_system: it.sizeSystem || 'EU',
-    size_value: it.sizeValue || String(it.size),
-    quantity: it.quantity,
-    unit_price: Math.round(it.unitPrice),
-  }));
-
-  const { error: insertItemsErr } = await supabase
-    .from('order_items')
-    .insert(orderItemsToInsert);
-
-  if (insertItemsErr) {
-    return { error: 'Failed to update order items: ' + insertItemsErr.message };
-  }
-
-  const subtotal = mergedItems.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0);
-  const total = subtotal + Math.max(0, deliveryFee);
-  const mergedNotes = adminNotes !== undefined ? adminNotes : order.notes;
-
-  const { error: updateOrderErr } = await supabase
-    .from('orders')
-    .update({
-      subtotal,
-      delivery_fee: Math.max(0, deliveryFee),
-      total,
-      status: 'confirmed',
-      notes: mergedNotes,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', orderId);
-
-  if (updateOrderErr) {
-    return { error: 'Failed to update order: ' + updateOrderErr.message };
-  }
-
-  // Invalidate caches
-  revalidatePath('/admin/orders');
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath('/admin/products');
-  revalidatePath('/admin');
-  revalidatePath('/shop', 'page');
-  revalidatePath('/', 'page');
-
-  try {
-    const productIds = Array.from(new Set(mergedItems.map((i) => i.productId)));
-    const { data: prods } = await supabase
-      .from('products')
-      .select('slug')
-      .in('id', productIds);
-    if (prods) {
-      for (const p of prods) {
-        if (p.slug) revalidatePath(`/product/${p.slug}`, 'page');
-      }
-    }
-  } catch (e) {
-    console.warn('Could not revalidate product slugs:', e);
-  }
-
-  const totalQuantity = mergedItems.reduce((sum, it) => sum + it.quantity, 0);
-  return { success: true, total, itemCount: totalQuantity };
+  const { data, error } = await supabase.rpc('admin_save_order_checked', {
+    p_order_id: orderId, p_items: items, p_delivery_fee: deliveryFee,
+    p_notes: adminNotes ?? null, p_revision: revision,
+  });
+  if (error) return { error: orderMutationError(error.message) };
+  revalidateOrderViews(orderId);
+  return { success: true, total: data.total, itemCount: data.item_count };
 }
 
-export async function cancelOrderInquiry(
-  orderId: string
-): Promise<{ success: true } | { error: string }> {
-  const user = await getAuthUser();
-  if (!user?.isAdmin) return { error: 'Unauthorized.' };
-
-  const supabase = await getSupabaseServer();
-
-  const { data: order, error: orderErr } = await supabase
-    .from('orders')
-    .select('id, status')
-    .eq('id', orderId)
-    .single();
-
-  if (orderErr || !order) return { error: 'Order not found.' };
-
-  // If the order was confirmed/active (not pending), return stock to product_variants
-  if (order.status !== 'pending' && order.status !== 'cancelled') {
-    const { data: items } = await supabase
-      .from('order_items')
-      .select('variant_id, quantity')
-      .eq('order_id', orderId);
-
-    if (items && items.length > 0) {
-      for (const item of items) {
-        if (item.variant_id && item.quantity > 0) {
-          const { data: v } = await supabase
-            .from('product_variants')
-            .select('stock')
-            .eq('id', item.variant_id)
-            .single();
-          if (v) {
-            await supabase
-              .from('product_variants')
-              .update({ stock: v.stock + item.quantity })
-              .eq('id', item.variant_id);
-          }
-        }
-      }
-    }
-  }
-
-  const { error: updateErr } = await supabase
-    .from('orders')
-    .update({ status: 'cancelled', updated_at: new Date().toISOString() })
-    .eq('id', orderId);
-
-  if (updateErr) return { error: updateErr.message };
-
-  revalidatePath('/admin/orders');
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath('/admin/products');
-  revalidatePath('/admin');
-  revalidatePath('/shop', 'page');
-  return { success: true };
+export async function cancelOrderInquiry(orderId: string, revision: number): Promise<{ success: true } | { error: string }> {
+  return updateOrderStatus(orderId, 'cancelled', revision);
 }
 
 export async function getCatalogProductsWithVariants(): Promise<
@@ -1360,285 +942,94 @@ export async function getCatalogProductsWithVariants(): Promise<
   if (!user?.isAdmin) return { error: 'Unauthorized.' };
 
   const supabase = await getSupabaseServer();
-  const { data: products, error } = await supabase
-    .from('products')
-    .select(`
-      id,
-      name,
-      slug,
-      price,
-      is_active,
-      product_variants (
+  try {
+    const products = await readAllRows((from, to) => supabase
+      .from('products')
+      .select(`
         id,
-        colour,
-        size,
-        size_system,
-        size_value,
-        stock
-      )
-    `)
-    .eq('is_active', true)
-    .order('name');
+        name,
+        slug,
+        price,
+        is_active,
+        product_variants (
+          id,
+          colour,
+          size,
+          size_system,
+          size_value,
+          stock
+        )
+      `)
+      .eq('is_active', true)
+      .order('name').order('id').range(from, to));
 
-  if (error) return { error: error.message };
+    const normalized = (products ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: p.price,
+      is_active: p.is_active,
+      product_variants: (p.product_variants ?? []).map((v) => ({
+        id: v.id,
+        colour: v.colour,
+        size: v.size,
+        size_system: v.size_system || 'EU',
+        size_value: v.size_value || String(v.size ?? ''),
+        stock: v.stock,
+      })),
+    }));
 
-  const normalized = (products ?? []).map((p) => ({
-    id: p.id,
-    name: p.name,
-    slug: p.slug,
-    price: p.price,
-    is_active: p.is_active,
-    product_variants: (p.product_variants ?? []).map((v) => ({
-      id: v.id,
-      colour: v.colour,
-      size: v.size,
-      size_system: v.size_system || 'EU',
-      size_value: v.size_value || String(v.size ?? ''),
-      stock: v.stock,
-    })),
-  }));
-
-  return { products: normalized as CatalogProductOption[] };
+    return { products: normalized as CatalogProductOption[] };
+  } catch {
+    return { error: 'The catalog could not be loaded. Please try again.' };
+  }
 }
 
 export async function getOrderItemsWithStock(
   orderId: string
-): Promise<{ items: OrderItemWithStock[] } | { error: string }> {
+): Promise<{ items: OrderItemWithStock[]; revision: number; deliveryFee: number; notes: string | null } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: 'Unauthorized.' };
-
   const supabase = await getSupabaseServer();
-  const [{ data: order }, { data: items, error }] = await Promise.all([
-    supabase.from('orders').select('status').eq('id', orderId).single(),
-    supabase
-      .from('order_items')
-      .select(`
-        id,
-        order_id,
-        product_id,
-        variant_id,
-        product_name,
-        colour,
-        size,
-        size_system,
-        size_value,
-        quantity,
-        unit_price
-      `)
-      .eq('order_id', orderId),
-  ]);
-
-  if (error) return { error: error.message };
-
-  // If the order is already confirmed/active, its item quantities have already been deducted from product_variants.
-  // Add them back to current_stock so the Adjust modal shows the true available quantity for this order.
-  const isAlreadyDeducted =
-    order?.status && order.status !== 'pending' && order.status !== 'cancelled';
-
-  const variantIds = Array.from(
-    new Set(items?.map((it) => it.variant_id).filter(Boolean) as string[])
-  );
-
-  const stockMap = new Map<string, number>();
-  if (variantIds.length > 0) {
-    const { data: variants } = await supabase
-      .from('product_variants')
-      .select('id, stock')
-      .in('id', variantIds);
-
-    for (const v of variants ?? []) {
-      stockMap.set(v.id, v.stock);
-    }
+  const { data, error } = await supabase.rpc('admin_get_order_snapshot', { p_order_id: orderId });
+  if (error) return { error: orderMutationError(error.message) };
+  if (!data || !Array.isArray(data.items) || !Number.isInteger(data.revision)) {
+    return { error: 'The order could not be loaded. Refresh the page and try again.' };
   }
-
-  const itemsWithStock: OrderItemWithStock[] = (items ?? []).map((it) => {
-    const shelfStock = it.variant_id ? stockMap.get(it.variant_id) ?? 0 : 0;
-    return {
-      ...it,
-      current_stock: isAlreadyDeducted ? shelfStock + it.quantity : shelfStock,
-    };
-  });
-
-  return { items: itemsWithStock };
+  return { items: data.items, revision: data.revision, deliveryFee: data.deliveryFee, notes: data.notes };
 }
 
-export async function deleteOrder(
-  orderId: string
-): Promise<{ success: true } | { error: string }> {
+export async function deleteOrder(orderId: string, revision: number): Promise<{ success: true } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: 'Unauthorized.' };
-
   const supabase = await getSupabaseServer();
-
-  // Check if order had deducted stock before deleting
-  const { data: order } = await supabase
-    .from('orders')
-    .select('status')
-    .eq('id', orderId)
-    .single();
-
-  if (order && order.status !== 'pending' && order.status !== 'cancelled') {
-    const { data: items } = await supabase
-      .from('order_items')
-      .select('variant_id, quantity')
-      .eq('order_id', orderId);
-
-    if (items && items.length > 0) {
-      for (const item of items) {
-        if (item.variant_id && item.quantity > 0) {
-          const { data: v } = await supabase
-            .from('product_variants')
-            .select('stock')
-            .eq('id', item.variant_id)
-            .single();
-          if (v) {
-            await supabase
-              .from('product_variants')
-              .update({ stock: v.stock + item.quantity })
-              .eq('id', item.variant_id);
-          }
-        }
-      }
-    }
-  }
-
-  const { error } = await supabase.from('orders').delete().eq('id', orderId);
-  if (error) return { error: error.message };
-
-  revalidatePath('/admin/orders');
-  revalidatePath('/admin/products');
-  revalidatePath('/admin');
-  revalidatePath('/shop', 'page');
+  const { error } = await supabase.rpc('admin_delete_order_checked', { p_order_id: orderId, p_revision: revision });
+  if (error) return { error: orderMutationError(error.message) };
+  revalidateOrderViews();
   return { success: true };
 }
 
 export async function createManualOrder(input: {
-  customerName: string;
-  phone: string;
-  address: string;
-  city: string;
-  notes?: string;
-  deliveryFee: number;
-  status: 'confirmed' | 'pending';
-  items: SaleItemInput[];
+  customerName: string; phone: string; address: string; city: string; notes?: string;
+  deliveryFee: number; status: 'confirmed' | 'pending'; items: SaleItemInput[];
 }): Promise<{ success: true; orderId: string; orderNumber: string } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: 'Unauthorized.' };
-
-  const customerName = input.customerName.trim();
-  const phone = input.phone.trim();
-  const address = input.address.trim() || 'Direct / Walk-in';
-  const city = input.city.trim() || 'Colombo';
-
-  if (!customerName) return { error: 'Customer name is required.' };
-  if (!phone) return { error: 'Phone number is required.' };
-  if (!input.items || input.items.length === 0) {
-    return { error: 'Please add at least one item to the order.' };
+  if (!input || typeof input.customerName !== 'string' || typeof input.phone !== 'string'
+    || !input.customerName.trim() || !input.phone.trim() || !Array.isArray(input.items)
+    || !input.items.length || !Number.isInteger(input.deliveryFee) || input.deliveryFee < 0) {
+    return { error: 'Check the customer details, items and delivery fee.' };
   }
-
-  // Merge duplicate variants
-  const mergedMap = new Map<string, SaleItemInput>();
-  for (const rawItem of input.items) {
-    if (!rawItem.variantId) {
-      return { error: `Item "${rawItem.productName}" is missing a valid variant.` };
-    }
-    const existing = mergedMap.get(rawItem.variantId);
-    if (existing) {
-      existing.quantity += rawItem.quantity;
-    } else {
-      mergedMap.set(rawItem.variantId, { ...rawItem });
-    }
-  }
-  const mergedItems = Array.from(mergedMap.values());
-
   const supabase = await getSupabaseServer();
-
-  // If creating as confirmed, verify and deduct stock
-  if (input.status === 'confirmed') {
-    const stockMap = new Map<string, number>();
-    for (const item of mergedItems) {
-      const { data: v, error: vErr } = await supabase
-        .from('product_variants')
-        .select('stock')
-        .eq('id', item.variantId)
-        .single();
-      if (vErr || !v) {
-        return { error: `Could not verify stock for "${item.productName}".` };
-      }
-      if (v.stock < item.quantity) {
-        return {
-          error: `Insufficient stock for "${item.productName}" (${item.colour}, Size ${item.size}). Only ${v.stock} available.`,
-        };
-      }
-      stockMap.set(item.variantId, v.stock);
-    }
-
-    for (const item of mergedItems) {
-      const current = stockMap.get(item.variantId) ?? 0;
-      await supabase
-        .from('product_variants')
-        .update({ stock: Math.max(0, current - item.quantity) })
-        .eq('id', item.variantId);
-    }
-  }
-
-  const now = new Date();
-  const yy = String(now.getFullYear()).slice(-2);
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
-  const rand = String(Math.floor(10000 + Math.random() * 90000));
-  const orderNumber = `PROE-${yy}${mm}${dd}-${rand}`;
-
-  const subtotal = mergedItems.reduce((sum, it) => sum + it.quantity * Math.round(it.unitPrice), 0);
-  const deliveryFee = Math.max(0, Math.round(input.deliveryFee || 0));
-  const total = subtotal + deliveryFee;
-
-  const { data: newOrder, error: orderErr } = await supabase
-    .from('orders')
-    .insert({
-      order_number: orderNumber,
-      customer_name: customerName,
-      phone,
-      address,
-      city,
-      delivery_fee: deliveryFee,
-      subtotal,
-      total,
-      status: input.status,
-      notes: input.notes?.trim() || null,
-    })
-    .select('id, order_number')
-    .single();
-
-  if (orderErr || !newOrder) {
-    return { error: orderErr?.message || 'Failed to create order.' };
-  }
-
-  const orderItemsPayload = mergedItems.map((it) => ({
-    order_id: newOrder.id,
-    product_id: it.productId,
-    variant_id: it.variantId,
-    product_name: it.productName,
-    colour: it.colour,
-    size: String(it.size),
-    size_system: it.sizeSystem || 'EU',
-    size_value: it.sizeValue || String(it.size),
-    quantity: it.quantity,
-    unit_price: Math.round(it.unitPrice),
-  }));
-
-  const { error: itemsErr } = await supabase.from('order_items').insert(orderItemsPayload);
-  if (itemsErr) {
-    return { error: 'Order created, but failed to save items: ' + itemsErr.message };
-  }
-
-  revalidatePath('/admin/orders');
-  revalidatePath('/admin/products');
-  revalidatePath('/admin');
-  revalidatePath('/shop', 'page');
-  revalidatePath('/', 'page');
-
-  return { success: true, orderId: newOrder.id, orderNumber: newOrder.order_number };
+  const { data, error } = await supabase.rpc('admin_save_order', {
+    p_order_id: null, p_items: input.items, p_delivery_fee: input.deliveryFee,
+    p_notes: input.notes ?? null, p_status: input.status,
+    p_customer: { name: input.customerName.trim(), phone: input.phone.trim(),
+      address: typeof input.address === 'string' && input.address.trim() ? input.address.trim() : 'Direct / Walk-in',
+      city: typeof input.city === 'string' && input.city.trim() ? input.city.trim() : 'Colombo' },
+  });
+  if (error) return { error: orderMutationError(error.message) };
+  revalidateOrderViews();
+  return { success: true, orderId: data.order_id, orderNumber: data.order_number };
 }
-
 

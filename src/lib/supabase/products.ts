@@ -1,32 +1,18 @@
-import { cache } from "react";
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { cache } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import type { Product, ProductCategory, ProductVariant, SizeSystem, CategoryItem } from '@/types/product';
-import { MOCK_PRODUCTS } from '@/data/products';
 import { getStoreSettings } from '@/lib/settings';
+import { readAllRows } from './read-all';
 
-// ---------------------------------------------------------------------------
-// Client factory — returns null when env vars are not yet filled
-// ---------------------------------------------------------------------------
-
-let supabaseClient: SupabaseClient | null = null;
-
-function getSupabase(): SupabaseClient | null {
+function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  if (supabaseClient) return supabaseClient;
-  supabaseClient = createClient(url, key, {
-    auth: { persistSession: false },
-    global: {
-      fetch: (input, init) => fetch(input, { ...init, next: { tags: ["catalog"] } }),
-    },
+  if (!url || !key) throw new Error('The catalog is temporarily unavailable.');
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    global: { fetch: (input, init) => fetch(input, { ...init, next: { tags: ['catalog'] }, signal: AbortSignal.timeout(8000) }) },
   });
-  return supabaseClient;
 }
-
-// ---------------------------------------------------------------------------
-// Supabase row shape (with joined tables)
-// ---------------------------------------------------------------------------
 
 type DbVariantRow = {
   id: string;
@@ -58,8 +44,6 @@ type DbProductRow = {
 import {
   getCategorySlugsForQuery,
   getParentCategory,
-  PARENT_SPORTS,
-  ALL_CANONICAL_CATEGORIES,
 } from '@/data/categories';
 
 // ---------------------------------------------------------------------------
@@ -130,7 +114,7 @@ function mapProduct(row: DbProductRow, customHierarchy?: CategoryItem[]): Produc
     description: row.description ?? '',
     price: row.price,
     compareAtPrice: row.compare_at_price ?? undefined,
-    images: images.length > 0 ? images : [MOCK_PRODUCTS[0].images[0]],
+    images: images.length > 0 ? images : ['/product-placeholder.svg'],
     sizes: uniqueSizes,
     sizeSystem,
     colors: uniqueColors.length > 0 ? uniqueColors : ['Standard'],
@@ -142,277 +126,62 @@ function mapProduct(row: DbProductRow, customHierarchy?: CategoryItem[]): Produc
   };
 }
 
-// ---------------------------------------------------------------------------
-// Select fragments (with safe fallback if migration hasn't run yet)
-// ---------------------------------------------------------------------------
-
-const PRODUCT_SELECT_FULL = `
-  id, name, slug, brand, description, price, compare_at_price,
+const PRODUCT_SELECT = `id, name, slug, brand, description, price, compare_at_price,
   featured, is_new_arrival, is_on_sale, is_active, created_at,
-  categories!inner(slug, name, parent_id),
-  product_images(url, alt_text, sort_order),
-  product_variants(id, colour, size, size_system, size_value, stock)
-`;
+  categories!inner(slug, name, parent_id), product_images(url, alt_text, sort_order),
+  product_variants(id, colour, size, size_system, size_value, stock)`;
 
-const PRODUCT_SELECT_LEGACY = `
-  id, name, slug, brand, description, price, compare_at_price,
-  featured, is_new_arrival, is_on_sale, is_active, created_at,
-  categories!inner(slug),
-  product_images(url, alt_text, sort_order),
-  product_variants(id, colour, size, stock)
-`;
-
-// ---------------------------------------------------------------------------
-// Internal fetch helpers
-// ---------------------------------------------------------------------------
-
-type FetchOptions = {
-  categorySlug?: string;
-  featuredOnly?: boolean;
-  saleOnly?: boolean;
-};
-
-async function executeProductQuery(
-  sb: SupabaseClient,
-  querySelect: string,
-  opts: FetchOptions,
-  customHierarchy?: CategoryItem[],
-) {
-  let q = sb
-    .from('products')
-    .select(querySelect)
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
-
-  if (opts.categorySlug) {
-    const matchingSlugs = getCategorySlugsForQuery(opts.categorySlug, customHierarchy);
-    if (matchingSlugs.length > 1) {
-      q = q.in('categories.slug', matchingSlugs);
-    } else if (matchingSlugs.length === 1) {
-      q = q.eq('categories.slug', matchingSlugs[0]);
-    }
-  }
-  if (opts.featuredOnly) q = q.eq('featured', true);
-  if (opts.saleOnly) q = q.eq('is_on_sale', true);
-
-  return q;
-}
-
-async function fetchProducts(opts: FetchOptions = {}): Promise<Product[] | null> {
+type FetchOptions = { categorySlug?: string; featuredOnly?: boolean; saleOnly?: boolean };
+async function fetchProducts(opts: FetchOptions = {}): Promise<Product[]> {
   const sb = getSupabase();
-  if (!sb) return null;
-
-  try {
-    const hierarchy = await getCategoriesHierarchy();
-
-    // Try full select first
-    let { data, error } = await executeProductQuery(sb, PRODUCT_SELECT_FULL, opts, hierarchy);
-
-    // If size_system column doesn't exist yet, fall back to legacy select
-    if (error && error.message.includes('size_system')) {
-      const fallbackResult = await executeProductQuery(sb, PRODUCT_SELECT_LEGACY, opts, hierarchy);
-      data = fallbackResult.data;
-      error = fallbackResult.error;
+  const hierarchy = await getCategoriesHierarchy();
+  const rows = await readAllRows((from, to) => {
+    let q = sb.from('products').select(PRODUCT_SELECT).eq('is_active', true)
+      .order('created_at', { ascending: false }).order('id').range(from, to);
+    if (opts.categorySlug) {
+      const slugs = getCategorySlugsForQuery(opts.categorySlug, hierarchy);
+      if (slugs.length) q = q.in('categories.slug', slugs);
     }
-
-    if (error) {
-      console.error('[supabase] products query failed:', error.message);
-      return null;
-    }
-
-    return (data as unknown as DbProductRow[]).map((row) => mapProduct(row, hierarchy));
-  } catch (err) {
-    console.error('[supabase] connection error:', err);
-    return null;
-  }
+    if (opts.featuredOnly) q = q.eq('featured', true);
+    if (opts.saleOnly) q = q.eq('is_on_sale', true);
+    return q;
+  });
+  return (rows as unknown as DbProductRow[]).map(row => mapProduct(row, hierarchy));
 }
-
-async function fetchProductBySlug(slug: string): Promise<Product | null> {
-  const sb = getSupabase();
-  if (!sb) return null;
-
-  try {
-    const hierarchy = await getCategoriesHierarchy();
-    let data: unknown;
-    let error: { message: string } | null = null;
-
-    const fullResult = await sb
-      .from('products')
-      .select(PRODUCT_SELECT_FULL)
-      .eq('slug', slug)
-      .eq('is_active', true)
-      .single();
-
-    data = fullResult.data;
-    error = fullResult.error;
-
-    if (error && error.message.includes('size_system')) {
-      const legacyResult = await sb
-        .from('products')
-        .select(PRODUCT_SELECT_LEGACY)
-        .eq('slug', slug)
-        .eq('is_active', true)
-        .single();
-      data = legacyResult.data;
-      error = legacyResult.error;
-    }
-
-    if (error || !data) {
-      console.error('[supabase] product slug query failed:', error?.message);
-      return null;
-    }
-
-    return mapProduct(data as unknown as DbProductRow, hierarchy);
-  } catch (err) {
-    console.error('[supabase] connection error:', err);
-    return null;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Categories API
-// ---------------------------------------------------------------------------
 
 export const getAllCategories = cache(async (): Promise<CategoryItem[]> => {
   const sb = getSupabase();
-  if (!sb) {
-    return ALL_CANONICAL_CATEGORIES.map((c) => ({
-      id: c.id,
-      slug: c.slug,
-      name: c.name,
-      parentId: c.parentId,
-      sortOrder: c.sortOrder,
-      description: c.description,
-      imageUrl: c.image_url,
-      subtitle: c.subtitle,
-      tagline: c.tagline,
-    }));
-  }
-
-  try {
-    const { data, error } = await sb
-      .from('categories')
-      .select('id, slug, name, parent_id, sort_order, description, image_url, subtitle, tagline')
-      .order('sort_order', { ascending: true });
-
-    if (error || !data || data.length === 0) {
-      return ALL_CANONICAL_CATEGORIES.map((c) => ({
-        id: c.id,
-        slug: c.slug,
-        name: c.name,
-        parentId: c.parentId,
-        sortOrder: c.sortOrder,
-        description: c.description,
-      imageUrl: c.image_url,
-      subtitle: c.subtitle,
-      tagline: c.tagline,
-      }));
-    }
-
-    return data.map((c) => ({
-      id: c.id,
-      slug: c.slug,
-      name: c.name,
-      parentId: c.parent_id,
-      sortOrder: c.sort_order,
-      description: c.description,
-      imageUrl: c.image_url,
-      subtitle: c.subtitle,
-      tagline: c.tagline,
-    }));
-  } catch {
-    return ALL_CANONICAL_CATEGORIES.map((c) => ({
-      id: c.id,
-      slug: c.slug,
-      name: c.name,
-      parentId: c.parentId,
-      sortOrder: c.sortOrder,
-      description: c.description,
-      imageUrl: c.image_url,
-      subtitle: c.subtitle,
-      tagline: c.tagline,
-    }));
-  }
+  const data = await readAllRows((from, to) => sb.from('categories')
+    .select('id,slug,name,parent_id,sort_order,description,image_url,subtitle,tagline')
+    .order('sort_order').order('id').range(from,to));
+  return data.map(c => ({ id:c.id, slug:c.slug, name:c.name, parentId:c.parent_id,
+    sortOrder:c.sort_order, description:c.description, imageUrl:c.image_url,
+    subtitle:c.subtitle, tagline:c.tagline }));
 });
-
-export async function getCategoriesHierarchy(): Promise<CategoryItem[]> {
+export const getCategoriesHierarchy = cache(async (): Promise<CategoryItem[]> => {
   const categories = await getAllCategories();
-  const parents = categories.filter(
-    (c) => !c.parentId && !['men', 'women', 'sports', 'casual'].includes(c.slug),
-  );
-  if (parents.length === 0) {
-    return PARENT_SPORTS as CategoryItem[];
+  return categories.filter(c => !c.parentId && !['men','women','sports','casual'].includes(c.slug))
+    .map(parent => ({ ...parent, children: categories.filter(c => c.parentId === parent.id) }));
+});
+export const getAllProducts = cache(async () => fetchProducts());
+export const getFeaturedProducts = cache(async () => fetchProducts({ featuredOnly: true }));
+export const getNewArrivals = cache(async () => (await fetchProducts()).filter(p => p.newArrival).slice(0,8));
+export const getSaleProducts = cache(async () => fetchProducts({ saleOnly: true }));
+export const getProductsByCategory = cache(async (category: ProductCategory) => fetchProducts({ categorySlug: category }));
+export const getProductBySlug = cache(async (slug: string): Promise<Product|null> => {
+  const sb = getSupabase();
+  const [result, hierarchy] = await Promise.all([
+    sb.from('products').select(PRODUCT_SELECT).eq('slug',slug).eq('is_active',true).maybeSingle(),
+    getCategoriesHierarchy(),
+  ]);
+  if (result.error) throw new Error('The product could not be loaded. Please try again.');
+  return result.data ? mapProduct(result.data as unknown as DbProductRow,hierarchy) : null;
+});
+export const getHeroProduct = cache(async (): Promise<Product|null> => {
+  const settings = await getStoreSettings();
+  if (settings.heroProductSlug) {
+    const product = await getProductBySlug(settings.heroProductSlug);
+    if (product) return product;
   }
-  return parents
-    .map((parent) => ({
-      ...parent,
-      children: categories
-        .filter((c) => c.parentId === parent.id)
-        .sort((a, b) => a.sortOrder - b.sortOrder),
-    }))
-    .sort((a, b) => a.sortOrder - b.sortOrder);
-}
-
-// ---------------------------------------------------------------------------
-// Public Products API
-// ---------------------------------------------------------------------------
-
-export const getAllProducts = cache(async (): Promise<Product[]> => {
-  return (await fetchProducts()) ?? MOCK_PRODUCTS;
+  return (await getFeaturedProducts())[0] ?? (await getAllProducts())[0] ?? null;
 });
-
-export async function getFeaturedProducts(): Promise<Product[]> {
-  return (await fetchProducts({ featuredOnly: true })) ?? MOCK_PRODUCTS.filter((p) => p.featured);
-}
-
-export const getNewArrivals = cache(async (): Promise<Product[]> => {
-  const db = await fetchProducts();
-  // An empty real catalog must stay empty; demo data is only for a failed connection.
-  if (db) return db.filter((p) => p.newArrival).slice(0, 8);
-  return MOCK_PRODUCTS.filter((p) => p.newArrival).slice(0, 8);
-});
-
-export const getSaleProducts = cache(async (): Promise<Product[]> => {
-  return (await fetchProducts({ saleOnly: true })) ?? MOCK_PRODUCTS.filter((p) => p.onSale);
-});
-
-export const getProductsByCategory = cache(async (category: ProductCategory): Promise<Product[]> => {
-  const db = await fetchProducts({ categorySlug: category });
-  if (db) return db;
-  const matchingSlugs = getCategorySlugsForQuery(category);
-  return MOCK_PRODUCTS.filter(
-    (p) =>
-      matchingSlugs.includes(p.category) ||
-      (p.sport && matchingSlugs.includes(p.sport)) ||
-      p.category === category ||
-      p.sport === category,
-  );
-});
-
-export const getProductBySlug = cache(async (slug: string): Promise<Product | null> => {
-  const db = await fetchProductBySlug(slug);
-  if (db) return db;
-  return MOCK_PRODUCTS.find((p) => p.slug === slug) ?? null;
-});
-
-export const getHeroProduct = cache(async (): Promise<Product | null> => {
-  try {
-    const settings = await getStoreSettings();
-    if (settings.heroProductSlug) {
-      const product = await getProductBySlug(settings.heroProductSlug);
-      if (product) return product;
-    }
-
-    // Fallback 1: first featured product
-    const featured = await getFeaturedProducts();
-    if (featured && featured.length > 0) return featured[0];
-
-    // Fallback 2: runner-x1 or first product in mock catalog
-    return (await getProductBySlug('proedge-runner-x1')) ?? MOCK_PRODUCTS[0] ?? null;
-  } catch (err) {
-    console.error('Error in getHeroProduct:', err);
-    return MOCK_PRODUCTS.find((p) => p.slug === 'proedge-runner-x1') ?? MOCK_PRODUCTS[0] ?? null;
-  }
-});
-
-

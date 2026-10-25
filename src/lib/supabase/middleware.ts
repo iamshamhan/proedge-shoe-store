@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 export async function updateSession(request: NextRequest) {
-  const supabaseResponse = NextResponse.next({ request });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,7 +12,10 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet, headers) {
+        setAll(cookiesToSet, headers = {}) {
+          // The current render must see the refreshed session too.
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({ request });
           // Apply anti-caching headers so a refreshed session is never served
           // to another user from a CDN/static cache.
           Object.entries(headers).forEach(([key, value]) =>
@@ -40,7 +43,13 @@ export async function updateSession(request: NextRequest) {
 
     if (!hasValidSession && !isLoginPage && !isResetPage) {
       url.pathname = '/admin/login';
-      return NextResponse.redirect(url);
+      const redirectResponse = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach(cookie => redirectResponse.cookies.set(cookie));
+      for (const header of ['cache-control', 'expires', 'pragma']) {
+        const value = supabaseResponse.headers.get(header);
+        if (value) redirectResponse.headers.set(header, value);
+      }
+      return redirectResponse;
     }
 
     if (hasValidSession && isLoginPage) {
