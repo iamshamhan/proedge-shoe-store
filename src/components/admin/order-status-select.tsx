@@ -44,14 +44,19 @@ export function OrderStatusSelect({
     setStatus(newStatus);
 
     startTransition(async () => {
-      const res = await updateOrderStatus(orderId, newStatus as OrderStatus, revision);
-      if ('error' in res) {
-        setError(res.error);
-        setStatus(currentStatus); // Revert on failure
-      } else {
-        router.refresh();
+      try {
+        const res = await updateOrderStatus(orderId, newStatus as OrderStatus, revision);
+        if ('error' in res) {
+          setError(res.error);
+          setStatus(currentStatus); // Revert on failure
+        } else {
+          router.refresh();
+        }
+
+      } catch {
+        setError('The operation could not be completed. Check your connection and refresh before retrying.');
       }
-    });
+  });
   };
 
   const selectClasses =

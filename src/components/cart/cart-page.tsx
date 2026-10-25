@@ -1,5 +1,6 @@
 'use client';
 
+import { useCartAvailability } from './use-cart-availability';
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,6 +13,7 @@ import { getDeliveryFee } from '@/lib/config';
 export function CartPage() {
   const { items, updateQuantity, removeItem, subtotal } = useCart();
   const settings = useStoreSettings();
+  const availability = useCartAvailability(items);
 
   const deliveryFee = getDeliveryFee(subtotal, settings);
   const total = subtotal + deliveryFee;
@@ -215,7 +217,13 @@ export function CartPage() {
                 <span className="text-2xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">{formatLKR(total)}</span>
               </div>
 
+              {availability.checking && <p role="status">Checking current availability...</p>}
+              {availability.error && <p role="alert" className="text-sm text-rose-600">
+                {availability.error}{' '}<button type="button" onClick={availability.retry} className="underline">Check again</button>
+              </p>}
               <Link
+                aria-disabled={availability.checking || Boolean(availability.error)}
+                onClick={event => { if (availability.checking || availability.error) event.preventDefault(); }}
                 href="/checkout"
                 className="w-full py-4 bg-[#1d1d1f] dark:bg-amber-500 text-white dark:text-zinc-950 font-semibold text-[15px] tracking-tight rounded-full hover:bg-amber-500 dark:hover:bg-amber-400 hover:text-zinc-950 transition-all flex items-center justify-center gap-2 soft-shadow"
               >

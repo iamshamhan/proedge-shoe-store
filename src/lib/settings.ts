@@ -109,7 +109,7 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
           ? row.default_delivery_fee
           : DEFAULT_STORE_SETTINGS.defaultDeliveryFee,
       bannerTagline: row.banner_tagline?.trim() || DEFAULT_STORE_SETTINGS.bannerTagline,
-      heroProductSlug: row.hero_product_slug?.trim() || DEFAULT_STORE_SETTINGS.heroProductSlug,
+      heroProductSlug: row.hero_product_slug?.trim() ?? '',
       saleEnabled: row.sale_enabled ?? DEFAULT_STORE_SETTINGS.saleEnabled,
       saleDiscountPercent:
         typeof row.sale_discount_percent === 'number'
@@ -117,15 +117,9 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
           : DEFAULT_STORE_SETTINGS.saleDiscountPercent,
       brandName: row.brand_name?.trim() || DEFAULT_STORE_SETTINGS.brandName,
       contactAddress: row.contact_address?.trim() || DEFAULT_STORE_SETTINGS.contactAddress,
-      contactPhone:
-        row.contact_phone && row.contact_phone.replace(/\s+/g, '') !== '+94112345678'
-          ? row.contact_phone.trim()
-          : DEFAULT_STORE_SETTINGS.contactPhone,
-      contactEmail: row.contact_email?.trim() || DEFAULT_STORE_SETTINGS.contactEmail,
-      whatsappNumber:
-        row.whatsapp_number && row.whatsapp_number.replace(/\s+/g, '') !== '+94771234567'
-          ? row.whatsapp_number.trim()
-          : DEFAULT_STORE_SETTINGS.whatsappNumber,
+      contactPhone: row.contact_phone?.trim() ?? '',
+      contactEmail: row.contact_email?.trim() ?? '',
+      whatsappNumber: row.whatsapp_number?.trim() ?? '',
       saleSectionTitle: row.sale_section_title?.trim() || DEFAULT_STORE_SETTINGS.saleSectionTitle,
       saleSectionSubtitle: row.sale_section_subtitle?.trim() || DEFAULT_STORE_SETTINGS.saleSectionSubtitle,
       newArrivalsTitle: row.new_arrivals_title?.trim() || DEFAULT_STORE_SETTINGS.newArrivalsTitle,

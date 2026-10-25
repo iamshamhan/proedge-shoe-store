@@ -26,6 +26,7 @@ function catalog(productResult) {
     return query;
   } };
   return loadTs('src/lib/supabase/products.ts', {
+    '@/lib/local-images': loadTs('src/lib/local-images.ts'),
     react: { cache: fn => fn }, '@supabase/supabase-js': { createClient: () => sb },
     '@/lib/settings': { getStoreSettings: async () => ({}) }, './read-all': { readAllRows },
     '@/data/categories': { getCategorySlugsForQuery: () => [], getParentCategory: () => null },

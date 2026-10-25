@@ -1,3 +1,4 @@
+import { readAllRows } from '@/lib/supabase/read-all';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getAuthUser } from '@/lib/auth/admin';
@@ -19,28 +20,30 @@ export default async function EditCategoryPage({
   const { id } = await params;
   const supabase = await getSupabaseServer();
 
-  const { data: category } = await supabase
+  const { data: category, error: categoryError } = await supabase
     .from('categories')
     .select('*')
     .eq('id', id)
     .single();
 
+  if (categoryError) throw new Error(categoryError.message);
   if (!category) {
     redirect('/admin/categories');
   }
 
-  const { data: parentCategories } = await supabase
+  const parentCategories = await readAllRows((from, to) => supabase
     .from('categories')
     .select('id, name')
     .is('parent_id', null)
     .neq('id', id)
-    .order('sort_order');
+    .order('sort_order').order('id').range(from, to));
 
-  const { count: childCount } = await supabase
+  const { count: childCount, error: countError } = await supabase
     .from('categories')
     .select('id', { count: 'exact', head: true })
     .eq('parent_id', id);
 
+  if (typeof countError !== 'undefined' && countError) throw new Error(countError.message);
   return (
     <CategoryForm
       hasChildren={(childCount ?? 0) > 0}

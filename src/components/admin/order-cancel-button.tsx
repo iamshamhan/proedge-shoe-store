@@ -35,17 +35,22 @@ export function OrderCancelButton({
   const handleCancel = () => {
     setError(null);
     startTransition(async () => {
-      const res = await cancelOrderInquiry(orderId, revision);
-      if ('error' in res) {
-        setError(res.error);
-      } else {
-        setOpen(false);
-        if (redirectToList) {
-          router.push('/admin/orders');
+      try {
+        const res = await cancelOrderInquiry(orderId, revision);
+        if ('error' in res) {
+          setError(res.error);
+        } else {
+          setOpen(false);
+          if (redirectToList) {
+            router.push('/admin/orders');
+          }
+          router.refresh();
         }
-        router.refresh();
+
+      } catch {
+        setError('The operation could not be completed. Check your connection and refresh before retrying.');
       }
-    });
+  });
   };
 
   const isPendingInquiry = currentStatus === 'pending';

@@ -198,28 +198,33 @@ export function ManualOrderModal({ isOpen, onClose }: Props) {
     }));
 
     startTransition(async () => {
-      const res = await createManualOrder({
-        customerName,
-        phone,
-        city,
-        address,
-        deliveryFee,
-        status: orderStatus,
-        notes,
-        items: payloadItems,
-      });
+      try {
+        const res = await createManualOrder({
+          customerName,
+          phone,
+          city,
+          address,
+          deliveryFee,
+          status: orderStatus,
+          notes,
+          items: payloadItems,
+        });
 
-      if ('error' in res) {
-        setError(res.error);
-      } else {
-        setCustomerName('');
-        setPhone('');
-        setItems([]);
-        setNotes('');
-        onClose();
-        router.refresh();
+        if ('error' in res) {
+          setError(res.error);
+        } else {
+          setCustomerName('');
+          setPhone('');
+          setItems([]);
+          setNotes('');
+          onClose();
+          router.refresh();
+        }
+
+      } catch {
+        setError('The operation could not be completed. Check your connection and refresh before retrying.');
       }
-    });
+  });
   };
 
   const selectedProduct = catalogProducts.find((p) => p.id === selectedProductId);

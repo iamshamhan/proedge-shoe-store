@@ -1,3 +1,6 @@
+import { localImage } from '@/lib/local-images';
+import { AdminPagination } from '@/components/admin/pagination';
+import { adminPage, ADMIN_PAGE_SIZE, type AdminSearchParams } from '@/lib/admin-pagination';
 import Image from 'next/image';
 import { readAllRows } from '@/lib/supabase/read-all';
 import { redirect } from 'next/navigation';
@@ -37,32 +40,29 @@ function ProductCount({ count }: { count: number }) {
   );
 }
 
-export default async function CategoriesAdminPage() {
+export default async function CategoriesAdminPage({ searchParams }: { searchParams: Promise<AdminSearchParams> }) {
   const user = await getAuthUser();
   if (!user?.isAdmin) redirect('/admin/login');
 
   const supabase = await getSupabaseServer();
-  const [categoryData, productRows] = await Promise.all([
-    readAllRows<CategoryRow>((from, to) => supabase
-      .from('categories')
-      .select('id, name, slug, parent_id, image_url, sort_order')
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: true }).order('id').range(from, to)),
-    readAllRows<{ id: string; category_id: string }>((from, to) =>
-      supabase.from('products').select('id, category_id').order('id').range(from, to)),
-  ]);
-
-  const categories = (categoryData ?? []) as CategoryRow[];
-
-  const directCounts = new Map<string, number>();
-  for (const row of productRows ?? []) {
-    directCounts.set(row.category_id, (directCounts.get(row.category_id) ?? 0) + 1);
-  }
-
-  const knownIds = new Set(categories.map((c) => c.id));
-  // Treat a category whose parent no longer exists as a main category.
-  const mainCategories = categories.filter((c) => !c.parent_id || !knownIds.has(c.parent_id));
-  const childrenOf = (parentId: string) => categories.filter((c) => c.parent_id === parentId);
+  const params = await searchParams;
+  const page = adminPage(params.page);
+  const { data: roots, count, error } = await supabase.from('categories')
+    .select('id, name, slug, parent_id, image_url, sort_order', { count: 'exact' })
+    .is('parent_id', null).order('sort_order').order('created_at').order('id')
+    .range((page - 1) * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE - 1);
+  if (error) throw new Error(error.message);
+  const mainCategories = (roots ?? []) as CategoryRow[];
+  const children = roots?.length ? await readAllRows<CategoryRow>((from, to) => supabase.from('categories')
+    .select('id, name, slug, parent_id, image_url, sort_order').in('parent_id', roots.map(c => c.id))
+    .order('sort_order').order('created_at').order('id').range(from, to)) : [];
+  const categories = [...mainCategories, ...children];
+  const directCounts = new Map<string, number>(await Promise.all(categories.map(async category => {
+    const result = await supabase.from('products').select('id', { count: 'exact', head: true }).eq('category_id', category.id);
+    if (result.error) throw new Error(result.error.message);
+    return [category.id, result.count ?? 0] as [string, number];
+  })));
+  const childrenOf = (parentId: string) => children.filter(c => c.parent_id === parentId);
 
   return (
     <div className="space-y-6">
@@ -74,8 +74,8 @@ export default async function CategoriesAdminPage() {
           <div>
             <h1 className="text-2xl font-semibold tracking-[-0.025em] text-[#1d1d1f] dark:text-[#f5f5f7]">Categories</h1>
             <p className="text-sm text-[#6e6e73] dark:text-[#86868b]">
-              {mainCategories.length} main {mainCategories.length === 1 ? 'category' : 'categories'} ·{' '}
-              {categories.length - mainCategories.length} subcategories
+              {count ?? 0} main {mainCategories.length === 1 ? 'category' : 'categories'} ·{' '}
+              {children.length} subcategories on this page
             </p>
           </div>
         </div>
@@ -103,6 +103,7 @@ export default async function CategoriesAdminPage() {
         </ul>
       </div>
 
+      <AdminPagination path="/admin/categories" params={params} page={page} total={count ?? 0} />
       {mainCategories.length === 0 ? (
         <div className="rounded-[24px] border border-dashed border-black/15 dark:border-white/15 p-10 text-center text-sm text-[#6e6e73]">
           No categories yet. Create your first main category to get started.
@@ -125,7 +126,7 @@ export default async function CategoriesAdminPage() {
                   <div className="flex min-w-0 items-center gap-3">
                     {main.image_url ? (
                       <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-zinc-100">
-                        <Image src={main.image_url} alt={main.name} fill sizes="44px" className="object-cover" unoptimized />
+                        <Image src={localImage(main.image_url)} alt={main.name} fill sizes="44px" className="object-cover" unoptimized />
                       </div>
                     ) : (
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] text-[10px] text-[#86868b] dark:bg-white/[0.06]">
@@ -169,8 +170,8 @@ export default async function CategoriesAdminPage() {
                     <CategoryRowActions
                       id={main.id}
                       name={main.name}
-                      canMoveUp={mainIndex > 0}
-                      canMoveDown={mainIndex < mainCategories.length - 1}
+                      canMoveUp={page > 1 || mainIndex > 0}
+                      canMoveDown={(page - 1) * ADMIN_PAGE_SIZE + mainIndex < (count ?? 0) - 1}
                     />
                   </div>
                 </div>

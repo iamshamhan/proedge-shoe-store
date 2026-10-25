@@ -286,14 +286,14 @@ export async function reorderProductImages(
 
   const supabase = await getSupabaseServer();
 
-  for (let i = 0; i < orderedImageIds.length; i++) {
-    const { error } = await supabase
-      .from('product_images')
-      .update({ sort_order: i })
-      .eq('id', orderedImageIds[i])
-      .eq('product_id', productId);
-    if (error) return { error: error.message };
+  if (!Array.isArray(orderedImageIds) || new Set(orderedImageIds).size !== orderedImageIds.length) {
+    return { error: 'Invalid image order.' };
   }
+  const { error } = await supabase.rpc('admin_reorder_product_images', {
+    p_product_id: productId, p_image_ids: orderedImageIds,
+  });
+  if (error) return { error: error.code === 'PGRST202'
+    ? 'Image reordering requires the pending database migration.' : error.message };
 
   const { data: prod } = await supabase.from('products').select('slug').eq('id', productId).single();
   await revalidateProductPaths(prod?.slug, productId);
@@ -595,7 +595,7 @@ export async function updateStoreSettings(
   };
 
   if (input.hero_product_slug !== undefined) {
-    upsertPayload.hero_product_slug = input.hero_product_slug.trim() || null;
+    upsertPayload.hero_product_slug = input.hero_product_slug.trim();
   }
 
   if (input.sale_enabled !== undefined) {
@@ -615,14 +615,14 @@ export async function updateStoreSettings(
   }
 
   if (input.contact_phone !== undefined) {
-    upsertPayload.contact_phone = input.contact_phone.trim() || null;
+    upsertPayload.contact_phone = input.contact_phone.trim();
   }
 
     if (input.contact_email !== undefined) {
-    upsertPayload.contact_email = input.contact_email.trim() || null;
+    upsertPayload.contact_email = input.contact_email.trim();
   }
   if (input.whatsapp_number !== undefined) {
-    upsertPayload.whatsapp_number = input.whatsapp_number.trim() || null;
+    upsertPayload.whatsapp_number = input.whatsapp_number.trim();
   }
   if (input.sale_section_title !== undefined) {
     upsertPayload.sale_section_title = input.sale_section_title.trim() || null;
@@ -685,7 +685,8 @@ export async function createCategory(data: {
     query.is('parent_id', null);
   }
   
-  const { data: maxSort } = await query;
+  const { data: maxSort, error: sortError } = await query;
+  if (sortError) return { error: sortError.message };
   const sort_order = (maxSort?.[0]?.sort_order ?? 0) + 10;
 
   const { data: catData, error } = await supabase
@@ -753,20 +754,22 @@ export async function updateCategory(
       return { error: 'A category cannot be its own parent.' };
     }
 
-    const { data: parent } = await supabase
+    const { data: parent, error: parentError } = await supabase
       .from('categories')
       .select('id, parent_id')
       .eq('id', data.parent_id)
       .maybeSingle();
+    if (parentError) return { error: parentError.message };
     if (!parent) return { error: 'The selected parent category no longer exists.' };
     if (parent.parent_id) {
       return { error: 'Subcategories can only be placed under a main category.' };
     }
 
-    const { count: childCount } = await supabase
+    const { count: childCount, error: childError } = await supabase
       .from('categories')
       .select('id', { count: 'exact', head: true })
       .eq('parent_id', id);
+    if (childError) return { error: childError.message };
     if ((childCount ?? 0) > 0) {
       return {
         error:
@@ -809,11 +812,12 @@ export async function deleteCategory(
 
   const supabase = await getSupabaseServer();
 
-  const [{ count: productCount }, { count: childCount }] = await Promise.all([
+  const [{ count: productCount, error: productError }, { count: childCount, error: childError }] = await Promise.all([
     supabase.from('products').select('id', { count: 'exact', head: true }).eq('category_id', id),
     supabase.from('categories').select('id', { count: 'exact', head: true }).eq('parent_id', id),
   ]);
 
+  if (productError || childError) return { error: (productError || childError)!.message };
   if ((productCount ?? 0) > 0) {
     return {
       error: `This category still has ${productCount} product${productCount === 1 ? '' : 's'}. Move or delete them first.`,
@@ -854,15 +858,13 @@ export async function moveCategory(
     .maybeSingle();
   if (!current) return { error: 'Category not found.' };
 
-  const siblingsQuery = supabase
-    .from('categories')
-    .select('id')
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: true });
-  const { data: siblings, error: listError } = current.parent_id
-    ? await siblingsQuery.eq('parent_id', current.parent_id)
-    : await siblingsQuery.is('parent_id', null);
-  if (listError || !siblings) return { error: listError?.message ?? 'Could not load categories.' };
+  let siblings: { id: string }[];
+  try {
+    siblings = await readAllRows((from, to) => {
+      const query = supabase.from('categories').select('id').order('sort_order').order('created_at').order('id').range(from, to);
+      return current.parent_id ? query.eq('parent_id', current.parent_id) : query.is('parent_id', null);
+    });
+  } catch { return { error: 'Could not load categories.' }; }
 
   const ids = siblings.map((s) => s.id);
   const index = ids.indexOf(id);

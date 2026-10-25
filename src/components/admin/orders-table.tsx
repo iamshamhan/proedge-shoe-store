@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import type { AdminSearchParams } from '@/lib/admin-pagination';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -44,44 +46,30 @@ export interface AdminOrderSummary {
 
 type Props = {
   initialOrders: AdminOrderSummary[];
+  filters: AdminSearchParams;
+  statusCounts: Record<string, number>;
 };
 
-export function OrdersTable({ initialOrders }: Props) {
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+export function OrdersTable({ initialOrders, filters, statusCounts }: Props) {
+  const router = useRouter();
+  const [search, setSearch] = useState(filters.q ?? '');
+  const [statusFilter, setStatusFilter] = useState<string>(filters.status ?? 'all');
   const [selectedForCompletion, setSelectedForCompletion] = useState<AdminOrderSummary | null>(null);
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
 
-  const filteredOrders = useMemo(() => {
-    return initialOrders.filter((order) => {
-      // Status filter
-      if (statusFilter !== 'all' && order.status.toLowerCase() !== statusFilter) {
-        return false;
-      }
-
-      // Search filter
-      if (!search.trim()) return true;
-      const query = search.toLowerCase().trim();
-      return (
-        order.order_number.toLowerCase().includes(query) ||
-        order.customer_name.toLowerCase().includes(query) ||
-        order.phone.toLowerCase().includes(query) ||
-        order.city.toLowerCase().includes(query) ||
-        (order.email && order.email.toLowerCase().includes(query))
-      );
-    });
-  }, [initialOrders, search, statusFilter]);
-
-  const stats = useMemo(() => {
-    const total = initialOrders.length;
-    const pending = initialOrders.filter((o) => o.status === 'pending').length;
-    const confirmed = initialOrders.filter((o) =>
-      ['confirmed', 'processing', 'ready_to_ship', 'shipped', 'delivered'].includes(o.status)
-    ).length;
-    const cancelled = initialOrders.filter((o) => o.status === 'cancelled').length;
-
-    return { total, pending, confirmed, cancelled };
-  }, [initialOrders]);
+  const filteredOrders = initialOrders;
+  const stats = {
+    total: Object.values(statusCounts).reduce((sum, count) => sum + count, 0),
+    pending: statusCounts.pending ?? 0,
+    confirmed: ['confirmed', 'processing', 'ready_to_ship', 'shipped', 'delivered'].reduce((sum, status) => sum + (statusCounts[status] ?? 0), 0),
+    cancelled: statusCounts.cancelled ?? 0,
+  };
+  const applyFilter = (key: string, value: string) => {
+    const params = new URLSearchParams();
+    for (const [name, current] of Object.entries(filters)) if (current && name !== 'page') params.set(name, current);
+    params.set(key, value);
+    router.push('/admin/orders?' + params);
+  };
 
   const getWhatsAppLink = (order: AdminOrderSummary) => {
     let clean = (order.whatsapp || order.phone).replace(/[^0-9]/g, '');
@@ -171,36 +159,36 @@ export function OrdersTable({ initialOrders }: Props) {
   };
 
   const statusTabs = [
-    { id: 'all', label: 'All Orders', count: initialOrders.length },
+    { id: 'all', label: 'All Orders', count: stats.total },
     {
       id: 'pending',
       label: 'Pending WhatsApp',
-      count: initialOrders.filter((o) => o.status === 'pending').length,
+      count: (statusCounts.pending ?? 0),
     },
     {
       id: 'confirmed',
       label: 'Confirmed',
-      count: initialOrders.filter((o) => o.status === 'confirmed').length,
+      count: (statusCounts.confirmed ?? 0),
     },
     {
       id: 'processing',
       label: 'Processing',
-      count: initialOrders.filter((o) => o.status === 'processing').length,
+      count: (statusCounts.processing ?? 0),
     },
     {
       id: 'shipped',
       label: 'Shipped',
-      count: initialOrders.filter((o) => o.status === 'shipped').length,
+      count: (statusCounts.shipped ?? 0),
     },
     {
       id: 'delivered',
       label: 'Delivered',
-      count: initialOrders.filter((o) => o.status === 'delivered').length,
+      count: (statusCounts.delivered ?? 0),
     },
     {
       id: 'cancelled',
       label: 'Cancelled',
-      count: initialOrders.filter((o) => o.status === 'cancelled').length,
+      count: (statusCounts.cancelled ?? 0),
     },
   ];
 
@@ -281,7 +269,7 @@ export function OrdersTable({ initialOrders }: Props) {
             <button
               key={tab.id}
               type="button"
-              onClick={() => setStatusFilter(tab.id)}
+              onClick={() => { setStatusFilter(tab.id); applyFilter('status', tab.id); }}
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-tight transition-colors ${
                 statusFilter === tab.id
                   ? 'bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f]'
@@ -310,6 +298,8 @@ export function OrdersTable({ initialOrders }: Props) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') applyFilter('q', search); }}
+                onBlur={() => { if (search !== (filters.q ?? '')) applyFilter('q', search); }}
               placeholder="Search by order number, customer name, phone, or city..."
               className="w-full rounded-full border border-black/[0.08] dark:border-white/[0.12] bg-[#f5f5f7] dark:bg-white/[0.05] pl-10 pr-4 py-2.5 text-sm text-[#1d1d1f] dark:text-[#f5f5f7] placeholder:text-[#86868b] outline-none focus:bg-white dark:focus:bg-[#1d1d1f] focus:ring-2 focus:ring-amber-500 transition-all"
             />
@@ -321,10 +311,10 @@ export function OrdersTable({ initialOrders }: Props) {
               onClick={handleExportCsv}
               disabled={filteredOrders.length === 0}
               className="inline-flex items-center justify-center gap-1.5 rounded-full border border-black/[0.08] dark:border-white/[0.12] bg-white dark:bg-[#1d1d1f] px-4 py-2.5 text-xs font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors disabled:opacity-40"
-              title="Export filtered orders to CSV"
+              title="Export this page to CSV"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export CSV</span>
+              <span>Export page CSV</span>
             </button>
 
             <button

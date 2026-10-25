@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingBag, Check, PackageX } from 'lucide-react';
+import { resolveProductVariant } from '@/lib/product-variants';
 import { Product } from '@/types/product';
 import { formatLKR } from '@/data/products';
 import { useCart } from '@/context/cart-context';
@@ -20,23 +21,11 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
 
   const isOutOfStock = product.stock <= 0;
-  const hasVariants = Boolean(product.variants && product.variants.length > 0);
-
-  const isSizeAvailable = (size: string | number) => {
-    if (!hasVariants) return product.stock > 0;
-    return product.variants!.some(
-      (v) =>
-        (v.sizeValue === String(size) || String(v.size) === String(size)) &&
-        v.stock > 0,
-    );
-  };
-
-  // Default to the first in-stock size
-  const firstAvailableSize =
-    product.sizes?.find((s) => isSizeAvailable(s)) ?? product.sizes?.[0];
-  const [selectedQuickSize, setSelectedQuickSize] = useState<string | number | undefined>(
-    firstAvailableSize,
-  );
+  const variants = product.variants ?? [];
+  const [selectedVariantId, setSelectedVariantId] = useState(variants.find(v => v.stock > 0)?.id ?? '');
+  const selected = variants.find(v => v.id === selectedVariantId);
+  const targetVariant = selected ? resolveProductVariant(variants, selected.colour,
+    selected.sizeSystem ?? product.sizeSystem ?? 'Custom', String(selected.sizeValue || selected.size), product.sizeSystem) : null;
 
   const discountPercent =
     product.compareAtPrice && product.compareAtPrice > product.price
@@ -47,25 +36,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     e.preventDefault();
     if (isOutOfStock) return;
 
-    const targetSize = selectedQuickSize ?? firstAvailableSize;
-    // Pick an in-stock variant matching targetSize, or fallback to first in-stock variant
-    const targetVariant =
-      product.variants?.find(
-        (v) =>
-          (v.sizeValue === String(targetSize) || String(v.size) === String(targetSize)) &&
-          v.stock > 0,
-      ) ??
-      product.variants?.find((v) => v.stock > 0) ??
-      product.variants?.[0];
-
-    const resolvedSize =
-      targetVariant?.sizeValue ?? targetVariant?.size ?? targetSize ?? product.sizes?.[0] ?? 40;
-    const resolvedColor = targetVariant?.colour ?? product.colors?.[0] ?? 'Standard';
-    const resolvedSizeSystem = targetVariant?.sizeSystem ?? product.sizeSystem;
-    const resolvedMaxStock = targetVariant ? targetVariant.stock : product.stock;
-
-    if (resolvedMaxStock <= 0) return;
-
+    if (!targetVariant || targetVariant.stock <= 0) return;
     addItem({
       productId: product.id,
       variantId: targetVariant?.id,
@@ -73,11 +44,11 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       slug: product.slug,
       image: product.images[0],
       price: product.price,
-      size: resolvedSize,
-      sizeSystem: resolvedSizeSystem,
-      color: resolvedColor,
+      size: targetVariant.sizeValue || targetVariant.size,
+      sizeSystem: targetVariant.sizeSystem ?? product.sizeSystem ?? 'Custom',
+      color: targetVariant.colour,
       quantity: 1,
-      maxStock: resolvedMaxStock,
+      maxStock: targetVariant.stock,
     });
     setIsAdded(true);
     setIsCartDrawerOpen(true);
@@ -185,23 +156,24 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           </Link>
 
           {/* Interactive Size Quick-Select Strip (Pill Selector) */}
-          {!isOutOfStock && product.sizes.length > 0 && (
+          {!isOutOfStock && variants.length > 0 && (
             <div className="mt-1.5 sm:mt-3 flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-0.5 no-scrollbar relative z-20">
               <span className="text-[10px] sm:text-[11px] text-[#6e6e73] dark:text-[#86868b] font-medium mr-0.5 shrink-0 hidden xs:inline-block">
-                {product.sizeSystem && product.sizeSystem !== 'Custom' ? product.sizeSystem : 'Size'}:
+                Variant:
               </span>
-              {product.sizes.map((size) => {
-                const available = isSizeAvailable(size);
-                const isSelected = String(selectedQuickSize) === String(size);
+              {variants.map((variant) => {
+                const size = [variant.sizeSystem ?? product.sizeSystem ?? 'Custom', variant.sizeValue || variant.size, variant.colour].join(' ');
+                const available = variant.stock > 0;
+                const isSelected = selectedVariantId === variant.id;
                 return (
                   <button
-                    key={size}
+                    key={variant.id}
                     type="button"
                     disabled={!available}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      if (available) setSelectedQuickSize(size);
+                      if (available) setSelectedVariantId(variant.id);
                     }}
                     title={available ? `Select size ${size}` : `Size ${size} out of stock`}
                     className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-[11px] font-medium rounded-full shrink-0 transition-all ${
@@ -236,7 +208,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           <button
             type="button"
             onClick={handleAddToCart}
-            disabled={isOutOfStock}
+            disabled={isOutOfStock || !targetVariant || targetVariant.stock <= 0}
             className={`px-2.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold tracking-tight rounded-full transition-all flex items-center gap-1 sm:gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:cursor-not-allowed shrink-0 min-h-[30px] sm:min-h-0 ${
               isAdded
                 ? 'bg-emerald-600 text-white'

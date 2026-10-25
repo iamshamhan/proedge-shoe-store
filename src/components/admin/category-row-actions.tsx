@@ -23,19 +23,29 @@ export function CategoryRowActions({ id, name, canMoveUp, canMoveDown }: Props) 
   const move = (direction: 'up' | 'down') => {
     setError(null);
     startTransition(async () => {
-      const res = await moveCategory(id, direction);
-      if ('error' in res) setError(res.error);
-      else router.refresh();
-    });
+      try {
+        const res = await moveCategory(id, direction);
+        if ('error' in res) setError(res.error);
+        else router.refresh();
+
+      } catch {
+        setError('The operation could not be completed. Check your connection and refresh before retrying.');
+      }
+  });
   };
 
   const remove = () => {
     startTransition(async () => {
-      const res = await deleteCategory(id);
-      setConfirmOpen(false);
-      if ('error' in res) setError(res.error);
-      else router.refresh();
-    });
+      try {
+        const res = await deleteCategory(id);
+        setConfirmOpen(false);
+        if ('error' in res) setError(res.error);
+        else router.refresh();
+
+      } catch {
+        setError('The operation could not be completed. Check your connection and refresh before retrying.');
+      }
+  });
   };
 
   const iconBtn =

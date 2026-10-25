@@ -261,22 +261,27 @@ export function OrderCompleteModal({
     }));
 
     startTransition(async () => {
-      const res = await confirmOrderSale(
-        orderId,
-        payload,
-        deliveryFee,
-        adminNotes,
-        revision
-      );
+      try {
+        const res = await confirmOrderSale(
+          orderId,
+          payload,
+          deliveryFee,
+          adminNotes,
+          revision
+        );
 
-      if ('error' in res) {
-        setError(res.error);
-      } else {
-        onClose();
-        if (onSuccess) onSuccess();
-        router.refresh();
+        if ('error' in res) {
+          setError(res.error);
+        } else {
+          onClose();
+          if (onSuccess) onSuccess();
+          router.refresh();
+        }
+
+      } catch {
+        setError('The operation could not be completed. Check your connection and refresh before retrying.');
       }
-    });
+  });
   };
 
   const selectedProduct = catalogProducts.find((p) => p.id === selectedProductId);

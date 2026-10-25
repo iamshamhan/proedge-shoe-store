@@ -1,5 +1,7 @@
 'use client';
 
+import { localImage } from '@/lib/local-images';
+import { mergeCartItem, cartFingerprint, CHECKOUT_REQUEST_KEY } from '@/lib/cart';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface CartItem {
@@ -33,6 +35,7 @@ interface CartContextType {
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
+  replaceItems: (items: CartItem[]) => void;
   totalItemsCount: number;
   subtotal: number;
   isCartDrawerOpen: boolean;
@@ -58,6 +61,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (Array.isArray(rawItems)) {
             const normalizedItems = rawItems.map((item) => ({
               ...item,
+              image: localImage(item.image || '/product-placeholder.svg'),
               sizeSystem: item.sizeSystem || 'EU',
               id: generateCartItemId(item),
             }));
@@ -79,6 +83,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!isLoaded) return;
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
+      const request = JSON.parse(sessionStorage.getItem(CHECKOUT_REQUEST_KEY) ?? 'null');
+      if (request && request.fingerprint !== cartFingerprint(items)) sessionStorage.removeItem(CHECKOUT_REQUEST_KEY);
     } catch (err) {
       console.error('Failed to save cart to localStorage:', err);
     }
@@ -87,31 +93,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addItem = (newItem: Omit<CartItem, 'id'>) => {
     const id = generateCartItemId(newItem);
     
-    setItems((prevItems) => {
-      const existingIndex = prevItems.findIndex((item) => item.id === id);
-      if (existingIndex > -1) {
-        const updated = [...prevItems];
-        const existing = updated[existingIndex];
-        const cap = newItem.maxStock ?? existing.maxStock;
-        const nextQty = existing.quantity + newItem.quantity;
-        updated[existingIndex] = {
-          ...existing,
-          maxStock: cap,
-          quantity: cap !== undefined && cap > 0 ? Math.min(nextQty, cap) : nextQty,
-        };
-        return updated;
-      } else {
-        const cap = newItem.maxStock;
-        return [
-          ...prevItems,
-          {
-            ...newItem,
-            id,
-            quantity: cap !== undefined && cap > 0 ? Math.min(newItem.quantity, cap) : newItem.quantity,
-          },
-        ];
-      }
-    });
+    setItems(prev => mergeCartItem(prev, { ...newItem, id }));
   };
 
   const removeItem = (id: string) => {
@@ -151,6 +133,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeItem,
         updateQuantity,
         clearCart,
+        replaceItems: setItems,
         totalItemsCount,
         subtotal,
         isCartDrawerOpen,

@@ -13,7 +13,7 @@ const cspHeader = `
   default-src 'self';
   script-src ${scriptSrc};
   style-src 'self' 'unsafe-inline';
-  img-src 'self' blob: data: https://images.unsplash.com https://*.supabase.co;
+  img-src 'self' blob: data: https://*.supabase.co;
   font-src 'self';
   object-src 'none';
   base-uri 'self';
@@ -30,12 +30,6 @@ const nextConfig: NextConfig = {
   experimental: { cpus: 2 },
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        port: "",
-        pathname: "/**",
-      },
       {
         protocol: "https",
         hostname: "*.supabase.co",

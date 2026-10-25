@@ -14,7 +14,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
   // Fallback image if images array is empty
   const imageList = images && images.length > 0 ? images : [
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop'
+    '/images/catalog/photo-1542291026-7eec264c27ff.webp'
   ];
 
   const handleNext = () => {

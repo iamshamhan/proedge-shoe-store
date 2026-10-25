@@ -1,4 +1,5 @@
 'use client';
+import { localImage } from '@/lib/local-images';
 import Image from 'next/image';
 
 import React, { useState } from 'react';
@@ -225,7 +226,7 @@ export function CategoryForm({ parentCategories = [], defaultParentId, initialDa
               <div className="flex items-start gap-4">
                 {imageUrl && (
                   <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 shrink-0 bg-white">
-                    <Image src={imageUrl} alt="Category" fill className="object-cover" unoptimized />
+                    <Image src={localImage(imageUrl)} alt="Category" fill className="object-cover" unoptimized />
                   </div>
                 )}
                 <div className="flex-1 space-y-2">

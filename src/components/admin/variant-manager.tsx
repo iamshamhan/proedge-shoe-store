@@ -54,109 +54,123 @@ export function VariantManager({ productId, variants: initialVariants }: Variant
   }, [initialVariants]);
 
   const handleAdd = useCallback(async () => {
-    setError(null);
-    setSuccessMsg(null);
-
-    const sValue = size.trim();
-    const stockNum = Number(stock);
-
-    if (!colour.trim()) {
-      setError('Colour is required.');
-      return;
-    }
-    if (!sValue) {
-      setError('Size is required.');
-      return;
-    }
-    if (!Number.isInteger(stockNum) || stockNum < 0) {
-      setError('Stock must be a non-negative whole number.');
-      return;
-    }
-
-    // Support comma-separated sizes in the single size input as well!
-    if (sValue.includes(',')) {
-      const parsedSizes = sValue
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      setAdding(true);
-      const res = await addProductVariantsBulk(
-        productId,
-        colour.trim(),
-        parsedSizes,
-        stockNum,
-        sizeSystem,
-      );
-      setAdding(false);
-      if ('error' in res) {
-        setError(res.error);
-        return;
-      }
-      setVariants((prev) => [...prev, ...res.added]);
-      setSize('');
-      setSuccessMsg(`Added ${res.added.length} variants for ${colour.trim()}.`);
-      router.refresh();
-      return;
-    }
-
-    setAdding(true);
-    const result = await addProductVariant(productId, colour, sValue, stockNum, sizeSystem);
-    setAdding(false);
-
-    if ('error' in result) {
-      setError(result.error);
-      return;
-    }
-
-    setVariants((prev) => [
-      ...prev,
-      {
-        id: result.id,
-        colour: colour.trim(),
-        size: sValue,
-        size_system: sizeSystem,
-        size_value: sValue,
-        stock: stockNum,
-      },
-    ]);
-    setSize('');
-    router.refresh();
-  }, [colour, size, sizeSystem, stock, productId, router]);
-
-  const handleBulkPreset = useCallback(
-    async (preset: { label: string; system: string; sizes: string[] }) => {
+    try {
       setError(null);
       setSuccessMsg(null);
 
-      const cleanColour = colour.trim() || 'Standard';
+      const sValue = size.trim();
       const stockNum = Number(stock);
 
+      if (!colour.trim()) {
+        setError('Colour is required.');
+        return;
+      }
+      if (!sValue) {
+        setError('Size is required.');
+        return;
+      }
       if (!Number.isInteger(stockNum) || stockNum < 0) {
-        setError('Enter a valid default stock per size (0 or more) before generating a size run.');
+        setError('Stock must be a non-negative whole number.');
         return;
       }
 
-      setBulkAdding(true);
-      const result = await addProductVariantsBulk(
-        productId,
-        cleanColour,
-        preset.sizes,
-        stockNum,
-        preset.system,
-      );
-      setBulkAdding(false);
+      // Support comma-separated sizes in the single size input as well!
+      if (sValue.includes(',')) {
+        const parsedSizes = sValue
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        setAdding(true);
+        const res = await addProductVariantsBulk(
+          productId,
+          colour.trim(),
+          parsedSizes,
+          stockNum,
+          sizeSystem,
+        );
+        setAdding(false);
+        if ('error' in res) {
+          setError(res.error);
+          return;
+        }
+        setVariants((prev) => [...prev, ...res.added]);
+        setSize('');
+        setSuccessMsg(`Added ${res.added.length} variants for ${colour.trim()}.`);
+        router.refresh();
+        return;
+      }
+
+      setAdding(true);
+      const result = await addProductVariant(productId, colour, sValue, stockNum, sizeSystem);
+      setAdding(false);
 
       if ('error' in result) {
         setError(result.error);
         return;
       }
 
-      setVariants((prev) => [...prev, ...result.added]);
-      setSuccessMsg(
-        `Generated ${result.added.length} variants (${preset.label}) for "${cleanColour}" with ${stockNum} stock each.`,
-      );
+      setVariants((prev) => [
+        ...prev,
+        {
+          id: result.id,
+          colour: colour.trim(),
+          size: sValue,
+          size_system: sizeSystem,
+          size_value: sValue,
+          stock: stockNum,
+        },
+      ]);
+      setSize('');
       router.refresh();
-    },
+
+    } catch {
+      setError('The operation could not be completed. Check your connection and refresh before retrying.');
+    } finally {
+      setAdding(false);
+    }
+  }, [colour, size, sizeSystem, stock, productId, router]);
+
+  const handleBulkPreset = useCallback(
+    async (preset: { label: string; system: string; sizes: string[] }) => {
+      try {
+        setError(null);
+        setSuccessMsg(null);
+
+        const cleanColour = colour.trim() || 'Standard';
+        const stockNum = Number(stock);
+
+        if (!Number.isInteger(stockNum) || stockNum < 0) {
+          setError('Enter a valid default stock per size (0 or more) before generating a size run.');
+          return;
+        }
+
+        setBulkAdding(true);
+        const result = await addProductVariantsBulk(
+          productId,
+          cleanColour,
+          preset.sizes,
+          stockNum,
+          preset.system,
+        );
+        setBulkAdding(false);
+
+        if ('error' in result) {
+          setError(result.error);
+          return;
+        }
+
+        setVariants((prev) => [...prev, ...result.added]);
+        setSuccessMsg(
+          `Generated ${result.added.length} variants (${preset.label}) for "${cleanColour}" with ${stockNum} stock each.`,
+        );
+        router.refresh();
+
+      } catch {
+        setError('The operation could not be completed. Check your connection and refresh before retrying.');
+      } finally {
+        setBulkAdding(false);
+      }
+  },
     [colour, stock, productId, router],
   );
 
@@ -183,18 +197,25 @@ export function VariantManager({ productId, variants: initialVariants }: Variant
   );
 
   const handleDelete = useCallback(async () => {
-    if (!targetDelete) return;
-    setDeleting(true);
-    const result = await removeProductVariant(targetDelete.id);
-    setDeleting(false);
-    if ('error' in result) {
-      setError(result.error);
+    try {
+      if (!targetDelete) return;
+      setDeleting(true);
+      const result = await removeProductVariant(targetDelete.id);
+      setDeleting(false);
+      if ('error' in result) {
+        setError(result.error);
+        setTargetDelete(null);
+        return;
+      }
+      setVariants((prev) => prev.filter((v) => v.id !== targetDelete.id));
       setTargetDelete(null);
-      return;
+      router.refresh();
+
+    } catch {
+      setError('The operation could not be completed. Check your connection and refresh before retrying.');
+    } finally {
+      setDeleting(false);
     }
-    setVariants((prev) => prev.filter((v) => v.id !== targetDelete.id));
-    setTargetDelete(null);
-    router.refresh();
   }, [targetDelete, router]);
 
   const totalStock = variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);

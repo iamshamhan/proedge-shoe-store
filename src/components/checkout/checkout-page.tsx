@@ -20,6 +20,9 @@ import { useStoreSettings } from '@/context/settings-context';
 import { formatLKR } from '@/data/products';
 import { getDeliveryFee } from '@/lib/config';
 import { generateWhatsAppOrderLink } from '@/lib/whatsapp';
+import { useCartAvailability } from '@/components/cart/use-cart-availability';
+import { checkCart } from '@/app/checkout/cart-actions';
+import { cartFingerprint, checkoutRequest, CHECKOUT_REQUEST_KEY } from '@/lib/cart';
 import { placeOrder } from '@/app/checkout/actions';
 import type { ValidatedOrder } from '@/types/order';
 
@@ -51,8 +54,9 @@ const inputClasses =
   'w-full px-4 py-3.5 bg-[#f5f5f7] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.12] rounded-2xl text-base sm:text-sm text-[#1d1d1f] dark:text-[#f5f5f7] placeholder:text-[#86868b] focus:bg-white dark:focus:bg-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all';
 
 export function CheckoutPage() {
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, clearCart, replaceItems } = useCart();
   const settings = useStoreSettings();
+  const availability = useCartAvailability(items);
 
   const [form, setForm] = useState<CheckoutFormState>(INITIAL_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -100,7 +104,7 @@ export function CheckoutPage() {
     e.preventDefault();
 
     // Prevent duplicate accidental submissions.
-    if (submitting.current || orderData) return;
+    if (submitting.current || orderData || availability.checking || availability.error) return;
 
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -108,6 +112,7 @@ export function CheckoutPage() {
       return;
     }
 
+    if (!settings.whatsappNumber?.trim()) { setSubmitError('WhatsApp checkout is currently unavailable. Please contact the store.'); return; }
     submitting.current = true;
     setIsSubmitting(true);
     setSubmitError(null);
@@ -115,10 +120,16 @@ export function CheckoutPage() {
     // The client sends only identifiers + quantities + delivery details.
     // Prices, names, subtotals and totals are calculated by the server.
     try {
-      const fingerprint = JSON.stringify({ form, items });
-      if (submission.current?.fingerprint !== fingerprint) {
-        submission.current = { fingerprint, id: crypto.randomUUID() };
+      const checked = await checkCart(items);
+      if (checked.error) { setSubmitError(checked.error); return; }
+      if (!checked.items) return;
+      if (checked.items.some((item, index) => item.price !== items[index].price)) {
+        replaceItems(checked.items);
+        setSubmitError('Prices have changed. Review the updated total, then submit again.');
+        return;
       }
+      const fingerprint = cartFingerprint(items);
+      submission.current = checkoutRequest(sessionStorage, fingerprint);
       const result = await placeOrder(
         {
           requestId: submission.current.id,
@@ -152,7 +163,7 @@ export function CheckoutPage() {
       // Build the WhatsApp message ONLY from server-validated order data.
       const url = generateWhatsAppOrderLink({
         orderNumber: order.order_number,
-        storePhone: settings.whatsappNumber || settings.contactPhone,
+        storePhone: settings.whatsappNumber,
         customer: {
           fullName: order.customer.fullName,
           phone: order.customer.phone,
@@ -179,6 +190,8 @@ export function CheckoutPage() {
       window.open(url, '_blank', 'noopener,noreferrer');
       setOrderUrl(url);
       setOrderData(order);
+      try { sessionStorage.removeItem(CHECKOUT_REQUEST_KEY); } catch { /* Receipt is already saved. */ }
+      submission.current = null;
       clearCart();
     } catch {
       setSubmitError('The connection was interrupted. Try again; the same request will not create a duplicate order.');
@@ -480,6 +493,11 @@ export function CheckoutPage() {
                 </div>
               </fieldset>
 
+              {availability.checking && <p role="status">Checking current availability...</p>}
+              {availability.error && <div role="alert" className="text-sm text-rose-600">
+                {availability.error} <Link href="/cart" className="underline">Edit bag</Link>{' '}
+                <button type="button" onClick={availability.retry} className="underline">Check again</button>
+              </div>}
               {submitError && (
                 <div
                   role="alert"
@@ -500,7 +518,7 @@ export function CheckoutPage() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || availability.checking || Boolean(availability.error)}
                   className="px-8 py-4 bg-emerald-600 text-white font-semibold text-[15px] tracking-tight rounded-full hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 soft-shadow disabled:opacity-60"
                 >
                   <MessageSquare className="w-5 h-5" />

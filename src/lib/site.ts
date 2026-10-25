@@ -16,14 +16,15 @@ export const SITE_DESCRIPTION =
  * production domain exists.
  */
 export function getSiteUrl(): string | null {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL;
+  const raw = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : undefined);
   if (!raw) return null;
 
   const trimmed = raw.trim().replace(/\/+$/, '');
   if (!/^https?:\/\/.+/i.test(trimmed)) return null;
 
   try {
-    new URL(trimmed);
+    const url = new URL(trimmed);
+    if (url.username || url.password || url.search || url.hash || url.pathname !== '/') return null;
   } catch {
     return null;
   }

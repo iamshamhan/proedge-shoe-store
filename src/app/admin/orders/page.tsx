@@ -1,3 +1,5 @@
+import { AdminPagination } from '@/components/admin/pagination';
+import { adminPage, ADMIN_PAGE_SIZE, searchTerm, type AdminSearchParams } from '@/lib/admin-pagination';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getAuthUser } from '@/lib/auth/admin';
@@ -12,22 +14,29 @@ export const metadata: Metadata = {
   title: 'Orders | Admin',
 };
 
-export default async function AdminOrdersPage() {
+export default async function AdminOrdersPage({ searchParams }: { searchParams: Promise<AdminSearchParams> }) {
   const user = await getAuthUser();
   if (!user?.isAdmin) redirect('/admin/login');
 
   const supabase = await getSupabaseServer();
 
-  // Fetch orders and item counts
-  const [rawOrders, orderItemCounts] = await Promise.all([
-    readAllRows((from, to) => supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false }).order('id').range(from, to)),
-    readAllRows((from, to) => supabase
-      .from('order_items')
-      .select('order_id, quantity').order('id').range(from, to)),
-  ]);
+  const params = await searchParams;
+  const page = adminPage(params.page);
+  const term = searchTerm(params.q);
+  let query = supabase.from('orders').select('*', { count: 'exact' });
+  if (term) query = query.or(['order_number', 'customer_name', 'phone', 'city', 'email'].map(field => `${field}.ilike.%${term}%`).join(','));
+  if (params.status && params.status !== 'all') query = query.eq('status', params.status);
+  const { data: rawOrders, count, error } = await query.order('created_at', { ascending: false })
+    .order('id').range((page - 1) * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE - 1);
+  if (error) throw new Error(error.message);
+  const orderItemCounts = rawOrders?.length ? await readAllRows((from, to) => supabase.from('order_items')
+    .select('order_id, quantity').in('order_id', rawOrders.map(o => o.id)).order('id').range(from, to)) : [];
+  const statusCounts = Object.fromEntries(await Promise.all(
+    ['pending', 'confirmed', 'processing', 'ready_to_ship', 'shipped', 'delivered', 'cancelled'].map(async status => {
+      const result = await supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', status);
+      if (result.error) throw new Error(result.error.message);
+      return [status, result.count ?? 0];
+    })));
 
   const countMap = new Map<string, number>();
   for (const item of orderItemCounts ?? []) {
@@ -76,7 +85,8 @@ export default async function AdminOrdersPage() {
         </div>
       </div>
 
-      <OrdersTable initialOrders={orders} />
+      <AdminPagination path="/admin/orders" params={params} page={page} total={count ?? 0} />
+      <OrdersTable key={JSON.stringify(params)} initialOrders={orders} filters={params} statusCounts={statusCounts} />
     </div>
   );
 }

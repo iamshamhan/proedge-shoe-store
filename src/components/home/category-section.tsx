@@ -1,3 +1,4 @@
+import { localImage } from '@/lib/local-images';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,7 +20,7 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     name: 'Football',
     slug: 'football',
     href: '/shop?category=football',
-    image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000&auto=format&fit=crop',
+    image: '/images/catalog/photo-1574629810360-7efbbe195018.webp',
     subtitle: 'Matchday Precision & Speed',
     tagline: 'Boots, Turf Shoes, Match Balls & Protection',
   },
@@ -27,7 +28,7 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     name: 'Rugby',
     slug: 'rugby',
     href: '/shop?category=rugby',
-    image: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?q=80&w=1000&auto=format&fit=crop',
+    image: '/product-placeholder.svg',
     subtitle: 'Power, Traction & Impact',
     tagline: '8-Stud Boots, Match Balls & Kicking Tees',
   },
@@ -35,7 +36,7 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     name: 'Basketball',
     slug: 'basketball',
     href: '/shop?category=basketball',
-    image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1000&auto=format&fit=crop',
+    image: '/images/catalog/photo-1546519638-68e109498ffc.webp',
     subtitle: 'High-Elevation Court Control',
     tagline: 'Court Shoes, Grip Balls & Accessories',
   },
@@ -43,7 +44,7 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     name: 'Running',
     slug: 'running',
     href: '/shop?category=running',
-    image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=1000&auto=format&fit=crop',
+    image: '/images/catalog/photo-1552674605-db6ffd4facb5.webp',
     subtitle: 'Distance & Energy Return',
     tagline: 'Road Runners, Trail Max & Race Day Trainers',
   },
@@ -51,7 +52,7 @@ const SPORTS_SHOWCASE: SportShowcaseItem[] = [
     name: 'General Gear & Accessories',
     slug: 'general',
     href: '/shop?category=general',
-    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1000&auto=format&fit=crop',
+    image: '/product-placeholder.svg',
     subtitle: 'Training Bags, Slides & Essentials',
     tagline: 'Boot Bags, Gym Duffles, Grip Socks & Strapping Tape',
   },
@@ -67,7 +68,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
         name: cat.name,
         slug: cat.slug,
         href: '/shop?category=' + cat.slug,
-        image: cat.imageUrl || 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=1000',
+        image: (cat.imageUrl ? localImage(cat.imageUrl) : '') || '/images/catalog/photo-1552674605-db6ffd4facb5.webp',
         subtitle: cat.subtitle || 'Proedge Sports Collection',
         tagline: cat.tagline || cat.description || 'Explore the best gear for your next match.',
       }))

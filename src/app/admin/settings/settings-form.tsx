@@ -23,9 +23,9 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
   const [brandName, setBrandName] = useState(initialSettings.brandName || 'Pro Edge');
   const [bannerTagline, setBannerTagline] = useState(initialSettings.bannerTagline || 'Built for Your Next Step');
   const [contactAddress, setContactAddress] = useState(initialSettings.contactAddress || '38 Attidiya Road Kawdana Dehiwala');
-  const [contactPhone, setContactPhone] = useState(initialSettings.contactPhone || '+94 76 387 1280');
-  const [contactEmail, setContactEmail] = useState(initialSettings.contactEmail || 'pro_edge@yahoo.com');
-  const [whatsappNumber, setWhatsappNumber] = useState(initialSettings.whatsappNumber || '+94 76 387 1280');
+  const [contactPhone, setContactPhone] = useState(initialSettings.contactPhone ?? '');
+  const [contactEmail, setContactEmail] = useState(initialSettings.contactEmail ?? '');
+  const [whatsappNumber, setWhatsappNumber] = useState(initialSettings.whatsappNumber ?? '');
 
   // Delivery
   const [freeDeliveryEnabled, setFreeDeliveryEnabled] = useState(initialSettings.freeDeliveryEnabled);
@@ -33,7 +33,7 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
   const [defaultDeliveryFee, setDefaultDeliveryFee] = useState(initialSettings.defaultDeliveryFee);
 
   // Homepage Settings
-  const [heroProductSlug, setHeroProductSlug] = useState(initialSettings.heroProductSlug || 'proedge-runner-x1');
+  const [heroProductSlug, setHeroProductSlug] = useState(initialSettings.heroProductSlug ?? '');
   const [saleEnabled, setSaleEnabled] = useState(initialSettings.saleEnabled !== false);
   const [saleDiscountPercent, setSaleDiscountPercent] = useState(initialSettings.saleDiscountPercent ?? 30);
   

@@ -11,7 +11,7 @@ export function WhatsAppFloatingButton() {
   const [isHovered, setIsHovered] = useState(false);
 
   // Do not render floating widget inside the Admin management workspace
-  if (pathname?.startsWith('/admin')) {
+  if (!whatsappNumber || pathname?.startsWith('/admin')) {
     return null;
   }
 

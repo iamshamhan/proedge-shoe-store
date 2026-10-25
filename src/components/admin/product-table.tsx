@@ -1,5 +1,7 @@
 'use client';
 
+import type { AdminSearchParams } from '@/lib/admin-pagination';
+import { localImage } from '@/lib/local-images';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, useMemo } from 'react';
@@ -55,10 +57,11 @@ type QuickFilter = 'all' | 'low-stock' | 'out-of-stock' | 'on-sale' | 'featured'
 
 interface ProductTableProps {
   products: Product[];
+  filters?: AdminSearchParams;
   categories?: Category[];
 }
 
-export function ProductTable({ products: initial, categories = [] }: ProductTableProps) {
+export function ProductTable({ products: initial, filters = {}, categories = [] }: ProductTableProps) {
   const router = useRouter();
   const [products, setProducts] = useState(initial);
   const [toggling, setToggling] = useState<string | null>(null);
@@ -67,9 +70,9 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
   const [deleting, setDeleting] = useState(false);
   const [targetDelete, setTargetDelete] = useState<Product | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<string>('all');
-  const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
+  const [searchQuery, setSearchQuery] = useState(filters.q ?? '');
+  const [activeTab, setActiveTab] = useState<string>(filters.category ?? 'all');
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>((filters.filter as QuickFilter) ?? 'all');
 
   useEffect(() => {
     setProducts(initial);
@@ -77,73 +80,108 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
 
   const handleToggle = useCallback(
     async (product: Product) => {
-      setActionError(null);
-      setToggling(product.id);
-      const result = await toggleProductActive(product.id, !product.is_active);
-      setToggling(null);
-      if ('error' in result) {
-        setActionError(result.error);
-        return;
+      try {
+        setActionError(null);
+        setToggling(product.id);
+        const result = await toggleProductActive(product.id, !product.is_active);
+        setToggling(null);
+        if ('error' in result) {
+          setActionError(result.error);
+          return;
+        }
+        setProducts((prev) =>
+          prev.map((p) => (p.id === product.id ? { ...p, is_active: !p.is_active } : p)),
+        );
+        router.refresh();
+
+      } catch {
+        setActionError('The operation could not be completed. Check your connection and refresh before retrying.');
+      } finally {
+        setToggling(null);
       }
-      setProducts((prev) =>
-        prev.map((p) => (p.id === product.id ? { ...p, is_active: !p.is_active } : p)),
-      );
-      router.refresh();
-    },
+  },
     [router],
   );
 
   const handleFlagToggle = useCallback(
     async (product: Product, field: 'featured' | 'is_new_arrival' | 'is_on_sale') => {
-      setActionError(null);
-      const key = `${product.id}:${field}`;
-      setFlagBusy(key);
-      const nextVal = !product[field];
-      const result = await updateProductFlags(product.id, { [field]: nextVal });
-      setFlagBusy(null);
-      if ('error' in result) {
-        setActionError(result.error);
-        return;
+      try {
+        setActionError(null);
+        const key = `${product.id}:${field}`;
+        setFlagBusy(key);
+        const nextVal = !product[field];
+        const result = await updateProductFlags(product.id, { [field]: nextVal });
+        setFlagBusy(null);
+        if ('error' in result) {
+          setActionError(result.error);
+          return;
+        }
+        setProducts((prev) =>
+          prev.map((p) => (p.id === product.id ? { ...p, [field]: nextVal } : p)),
+        );
+        router.refresh();
+
+      } catch {
+        setActionError('The operation could not be completed. Check your connection and refresh before retrying.');
+      } finally {
+        setFlagBusy(null);
       }
-      setProducts((prev) =>
-        prev.map((p) => (p.id === product.id ? { ...p, [field]: nextVal } : p)),
-      );
-      router.refresh();
-    },
+  },
     [router],
   );
 
   const handleDuplicate = useCallback(
     async (product: Product) => {
-      setActionError(null);
-      setDuplicating(product.id);
-      const result = await duplicateProduct(product.id);
-      setDuplicating(null);
-      if ('error' in result) {
-        setActionError(result.error);
-        return;
+      try {
+        setActionError(null);
+        setDuplicating(product.id);
+        const result = await duplicateProduct(product.id);
+        setDuplicating(null);
+        if ('error' in result) {
+          setActionError(result.error);
+          return;
+        }
+        router.push(`/admin/products/${result.id}`);
+        router.refresh();
+
+      } catch {
+        setActionError('The operation could not be completed. Check your connection and refresh before retrying.');
+      } finally {
+        setDuplicating(null);
       }
-      router.push(`/admin/products/${result.id}`);
-      router.refresh();
-    },
+  },
     [router],
   );
 
   const handleDelete = useCallback(async () => {
-    if (!targetDelete) return;
-    setActionError(null);
-    setDeleting(true);
-    const result = await deleteProduct(targetDelete.id);
-    setDeleting(false);
-    if ('error' in result) {
-      setActionError(result.error);
+    try {
+      if (!targetDelete) return;
+      setActionError(null);
+      setDeleting(true);
+      const result = await deleteProduct(targetDelete.id);
+      setDeleting(false);
+      if ('error' in result) {
+        setActionError(result.error);
+        setTargetDelete(null);
+        return;
+      }
+      setProducts((prev) => prev.filter((p) => p.id !== targetDelete.id));
       setTargetDelete(null);
-      return;
+      router.refresh();
+
+    } catch {
+      setActionError('The operation could not be completed. Check your connection and refresh before retrying.');
+    } finally {
+      setDeleting(false);
     }
-    setProducts((prev) => prev.filter((p) => p.id !== targetDelete.id));
-    setTargetDelete(null);
-    router.refresh();
   }, [targetDelete, router]);
+
+  const applyFilter = (key: string, value: string) => {
+    const params = new URLSearchParams();
+    for (const [name, current] of Object.entries(filters)) if (current && name !== 'page') params.set(name, current);
+    params.set(key, value);
+    router.push('/admin/products?' + params);
+  };
 
   // Build category lookup map
   const categoryMap = useMemo(() => {
@@ -163,21 +201,7 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
   }, [categories]);
 
   // Filter products by search query and quick filter
-  const filteredProducts = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    return products.filter((p) => {
-      if (q && !p.name.toLowerCase().includes(q) && !p.slug.toLowerCase().includes(q)) {
-        return false;
-      }
-      const totalStock = p.product_variants.reduce((s, v) => s + v.stock, 0);
-      if (quickFilter === 'out-of-stock') return totalStock === 0;
-      if (quickFilter === 'low-stock') return totalStock > 0 && totalStock <= 5;
-      if (quickFilter === 'on-sale') return p.is_on_sale;
-      if (quickFilter === 'featured') return p.featured;
-      if (quickFilter === 'inactive') return !p.is_active;
-      return true;
-    });
-  }, [products, searchQuery, quickFilter]);
+  const filteredProducts = products;
 
   // Group filtered products by Big Category and Small Category
   const groupedData = useMemo(() => {
@@ -303,21 +327,6 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
     return groupedData.filter((g) => g.bigCat.slug === activeTab || g.bigCat.id === activeTab);
   }, [groupedData, activeTab]);
 
-  if (products.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-6 py-16 text-center">
-        <Package className="mx-auto mb-4 h-12 w-12 text-zinc-300 dark:text-zinc-600" />
-        <p className="text-sm font-bold text-zinc-500 dark:text-zinc-400">No products yet.</p>
-        <Link
-          href="/admin/products/new"
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-zinc-950 transition-colors hover:bg-amber-400"
-        >
-          <Plus className="h-4 w-4" />
-          Create your first product
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -346,7 +355,7 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
           <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
             <button
               type="button"
-              onClick={() => setActiveTab('all')}
+              onClick={() => { setActiveTab('all'); applyFilter('category', 'all'); }}
               className={`px-3.5 py-1.5 text-xs font-semibold tracking-tight rounded-full transition-colors ${
                 activeTab === 'all'
                   ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] shadow-xs'
@@ -359,7 +368,7 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
               <button
                 key={group.bigCat.id}
                 type="button"
-                onClick={() => setActiveTab(group.bigCat.slug)}
+                onClick={() => { setActiveTab(group.bigCat.slug); applyFilter('category', group.bigCat.slug); }}
                 className={`px-3.5 py-1.5 text-xs font-semibold tracking-tight rounded-full transition-colors ${
                   activeTab === group.bigCat.slug
                     ? 'bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] shadow-xs'
@@ -378,13 +387,15 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') applyFilter('q', searchQuery); }}
+                onBlur={() => { if (searchQuery !== (filters.q ?? '')) applyFilter('q', searchQuery); }}
               placeholder="Search products…"
               className="w-full rounded-full border border-black/[0.08] dark:border-white/[0.12] bg-white dark:bg-[#1d1d1f] pl-9 pr-4 py-2 text-xs font-medium text-[#1d1d1f] dark:text-[#f5f5f7] focus:outline-none focus:ring-2 focus:ring-amber-500 soft-shadow"
             />
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
+                onClick={() => { setSearchQuery(''); applyFilter('q', ''); }}
                 className="absolute right-3 top-2.5 text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white"
               >
                 <X className="h-4 w-4" />
@@ -411,7 +422,7 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
             <button
               key={f.id}
               type="button"
-              onClick={() => setQuickFilter(f.id)}
+              onClick={() => { setQuickFilter(f.id); applyFilter('filter', f.id); }}
               className={`px-3 py-1 rounded-full font-semibold transition-colors ${
                 quickFilter === f.id
                   ? 'bg-amber-500 text-zinc-950'
@@ -525,7 +536,7 @@ export function ProductTable({ products: initial, categories = [] }: ProductTabl
                                         {img ? (
                                           // eslint-disable-next-line @next/next/no-img-element
                                           <img
-                                            src={img.url}
+                                            src={localImage(img.url)}
                                             alt={product.name}
                                             className="h-10 w-10 rounded-lg object-cover border border-zinc-200 dark:border-zinc-800"
                                           />

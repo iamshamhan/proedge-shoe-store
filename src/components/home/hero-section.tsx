@@ -83,7 +83,7 @@ export function HeroSection({ heroProduct, whatsappNumber }: HeroSectionProps) {
                 <p className="text-lg sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white truncate">Islandwide</p>
                 <p className="text-[11px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5">Express Delivery</p>
               </div>
-              <a
+              {whatsappNumber && <a
                 href={formatWhatsAppChatUrl(
                   whatsappNumber,
                   'Hello PROEDGE team! I have an inquiry about athletic footwear and sporting gear.',
@@ -99,7 +99,7 @@ export function HeroSection({ heroProduct, whatsappNumber }: HeroSectionProps) {
                 <p className="text-[11px] sm:text-xs text-[#6e6e73] dark:text-[#86868b] font-medium mt-0.5 group-hover:underline">
                   WhatsApp Concierge
                 </p>
-              </a>
+              </a>}
             </div>
 
           </div>

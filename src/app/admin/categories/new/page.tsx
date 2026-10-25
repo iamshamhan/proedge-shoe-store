@@ -1,3 +1,4 @@
+import { readAllRows } from '@/lib/supabase/read-all';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getAuthUser } from '@/lib/auth/admin';
@@ -20,11 +21,11 @@ export default async function NewCategoryPage({
 
   const supabase = await getSupabaseServer();
   // Fetch only top-level categories to use as parents
-  const { data: parentCategories } = await supabase
+  const parentCategories = await readAllRows((from, to) => supabase
     .from('categories')
     .select('id, name')
     .is('parent_id', null)
-    .order('sort_order');
+    .order('sort_order').order('id').range(from, to));
 
   let defaultParentId = '';
   if (queryParent) {

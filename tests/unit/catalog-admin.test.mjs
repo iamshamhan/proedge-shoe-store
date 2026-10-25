@@ -76,3 +76,42 @@ test('unavailable store settings fail explicitly instead of substituting deliver
     if (oldKey === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; else process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = oldKey;
   }
 });
+
+test('cleared settings are written without fallback defaults', async () => {
+  const action = setup([ok(null)]);
+  const input = { free_delivery_enabled: true, free_delivery_threshold: 30000, default_delivery_fee: 600,
+    hero_product_slug: '', contact_phone: '', contact_email: '', whatsapp_number: '' };
+  assert.deepEqual(await action.updateStoreSettings(input), { success: true });
+  const payload = action.calls.find(c => c[0] === 'upsert')[1];
+  for (const key of ['hero_product_slug', 'contact_phone', 'contact_email', 'whatsapp_number']) assert.equal(payload[key], '');
+});
+
+test('image reordering uses one RPC, rejects duplicates and surfaces transaction failure', async () => {
+  const action = setup([ok({ slug: 'p' })]);
+  assert.deepEqual(await action.reorderProductImages('p', ['a', 'b']), { success: true });
+  assert.deepEqual(action.calls[0], ['rpc', 'admin_reorder_product_images', { p_product_id: 'p', p_image_ids: ['a', 'b'] }]);
+  assert.equal(action.calls.filter(c => c[0] === 'update').length, 0);
+  assert.match((await setup().reorderProductImages('p', ['a', 'a'])).error, /Invalid/);
+  assert.equal((await setup([], false).reorderProductImages('p', ['a'])).error, 'Unauthorized.');
+  assert.equal((await setup([], true, { message: 'Gallery changed' }).reorderProductImages('p', ['a'])).error, 'Gallery changed');
+});
+
+test('reading cleared settings preserves empty values after reload', async () => {
+  const oldUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const oldKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.invalid';
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'fixture';
+  try {
+    for (const empty of ['', null]) {
+      const row = { free_delivery_enabled: true, free_delivery_threshold: 30000, default_delivery_fee: 600,
+        hero_product_slug: empty, contact_phone: empty, contact_email: empty, whatsapp_number: empty };
+      const chain = { select() { return this; }, eq() { return this; }, maybeSingle: async () => ({ data: row }) };
+      const { getStoreSettings } = loadTs('src/lib/settings.ts', { react: { cache: fn => fn }, '@supabase/supabase-js': { createClient: () => ({ from: () => chain }) } });
+      const settings = await getStoreSettings();
+      for (const key of ['heroProductSlug', 'contactPhone', 'contactEmail', 'whatsappNumber']) assert.equal(settings[key], '');
+    }
+  } finally {
+    if (oldUrl === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL; else process.env.NEXT_PUBLIC_SUPABASE_URL = oldUrl;
+    if (oldKey === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; else process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = oldKey;
+  }
+});

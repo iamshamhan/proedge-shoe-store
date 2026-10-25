@@ -78,59 +78,66 @@ export function ProductForm({ categories, defaultCategoryId, product }: ProductF
   };
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
+    try {
+      e.preventDefault();
+      setError(null);
 
-    const priceNum = Number(price);
-    if (!name.trim()) {
-      setError('Name is required.');
-      return;
-    }
-    if (!slug.trim()) {
-      setError('Slug is required.');
-      return;
-    }
-    if (!categoryId) {
-      setError('Please select a category.');
-      return;
-    }
-    if (!Number.isInteger(priceNum) || priceNum <= 0) {
-      setError('Price must be a whole number greater than zero.');
-      return;
-    }
+      const priceNum = Number(price);
+      if (!name.trim()) {
+        setError('Name is required.');
+        return;
+      }
+      if (!slug.trim()) {
+        setError('Slug is required.');
+        return;
+      }
+      if (!categoryId) {
+        setError('Please select a category.');
+        return;
+      }
+      if (!Number.isInteger(priceNum) || priceNum <= 0) {
+        setError('Price must be a whole number greater than zero.');
+        return;
+      }
 
-    const compareNum = compareAtPrice ? Number(compareAtPrice) : null;
-    if (compareNum !== null && compareNum <= priceNum) {
-      setError('Compare-at price must be higher than the sale price.');
-      return;
+      const compareNum = compareAtPrice ? Number(compareAtPrice) : null;
+      if (compareNum !== null && compareNum <= priceNum) {
+        setError('Compare-at price must be higher than the sale price.');
+        return;
+      }
+
+      const data = {
+        name,
+        slug,
+        description,
+        category_id: categoryId,
+        price: priceNum,
+        compare_at_price: compareNum,
+        featured,
+        is_new_arrival: isNewArrival,
+        is_on_sale: isOnSale,
+        is_active: isActive,
+      };
+
+      setSaving(true);
+      const result = isEdit
+        ? await updateProduct(product.id, data)
+        : await createProduct(data);
+      setSaving(false);
+
+      if ('error' in result) {
+        setError(result.error);
+        return;
+      }
+
+      router.push(isEdit ? '/admin/products' : `/admin/products/${(result as { id: string }).id}`);
+      router.refresh();
+
+    } catch {
+      setError('The operation could not be completed. Check your connection and refresh before retrying.');
+    } finally {
+      setSaving(false);
     }
-
-    const data = {
-      name,
-      slug,
-      description,
-      category_id: categoryId,
-      price: priceNum,
-      compare_at_price: compareNum,
-      featured,
-      is_new_arrival: isNewArrival,
-      is_on_sale: isOnSale,
-      is_active: isActive,
-    };
-
-    setSaving(true);
-    const result = isEdit
-      ? await updateProduct(product.id, data)
-      : await createProduct(data);
-    setSaving(false);
-
-    if ('error' in result) {
-      setError(result.error);
-      return;
-    }
-
-    router.push(isEdit ? '/admin/products' : `/admin/products/${(result as { id: string }).id}`);
-    router.refresh();
   };
 
   const inputClass =

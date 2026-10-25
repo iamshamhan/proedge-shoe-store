@@ -1,3 +1,4 @@
+import { readAllRows } from '@/lib/supabase/read-all';
 import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getAuthUser } from '@/lib/auth/admin';
@@ -51,10 +52,10 @@ export default async function EditProductPage({
 
   if (!product) notFound();
 
-  const { data: categories } = await supabase
+  const categories = await readAllRows((from, to) => supabase
     .from('categories')
     .select('id, slug, name, parent_id')
-    .order('sort_order');
+    .order('sort_order').order('id').range(from, to));
 
   return <ProductForm categories={categories ?? []} product={product} />;
 }

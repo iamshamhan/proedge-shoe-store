@@ -1,3 +1,4 @@
+import { localImage } from '@/lib/local-images';
 import { cache } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import type { Product, ProductCategory, ProductVariant, SizeSystem, CategoryItem } from '@/types/product';
@@ -59,7 +60,7 @@ function mapProduct(row: DbProductRow, customHierarchy?: CategoryItem[]): Produc
 
   const images = [...(row.product_images ?? [])]
     .sort((a, b) => a.sort_order - b.sort_order)
-    .map((img) => img.url);
+    .map((img) => localImage(img.url));
 
   const uniqueColors = [...new Set((row.product_variants ?? []).map((v) => v.colour))];
 
@@ -155,7 +156,7 @@ export const getAllCategories = cache(async (): Promise<CategoryItem[]> => {
     .select('id,slug,name,parent_id,sort_order,description,image_url,subtitle,tagline')
     .order('sort_order').order('id').range(from,to));
   return data.map(c => ({ id:c.id, slug:c.slug, name:c.name, parentId:c.parent_id,
-    sortOrder:c.sort_order, description:c.description, imageUrl:c.image_url,
+    sortOrder:c.sort_order, description:c.description, imageUrl:c.image_url ? localImage(c.image_url) : null,
     subtitle:c.subtitle, tagline:c.tagline }));
 });
 export const getCategoriesHierarchy = cache(async (): Promise<CategoryItem[]> => {
@@ -183,5 +184,5 @@ export const getHeroProduct = cache(async (): Promise<Product|null> => {
     const product = await getProductBySlug(settings.heroProductSlug);
     if (product) return product;
   }
-  return (await getFeaturedProducts())[0] ?? (await getAllProducts())[0] ?? null;
+  return null;
 });

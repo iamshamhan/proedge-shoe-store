@@ -48,10 +48,10 @@ export function Footer({ categories: propCategories }: FooterProps) {
     logoSuffix = '';
   }
 
-  const cleanPhone = contactPhone || '+94 76 387 1280';
-  const cleanEmail = contactEmail || 'pro_edge@yahoo.com';
+  const cleanPhone = contactPhone ?? '';
+  const cleanEmail = contactEmail ?? '';
   const cleanAddress = contactAddress || '38 Attidiya Road Kawdana Dehiwala';
-  let whatsappNumber = (storeWhatsappNumber || cleanPhone).replace(/[^0-9]/g, '');
+  let whatsappNumber = (storeWhatsappNumber ?? '').replace(/[^0-9]/g, '');
   if (whatsappNumber.length === 10 && whatsappNumber.startsWith('0')) {
     whatsappNumber = '94' + whatsappNumber.substring(1);
   } else if (whatsappNumber.length === 9) {
@@ -85,7 +85,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
 
             {/* Social & WhatsApp Buttons */}
             <div className="flex items-center space-x-2.5 pt-1">
-              <a
+              {whatsappNumber && <a
                 href={whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#'}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -93,7 +93,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
                 className="w-9 h-9 rounded-full bg-black/[0.05] dark:bg-white/[0.08] flex items-center justify-center text-[#1d1d1f] dark:text-zinc-300 hover:bg-amber-500 hover:text-zinc-950 transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
-              </a>
+              </a>}
               <Link
                 href="/"
                 aria-label="Official Website"
@@ -159,7 +159,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
                 <MapPin className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <span className="leading-snug">{cleanAddress}</span>
               </li>
-              <li className="flex items-center gap-2.5">
+              {cleanPhone && <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-amber-500 shrink-0" />
                 <a
                   href={`tel:${cleanPhone.replace(/\s+/g, '')}`}
@@ -167,8 +167,8 @@ export function Footer({ categories: propCategories }: FooterProps) {
                 >
                   {cleanPhone}
                 </a>
-              </li>
-              <li className="flex items-center gap-2.5">
+              </li>}
+              {cleanEmail && <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-amber-500 shrink-0" />
                 <a
                   href={`mailto:${cleanEmail}`}
@@ -176,7 +176,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
                 >
                   {cleanEmail}
                 </a>
-              </li>
+              </li>}
             </ul>
           </div>
         </div>

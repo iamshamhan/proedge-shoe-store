@@ -16,6 +16,8 @@ export function NewsletterSection() {
     window.open(url, '_blank');
   };
 
+  if (!whatsappNumber) return null;
+
   return (
     <section className="py-16 sm:py-24 bg-white dark:bg-[#0a0a0c] border-t border-black/[0.06] dark:border-white/[0.08] transition-colors">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -41,7 +43,7 @@ export function NewsletterSection() {
               <span>Chat with a Specialist</span>
             </button>
             <p className="mt-3 text-xs font-medium text-[#6e6e73] dark:text-[#86868b]">
-              {whatsappNumber || '+94 76 387 1280'} • Available 24/7 on WhatsApp
+              {whatsappNumber} • Available 24/7 on WhatsApp
             </p>
           </div>
         </div>

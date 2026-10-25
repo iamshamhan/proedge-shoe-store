@@ -15,8 +15,8 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 24500,
     compareAtPrice: 28900,
     images: [
-      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=1000&auto=format&fit=crop',
+      '/images/catalog/photo-1542291026-7eec264c27ff.webp',
+      '/images/catalog/photo-1608231387042-66d1773070a5.webp',
     ],
     sizes: [40, 41, 42, 43, 44, 45],
     sizeSystem: 'EU',
@@ -46,8 +46,8 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'Minimalist street sneaker crafted with full-grain suede accents and durable rubber cupsole for effortless daily style.',
     price: 18900,
     images: [
-      'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=1000&auto=format&fit=crop',
+      '/images/catalog/photo-1525966222134-fcfa99b8ae77.webp',
+      '/images/catalog/photo-1560769629-975ec94e6a86.webp',
     ],
     sizes: [39, 40, 41, 42, 43],
     sizeSystem: 'EU',
@@ -76,7 +76,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 21900,
     compareAtPrice: 26000,
     images: [
-      'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=1000&auto=format&fit=crop',
+      '/images/catalog/photo-1606107557195-0e29a4b5b4aa.webp',
     ],
     sizes: [40, 41, 42, 43, 44],
     sizeSystem: 'EU',
@@ -104,7 +104,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'Timeless low-top silhouette tailored for modern urban living, featuring premium leather trims and padded collar.',
     price: 22500,
     images: [
-      'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=1000&auto=format&fit=crop',
+      '/images/catalog/photo-1595950653106-6c9ebd614d3a.webp',
     ],
     sizes: [40, 41, 42, 43, 44, 45],
     sizeSystem: 'EU',
@@ -133,7 +133,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 19800,
     compareAtPrice: 23000,
     images: [
-      'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?q=80&w=1000&auto=format&fit=crop',
+      '/images/catalog/photo-1584735935682-2f2b69dff9d2.webp',
     ],
     sizes: [36, 37, 38, 39, 40],
     sizeSystem: 'EU',
@@ -162,7 +162,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 27900,
     compareAtPrice: 32000,
     images: [
-      'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=1000&auto=format&fit=crop',
+      '/images/catalog/photo-1551107696-a4b0c5a0d9a2.webp',
     ],
     sizes: [41, 42, 43, 44],
     sizeSystem: 'EU',
@@ -190,7 +190,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'Vintage-inspired tennis cupsole shoe with clean lines, reinforced toe cap, and herringbone traction.',
     price: 17500,
     images: [
-      'https://images.unsplash.com/photo-1579338559194-a162d19bf842?q=80&w=1000&auto=format&fit=crop',
+      '/images/catalog/photo-1579338559194-a162d19bf842.webp',
     ],
     sizes: [39, 40, 41, 42, 43, 44],
     sizeSystem: 'EU',
@@ -218,7 +218,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'Rugged all-terrain running shoe featuring aggressive multidirectional lugs and water-resistant protective mudguard.',
     price: 29500,
     images: [
-      'https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?q=80&w=1000&auto=format&fit=crop',
+      '/images/catalog/photo-1515955656352-a1fa3ffcd111.webp',
     ],
     sizes: [40, 41, 42, 43, 44, 45],
     sizeSystem: 'EU',
@@ -247,7 +247,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 20500,
     compareAtPrice: 24000,
     images: [
-      'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1000&auto=format&fit=crop',
+      '/product-placeholder.svg',
     ],
     sizes: [36, 37, 38, 39, 40, 41],
     sizeSystem: 'EU',
@@ -275,7 +275,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'Pro-level competition shoe with nitrogen-infused midsole foam and targeted zonal grip for track and road.',
     price: 26000,
     images: [
-      'https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=1000&auto=format&fit=crop',
+      '/images/catalog/photo-1539185441755-769473a23570.webp',
     ],
     sizes: [41, 42, 43, 44, 45],
     sizeSystem: 'EU',
@@ -308,8 +308,8 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 26500,
     compareAtPrice: 31000,
     images: [
-      'https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=1200&q=80&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1511556532299-8f662fc26c06.webp',
+      '/images/catalog/photo-1542291026-7eec264c27ff.webp',
     ],
     sizes: ['7', '8', '9', '10', '11'],
     sizeSystem: 'UK',
@@ -345,8 +345,8 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 28000,
     compareAtPrice: 32500,
     images: [
-      'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=1200&q=80&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1560769629-975ec94e6a86.webp',
+      '/images/catalog/photo-1595950653106-6c9ebd614d3a.webp',
     ],
     sizes: ['7', '8', '9', '10', '11'],
     sizeSystem: 'UK',
@@ -382,8 +382,8 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 11500,
     compareAtPrice: 13800,
     images: [
-      'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200&q=80&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1562077772-3ab121863412?w=1200&q=80&auto=format&fit=crop',
+      '/product-placeholder.svg',
+      '/product-placeholder.svg',
     ],
     sizes: ['Size 5'],
     sizeSystem: 'Custom',
@@ -410,7 +410,7 @@ export const MOCK_PRODUCTS: Product[] = [
       'Telescopic height-adjustable kicking tee crafted from ultra-resilient molded polymer. Delivers a zero-slip ball perch engineered for place-kickers demanding precise launch angles.',
     price: 4800,
     images: [
-      'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?w=1200&q=80&auto=format&fit=crop',
+      '/product-placeholder.svg',
     ],
     sizes: ['One Size'],
     sizeSystem: 'Custom',
@@ -438,7 +438,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 14500,
     compareAtPrice: 17000,
     images: [
-      'https://images.unsplash.com/photo-1544717305-2782549b5136?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1544717305-2782549b5136.webp',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     sizeSystem: 'Custom',
@@ -471,7 +471,7 @@ export const MOCK_PRODUCTS: Product[] = [
       'Dual-layer boil-and-bite mouth guard designed for contact sports and training.',
     price: 3200,
     images: [
-      'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1584735935682-2f2b69dff9d2.webp',
     ],
     sizes: ['One Size'],
     sizeSystem: 'Custom',
@@ -498,7 +498,7 @@ export const MOCK_PRODUCTS: Product[] = [
       'High-performance compression crew socks featuring silicon grip pads on the footbed to lock feet securely inside boots, reinforced arch band, and moisture-wicking yarns.',
     price: 2400,
     images: [
-      'https://images.unsplash.com/photo-1582965372486-663c762c222f?w=1200&q=80&auto=format&fit=crop',
+      '/product-placeholder.svg',
     ],
     sizes: ['M (UK 6-8)', 'L (UK 9-11)'],
     sizeSystem: 'Custom',
@@ -527,7 +527,7 @@ export const MOCK_PRODUCTS: Product[] = [
       'Elastic kinesiology tape designed for sports support, mobility, and training use.',
     price: 2800,
     images: [
-      'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1576091160550-2173dba999ef.webp',
     ],
     sizes: ['One Size'],
     sizeSystem: 'Custom',
@@ -555,7 +555,7 @@ export const MOCK_PRODUCTS: Product[] = [
       'Heavy-duty non-elastic zinc-oxide rigid athletic tape. Features a serrated edge for easy hand-tearing, designed for secure joint and finger strapping during training and match play.',
     price: 2200,
     images: [
-      'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1584308666744-24d5c474f2ae.webp',
     ],
     sizes: ['One Size'],
     sizeSystem: 'Custom',
@@ -582,7 +582,7 @@ export const MOCK_PRODUCTS: Product[] = [
       'Rapid dual-action air pump that delivers continuous inflation on both push and pull strokes. Built-in analog PSI pressure gauge, flexible hose extension, and 3 spare stainless steel needles.',
     price: 3900,
     images: [
-      'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?w=1200&q=80&auto=format&fit=crop',
+      '/product-placeholder.svg',
     ],
     sizes: ['One Size'],
     sizeSystem: 'Custom',
@@ -612,8 +612,8 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 26500,
     compareAtPrice: 31000,
     images: [
-      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1579338559194-a162d19bf842?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1542291026-7eec264c27ff.webp',
+      '/images/catalog/photo-1579338559194-a162d19bf842.webp',
     ],
     sizes: ['6', '7', '8', '9', '10', '11'],
     sizeSystem: 'UK',
@@ -651,8 +651,8 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 24500,
     compareAtPrice: 28500,
     images: [
-      'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=1200&q=80&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1552346154-21d32810aba3.webp',
+      '/images/catalog/photo-1595950653106-6c9ebd614d3a.webp',
     ],
     sizes: ['6', '7', '8', '9', '10', '11'],
     sizeSystem: 'UK',
@@ -690,8 +690,8 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 11500,
     compareAtPrice: 13500,
     images: [
-      'https://images.unsplash.com/photo-1519861531473-9200262188bf?w=1200&q=80&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1519861531473-9200262188bf.webp',
+      '/images/catalog/photo-1546519638-68e109498ffc.webp',
     ],
     sizes: ['Size 7'],
     sizeSystem: 'Custom',
@@ -718,8 +718,8 @@ export const MOCK_PRODUCTS: Product[] = [
       'Ultra-durable vulcanized rubber basketball built to withstand asphalt, concrete, and rough outdoor court surfaces with deep groove grip channels.',
     price: 6900,
     images: [
-      'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&q=80&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1519766304817-4f37bda74a29?w=1200&q=80&auto=format&fit=crop',
+      '/images/catalog/photo-1574629810360-7efbbe195018.webp',
+      '/product-placeholder.svg',
     ],
     sizes: ['Size 7'],
     sizeSystem: 'Custom',
@@ -746,8 +746,8 @@ export const MOCK_PRODUCTS: Product[] = [
       'High-density cushioned crew socks with targeted ankle and Achilles padding, arch compression band, and ventilated knit zones for high-impact court play.',
     price: 2600,
     images: [
-      'https://images.unsplash.com/photo-1582965372486-663c762c222f?w=1200&q=80&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=1200&q=80&auto=format&fit=crop',
+      '/product-placeholder.svg',
+      '/images/catalog/photo-1584735935682-2f2b69dff9d2.webp',
     ],
     sizes: ['M (UK 6-8)', 'L (UK 9-11)'],
     sizeSystem: 'Custom',

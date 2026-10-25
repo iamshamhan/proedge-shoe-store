@@ -1,4 +1,5 @@
 'use client';
+import { localImage } from '@/lib/local-images';
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, useRef } from 'react';
@@ -96,21 +97,29 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
 
   const handleReorder = useCallback(
     async (nextImages: Image[]) => {
-      setError(null);
-      const updated = nextImages.map((img, idx) => ({ ...img, sort_order: idx + 1 }));
-      setImages(updated);
-      setReordering(true);
-      const res = await reorderProductImages(
-        productId,
-        updated.map((i) => i.id),
-      );
-      setReordering(false);
-      if ('error' in res) {
-        setError(res.error);
-        return;
+      try {
+        setError(null);
+        const updated = nextImages.map((img, idx) => ({ ...img, sort_order: idx + 1 }));
+
+        setReordering(true);
+        const res = await reorderProductImages(
+          productId,
+          updated.map((i) => i.id),
+        );
+        setReordering(false);
+        if ('error' in res) {
+          setError(res.error);
+          return;
+        }
+        setImages(updated);
+        router.refresh();
+
+      } catch {
+        setError('The operation could not be completed. Check your connection and refresh before retrying.');
+      } finally {
+        setReordering(false);
       }
-      router.refresh();
-    },
+  },
     [productId, router],
   );
 
@@ -139,17 +148,24 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
   );
 
   const handleDelete = useCallback(async () => {
-    if (!targetDelete) return;
-    setDeleting(true);
-    const result = await removeProductImage(targetDelete.id);
-    setDeleting(false);
-    if ('error' in result) {
-      setError(result.error);
-      return;
+    try {
+      if (!targetDelete) return;
+      setDeleting(true);
+      const result = await removeProductImage(targetDelete.id);
+      setDeleting(false);
+      if ('error' in result) {
+        setError(result.error);
+        return;
+      }
+      setImages((prev) => prev.filter((img) => img.id !== targetDelete.id));
+      setTargetDelete(null);
+      router.refresh();
+
+    } catch {
+      setError('The operation could not be completed. Check your connection and refresh before retrying.');
+    } finally {
+      setDeleting(false);
     }
-    setImages((prev) => prev.filter((img) => img.id !== targetDelete.id));
-    setTargetDelete(null);
-    router.refresh();
   }, [targetDelete, router]);
 
   return (
@@ -211,7 +227,7 @@ export function ImageManager({ productId, images: initialImages }: ImageManagerP
                 }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt={img.alt_text ?? ''} className="h-full w-full object-cover" />
+                <img src={localImage(img.url)} alt={img.alt_text ?? ''} className="h-full w-full object-cover" />
 
                 {/* Cover Badge */}
                 {isPrimary ? (
