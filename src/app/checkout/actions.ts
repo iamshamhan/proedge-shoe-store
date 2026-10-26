@@ -1,6 +1,6 @@
 'use server';
 
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { saveVerifiedInquiry } from '@/lib/checkout-security';
 import type { ValidatedOrder } from '@/types/order';
 
 export type CheckoutItemInput = {
@@ -33,6 +33,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const SIZE_SYSTEMS = ['EU', 'UK', 'US', 'Custom'];
 
 function mapOrderError(message: string): string {
+  if (message.includes('ERR_BOT_VERIFICATION')) return 'Please complete the security check again and retry.';
   if (message.includes('ERR_RATE_LIMIT')) return 'Too many order inquiries. Please wait an hour or contact us on WhatsApp.';
   if (message.includes('ERR_REQUEST_CHANGED')) return 'This request changed. Refresh checkout before trying again.';
   if (message.includes('ERR_INSUFFICIENT_STOCK')) {
@@ -56,6 +57,7 @@ function mapOrderError(message: string): string {
 export async function placeOrder(
   customer: CheckoutCustomerInput,
   items: CheckoutItemInput[],
+  turnstileToken?: string,
 ): Promise<{ success: true; order: ValidatedOrder } | { success: false; error: string }> {
   // ---- Server-side validation (the client is never trusted) ----
   if (!customer || typeof customer !== 'object') return { success: false, error: 'Invalid customer details.' };
@@ -158,17 +160,7 @@ export async function placeOrder(
     notes: notes ?? null,
   };
 
-  let supabase;
-  try {
-    supabase = await getSupabaseServer();
-  } catch {
-    return { success: false, error: 'We could not connect to place your order. Please try again.' };
-  }
-
-  const { data, error } = await supabase.rpc('place_order', {
-    p_customer: rpcCustomer,
-    p_items: rpcItems,
-  });
+  const { data, error } = await saveVerifiedInquiry(rpcCustomer, rpcItems, turnstileToken);
 
   if (error) {
     return { success: false, error: mapOrderError(error.message) };

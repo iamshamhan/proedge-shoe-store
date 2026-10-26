@@ -25,6 +25,7 @@ import { checkCart } from '@/app/checkout/cart-actions';
 import { cartFingerprint, checkoutRequest, CHECKOUT_REQUEST_KEY } from '@/lib/cart';
 import { placeOrder } from '@/app/checkout/actions';
 import type { ValidatedOrder } from '@/types/order';
+import { Turnstile } from './turnstile';
 
 interface CheckoutFormState {
   fullName: string;
@@ -61,6 +62,8 @@ export function CheckoutPage() {
   const [form, setForm] = useState<CheckoutFormState>(INITIAL_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [challengeVersion, setChallengeVersion] = useState(0);
   const [orderUrl, setOrderUrl] = useState<string | null>(null);
   const [orderData, setOrderData] = useState<ValidatedOrder | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -102,6 +105,7 @@ export function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!turnstileToken) { setSubmitError('Please complete the security check.'); return; }
 
     // Prevent duplicate accidental submissions.
     if (submitting.current || orderData || availability.checking || availability.error) return;
@@ -150,6 +154,7 @@ export function CheckoutPage() {
           color: item.color,
           quantity: item.quantity,
         })),
+        turnstileToken,
       );
 
       if (!result.success) {
@@ -196,6 +201,8 @@ export function CheckoutPage() {
     } catch {
       setSubmitError('The connection was interrupted. Try again; the same request will not create a duplicate order.');
     } finally {
+      setTurnstileToken('');
+      setChallengeVersion(version => version + 1);
       submitting.current = false;
       setIsSubmitting(false);
     }
@@ -507,6 +514,7 @@ export function CheckoutPage() {
                 </div>
               )}
 
+              <Turnstile key={challengeVersion} onToken={setTurnstileToken} />
               <div className="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4">
                 <Link
                   href="/cart"
@@ -518,7 +526,7 @@ export function CheckoutPage() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || availability.checking || Boolean(availability.error)}
+                  disabled={!turnstileToken || isSubmitting || availability.checking || Boolean(availability.error)}
                   className="px-8 py-4 bg-emerald-600 text-white font-semibold text-[15px] tracking-tight rounded-full hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 soft-shadow disabled:opacity-60"
                 >
                   <MessageSquare className="w-5 h-5" />

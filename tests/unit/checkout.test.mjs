@@ -13,7 +13,7 @@ function setup(result = { data: { order_number: 'TEST', total: 2500 }, error: nu
   };
   const actions = loadTs('src/app/checkout/actions.ts', {
     'next/cache': { revalidatePath() { throw new Error('Checkout must not invalidate inventory'); } },
-    '@/lib/supabase/server': { getSupabaseServer: async () => sb },
+    '@/lib/checkout-security': { saveVerifiedInquiry: async (customer, items) => sb.rpc('place_order', { p_customer: customer, p_items: items }) },
   });
   return { ...actions, calls };
 }
@@ -80,4 +80,18 @@ test('legacy explicit sizeValue works without numeric size', async () => {
   assert.equal((await placeOrder(customer, [{ productId: item.productId,
     sizeValue: 'XL', sizeSystem: 'Custom', color: 'Blue', quantity: 1 }])).success, true);
   assert.equal(calls[0].args.p_items[0].sizeValue, 'XL');
+});
+
+test('checkout passes the challenge to the guarded writer and surfaces rejection', async () => {
+  let seen;
+  const { placeOrder } = loadTs('src/app/checkout/actions.ts', {
+    '@/lib/checkout-security': { saveVerifiedInquiry: async (_customer, _items, token) => {
+      seen = token;
+      return { data: null, error: { message: 'ERR_BOT_VERIFICATION' } };
+    } },
+  });
+  const result = await placeOrder(customer, [item], 'challenge-token');
+  assert.equal(seen, 'challenge-token');
+  assert.equal(result.success, false);
+  assert.match(result.error, /security check/);
 });

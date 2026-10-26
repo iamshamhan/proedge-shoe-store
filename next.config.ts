@@ -11,7 +11,8 @@ const scriptSrc = (isDev || isPreview)
 
 const cspHeader = `
   default-src 'self';
-  script-src ${scriptSrc};
+  script-src ${scriptSrc} https://challenges.cloudflare.com;
+  frame-src https://challenges.cloudflare.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' blob: data: https://*.supabase.co;
   font-src 'self';
@@ -21,7 +22,7 @@ const cspHeader = `
   frame-ancestors 'none';
   block-all-mixed-content;
   upgrade-insecure-requests;
-  connect-src 'self' wss://*.supabase.co https://*.supabase.co;
+  connect-src 'self' wss://*.supabase.co https://*.supabase.co https://challenges.cloudflare.com;
 `.replace(/\s{2,}/g, " ").trim();
 
 const nextConfig: NextConfig = {
