@@ -10,6 +10,8 @@ export interface StoreSettings {
   saleEnabled?: boolean;
   saleDiscountPercent?: number;
   brandName?: string;
+  logoHorizontalUrl?: string;
+  logoStackedUrl?: string;
   contactAddress?: string;
   contactPhone?: string;
   contactEmail?: string;
@@ -29,6 +31,8 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   saleEnabled: true,
   saleDiscountPercent: 30,
   brandName: 'Pro Edge',
+  logoHorizontalUrl: '/images/branding/logo-horizontal.jpeg',
+  logoStackedUrl: '/images/branding/logo-stacked.jpeg',
   contactAddress: '38 Attidiya Road Kawdana Dehiwala',
   contactPhone: '+94 76 387 1280',
   contactEmail: 'pro_edge@yahoo.com',
@@ -49,6 +53,8 @@ type DbSettingsRow = {
   sale_enabled?: boolean | null;
   sale_discount_percent?: number | null;
   brand_name?: string | null;
+  logo_horizontal_url?: string | null;
+  logo_stacked_url?: string | null;
   contact_address?: string | null;
   contact_phone?: string | null;
   contact_email?: string | null;
@@ -116,6 +122,8 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
           ? row.sale_discount_percent
           : DEFAULT_STORE_SETTINGS.saleDiscountPercent,
       brandName: row.brand_name?.trim() || DEFAULT_STORE_SETTINGS.brandName,
+      logoHorizontalUrl: row.logo_horizontal_url?.trim() || DEFAULT_STORE_SETTINGS.logoHorizontalUrl,
+      logoStackedUrl: row.logo_stacked_url?.trim() || DEFAULT_STORE_SETTINGS.logoStackedUrl,
       contactAddress: row.contact_address?.trim() || DEFAULT_STORE_SETTINGS.contactAddress,
       contactPhone: row.contact_phone?.trim() ?? '',
       contactEmail: row.contact_email?.trim() ?? '',

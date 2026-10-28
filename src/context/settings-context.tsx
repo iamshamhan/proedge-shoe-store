@@ -55,6 +55,8 @@ async function fetchLatestSettings() {
             data.saleEnabled !== globalSettings.saleEnabled ||
             data.saleDiscountPercent !== globalSettings.saleDiscountPercent ||
             data.brandName !== globalSettings.brandName ||
+            data.logoHorizontalUrl !== globalSettings.logoHorizontalUrl ||
+            data.logoStackedUrl !== globalSettings.logoStackedUrl ||
             data.contactAddress !== globalSettings.contactAddress ||
             data.contactPhone !== globalSettings.contactPhone ||
             data.contactEmail !== globalSettings.contactEmail ||

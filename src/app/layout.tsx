@@ -19,7 +19,7 @@ import { getCategoriesHierarchy } from '@/lib/supabase/products';
 
 const siteUrl = getSiteUrl();
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
   applicationName: SITE_NAME,
   title: {
@@ -55,6 +55,17 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getStoreSettings();
+  const logo = settings.logoStackedUrl || '/images/branding/logo-stacked.jpeg';
+  return {
+    ...baseMetadata,
+    icons: { icon: logo, apple: logo },
+    openGraph: { ...baseMetadata.openGraph, images: [{ url: logo, alt: settings.brandName || SITE_NAME }] },
+    twitter: { ...baseMetadata.twitter, images: [logo] },
+  };
+}
 
 export default async function RootLayout({
   children,

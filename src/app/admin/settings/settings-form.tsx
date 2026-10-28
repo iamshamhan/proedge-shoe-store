@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import { LogoPicker } from '@/components/admin/logo-picker';
 
 import React, { useState, useTransition } from 'react';
 import { Save } from 'lucide-react';
@@ -18,6 +19,10 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
   const [activeTab, setActiveTab] = useState<'store' | 'homepage' | 'profile'>('store');
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const [logoHorizontalUrl, setLogoHorizontalUrl] = useState(initialSettings.logoHorizontalUrl || '/images/branding/logo-horizontal.jpeg');
+  const [logoStackedUrl, setLogoStackedUrl] = useState(initialSettings.logoStackedUrl || '/images/branding/logo-stacked.jpeg');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Store Settings
   const [brandName, setBrandName] = useState(initialSettings.brandName || 'Pro Edge');
@@ -49,6 +54,7 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (uploadingLogo || isPending) return;
     setMessage(null);
 
     startTransition(async () => {
@@ -56,6 +62,8 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       // 1. Save general settings
       const res = await updateStoreSettings({
         brand_name: brandName.trim(),
+        logo_horizontal_url: logoHorizontalUrl,
+        logo_stacked_url: logoStackedUrl,
         banner_tagline: bannerTagline.trim(),
         free_delivery_enabled: freeDeliveryEnabled,
         free_delivery_threshold: Number(freeDeliveryThreshold),
@@ -90,6 +98,7 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       if ('success' in res && res.success && profileRes.success) {
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('proedge_settings_updated'));
+          try { localStorage.setItem('proedge_settings_sync', String(Date.now())); } catch { /* Same-tab refresh still works. */ }
         }
         setMessage({
           type: 'success',
@@ -145,6 +154,11 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 soft-shadow">
             <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Branding &amp; Contact</h2>
+            <div className="mb-6 grid gap-4 sm:grid-cols-2">
+              <LogoPicker label="Horizontal logo — header and navigation" value={logoHorizontalUrl} fallback="/images/branding/logo-horizontal.jpeg" disabled={isPending || uploadingLogo} onChange={setLogoHorizontalUrl} onUploading={setUploadingLogo} />
+              <LogoPicker label="Stacked logo — footer, sign-in and site icon" value={logoStackedUrl} fallback="/images/branding/logo-stacked.jpeg" disabled={isPending || uploadingLogo} onChange={setLogoStackedUrl} onUploading={setUploadingLogo} />
+            </div>
+            <p className="mb-5 text-xs text-zinc-500">Upload your logos, then select Save All Settings to publish them. The originals remain available using Use original logo.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold mb-1.5">Brand Name</label>
@@ -301,11 +315,11 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       <div className="sticky bottom-0 pt-4 pb-6 bg-[#f5f5f7]/90 dark:bg-black/90 apple-glass border-t border-black/[0.06] dark:border-white/[0.08] z-10">
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || uploadingLogo}
           className="flex w-full items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-4 text-sm font-semibold tracking-tight text-zinc-950 soft-shadow transition-all hover:bg-amber-400 disabled:opacity-50"
         >
           <Save className="h-5 w-5" />
-          {isPending ? 'Saving Changes...' : 'Save All Settings'}
+          {uploadingLogo ? 'Uploading Logo...' : isPending ? 'Saving Changes...' : 'Save All Settings'}
         </button>
       </div>
     </form>

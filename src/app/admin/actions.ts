@@ -549,6 +549,8 @@ export type UpdateSettingsInput = {
   sale_enabled?: boolean;
   sale_discount_percent?: number;
   brand_name?: string;
+  logo_horizontal_url?: string;
+  logo_stacked_url?: string;
   contact_address?: string;
   contact_phone?: string;
   contact_email?: string;
@@ -604,6 +606,24 @@ export async function updateStoreSettings(
 
   if (input.sale_discount_percent !== undefined) {
     upsertPayload.sale_discount_percent = Math.round(input.sale_discount_percent);
+  }
+
+  for (const field of ['logo_horizontal_url', 'logo_stacked_url'] as const) {
+    const value = input[field];
+    if (value === undefined) continue;
+    if (typeof value !== 'string' || value.length > 2048) return { error: 'Invalid logo URL.' };
+    const logo = value.trim();
+    const local = ['/images/branding/logo-horizontal.jpeg', '/images/branding/logo-stacked.jpeg'];
+    if (logo && !local.includes(logo)) {
+      try {
+        const parsed = new URL(logo);
+        const project = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || '');
+        if (parsed.origin !== project.origin || !parsed.pathname.startsWith('/storage/v1/object/public/product-images/branding/')) {
+          return { error: 'Please upload a logo using the logo picker.' };
+        }
+      } catch { return { error: 'Invalid logo URL.' }; }
+    }
+    upsertPayload[field] = logo || null;
   }
 
   if (input.brand_name !== undefined) {

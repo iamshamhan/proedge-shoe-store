@@ -1,8 +1,9 @@
 'use client';
 
+import { BrandLogo } from '@/components/ui/brand-logo';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState, type FormEvent } from 'react';
-import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft, MailCheck } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft, MailCheck } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 
 export function AdminLoginForm() {
@@ -104,9 +105,7 @@ export function AdminLoginForm() {
       <div className="w-full max-w-md">
         <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 shadow-sm">
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-900 dark:bg-zinc-800 text-amber-500">
-              <ShieldCheck className="h-7 w-7" />
-            </div>
+            <BrandLogo stacked className="mx-auto mb-6 h-auto w-52 rounded-xl bg-white object-contain" />
             <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
               {mode === 'login' ? 'Admin Sign In' : 'Reset Password'}
             </h1>

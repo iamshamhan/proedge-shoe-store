@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
+import { BrandLogo } from '@/components/ui/brand-logo';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Search,
@@ -46,25 +47,11 @@ export function Header({ categories: propCategories }: HeaderProps) {
     bannerTagline,
     saleEnabled,
     saleDiscountPercent,
-    brandName,
   } = useStoreSettings();
   const { theme, toggleTheme } = useTheme();
 
   const isAdminRoute = pathname.startsWith('/admin');
 
-  const normalizedBrand = (brandName || 'PROEDGE').trim();
-  let logoPrefix = 'PRO';
-  let logoSuffix = 'EDGE';
-  if (normalizedBrand.toUpperCase() === 'PROEDGE') {
-    logoPrefix = 'PRO';
-    logoSuffix = 'EDGE';
-  } else if (normalizedBrand.length > 3) {
-    logoPrefix = normalizedBrand.slice(0, 3).toUpperCase();
-    logoSuffix = normalizedBrand.slice(3).toUpperCase();
-  } else {
-    logoPrefix = normalizedBrand.toUpperCase();
-    logoSuffix = '';
-  }
 
   // Navigation hierarchy: prefer passed categories, fallback to canonical PARENT_SPORTS
   const sports: (NavCategory | CategoryItem)[] =
@@ -186,14 +173,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                 href={isAdminRoute ? '/admin' : '/'}
                 className="group flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-full"
               >
-                <span className="bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f] font-bold text-base sm:text-lg px-2.5 py-0.5 tracking-tight rounded-lg group-hover:bg-amber-500 group-hover:text-zinc-950 dark:group-hover:bg-amber-400 dark:group-hover:text-zinc-950 transition-colors">
-                  {logoPrefix}
-                </span>
-                {logoSuffix && (
-                  <span className="font-semibold text-base sm:text-lg tracking-tight text-[#1d1d1f] dark:text-white">
-                    {logoSuffix}
-                  </span>
-                )}
+                <BrandLogo />
                 {isAdminRoute && (
                   <span className="ml-1.5 px-2.5 py-0.5 text-[11px] font-semibold tracking-tight rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25">
                     Admin
@@ -542,14 +522,7 @@ export function Header({ categories: propCategories }: HeaderProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-full"
               >
-                <span className="bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f] font-bold text-base px-2.5 py-0.5 rounded-lg">
-                  {logoPrefix}
-                </span>
-                {logoSuffix && (
-                  <span className="font-semibold text-base tracking-tight text-[#1d1d1f] dark:text-white">
-                    {logoSuffix}
-                  </span>
-                )}
+                <BrandLogo />
                 {isAdminRoute && (
                   <span className="ml-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25">
                     Admin

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { BrandLogo } from '@/components/ui/brand-logo';
 import { usePathname } from 'next/navigation';
 import { Phone, Mail, MapPin, MessageSquare, Globe, Share2 } from 'lucide-react';
 import { useStoreSettings } from '@/context/settings-context';
@@ -35,18 +36,6 @@ export function Footer({ categories: propCategories }: FooterProps) {
 
   // Format brand logo
   const normalizedBrand = brandName.trim() || 'PROEDGE';
-  let logoPrefix = 'PRO';
-  let logoSuffix = 'EDGE';
-  if (normalizedBrand.toUpperCase() === 'PROEDGE') {
-    logoPrefix = 'PRO';
-    logoSuffix = 'EDGE';
-  } else if (normalizedBrand.length > 3) {
-    logoPrefix = normalizedBrand.slice(0, 3).toUpperCase();
-    logoSuffix = normalizedBrand.slice(3).toUpperCase();
-  } else {
-    logoPrefix = normalizedBrand.toUpperCase();
-    logoSuffix = '';
-  }
 
   const cleanPhone = contactPhone ?? '';
   const cleanEmail = contactEmail ?? '';
@@ -66,14 +55,7 @@ export function Footer({ categories: propCategories }: FooterProps) {
           {/* Brand Column (5 cols) */}
           <div className="lg:col-span-5 space-y-3.5">
             <Link href="/" className="inline-flex items-center gap-1.5 focus:outline-none">
-              <span className="bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f] font-bold text-lg px-2.5 py-0.5 tracking-tight rounded-lg">
-                {logoPrefix}
-              </span>
-              {logoSuffix && (
-                <span className="font-semibold text-lg tracking-tight text-[#1d1d1f] dark:text-white">
-                  {logoSuffix}
-                </span>
-              )}
+              <BrandLogo stacked />
             </Link>
             
             <p className="text-[#6e6e73] dark:text-[#86868b] text-xs sm:text-[13px] leading-relaxed max-w-sm">
