@@ -1,4 +1,6 @@
 -- Synthetic fixture and all updates roll back on success as well as failure.
+begin;
+set local role authenticated;
 do $$
 declare o uuid:=gen_random_uuid(); snapshot jsonb;
 begin
@@ -28,3 +30,4 @@ begin
     raise exception using errcode='ZX004',message='rollback revision fixture';
   exception when sqlstate 'ZX004' then null; end;
 end $$;
+rollback;

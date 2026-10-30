@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { ArrowRight, ArrowLeft, ShoppingBag, Trash2, Minus, Plus, Truck } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useStoreSettings } from '@/context/settings-context';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import { getDeliveryFee } from '@/lib/config';
 
 export function CartPage() {

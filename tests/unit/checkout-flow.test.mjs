@@ -22,7 +22,7 @@ function setup(save) {
     'next/link':{default:'a'},'next/image':{default:'img'},'lucide-react':{},
     '@/context/cart-context':{useCart:()=>({items:[item],subtotal:1000,clearCart(){cleared=true;},replaceItems(){}})},
     '@/context/settings-context':{useStoreSettings:()=>({whatsappNumber:'94771234567'})},
-    '@/data/products':{formatLKR:String},'@/lib/config':{getDeliveryFee:()=>500},
+    '@/lib/currency':{formatLKR:String},'@/lib/config':{getDeliveryFee:()=>500},
     '@/lib/whatsapp':{generateWhatsAppOrderLink:args=>{calls.push({receipt:args});return 'https://wa.me/fixture';}},
     '@/components/cart/use-cart-availability':{useCartAvailability:()=>({checking:false,error:null})},
     '@/app/checkout/cart-actions':{checkCart:async()=>({items:[item]})},

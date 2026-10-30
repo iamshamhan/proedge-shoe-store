@@ -1,5 +1,5 @@
 
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 
 
 export interface CustomerOrderDetails {

@@ -22,7 +22,7 @@ function nodes(tree) {
 test('Quick Buy uses the exact labelled fractional UK/US variant and never falls back after it disappears', () => {
   const h = harness(); const added = [];
   const { ProductCard } = loadTs('src/components/ui/product-card.tsx', { ...h.mocks,
-    '@/lib/product-variants': loadTs('src/lib/product-variants.ts'), '@/data/products': { formatLKR: String },
+    '@/lib/product-variants': loadTs('src/lib/product-variants.ts'), '@/lib/currency': { formatLKR: String },
     '@/context/cart-context': { useCart: () => ({ addItem: item => added.push(item), setIsCartDrawerOpen() {} }) },
     '@/context/wishlist-context': { useWishlist: () => ({ isWishlisted: () => false, toggleWishlist() {} }) },
   });
@@ -49,17 +49,42 @@ test('Quick Buy uses the exact labelled fractional UK/US variant and never falls
 
 test('admin product save clears loading and displays error after a rejected network call', async () => {
   const h = harness();
+  let passedRevision;
   const { ProductForm } = loadTs('src/components/admin/product-form.tsx', { ...h.mocks,
-    '@/app/admin/actions': { updateProduct: async () => { throw new Error('offline'); } },
+    '@/app/admin/actions': { updateProduct: async (_id, _data, revision) => { passedRevision = revision; throw new Error('offline'); } },
     './image-manager': { ImageManager: 'images' }, './variant-manager': { VariantManager: 'variants' },
   });
   const props = { categories: [{ id: 'c', slug: 'shoes', name: 'Shoes' }], product: {
-    id: 'p', name: 'Shoe', slug: 'shoe', description: '', category_id: 'c', price: 100, compare_at_price: null,
+    id: 'p', updated_at: '2026-10-30T10:00:00Z', name: 'Shoe', slug: 'shoe', description: '', category_id: 'c', price: 100, compare_at_price: null,
     featured: false, is_new_arrival: false, is_on_sale: false, is_active: true, product_images: [], product_variants: [],
   } };
   const tree = h.render(ProductForm, props);
   await nodes(tree).find(n => n.type === 'form').props.onSubmit({ preventDefault() {} });
+  assert.equal(passedRevision, props.product.updated_at);
   const after = h.render(ProductForm, props);
   assert.ok(h.state.some(value => typeof value === 'string' && value.includes('could not be completed')));
   assert.equal(nodes(after).find(n => n.type === 'button' && n.props?.type === 'submit').props.disabled, false);
+});
+
+test('settings keep the returned revision for a second save and surface conflicts', async () => {
+  const h = harness(); const submitted = []; let pending;
+  const react = { ...h.mocks.react, useTransition: () => [false, fn => { pending = fn(); }] };
+  const { SettingsForm } = loadTs('src/app/admin/settings/settings-form.tsx', { ...h.mocks,
+    react: { ...react, default: react }, '@/components/admin/logo-picker': { LogoPicker: 'logo-picker' },
+    '@/lib/currency': { formatLKR: String }, '../actions': {
+      updateStoreSettings: async input => { submitted.push(input); return submitted.length === 1
+        ? { success: true, updatedAt: '2026-10-30T11:00:00.123456Z' } : { error: 'Store settings changed. Reload before saving.' }; },
+    },
+  });
+  const props = { initialSettings: { updatedAt: '2026-10-30T10:00:00.123456Z',
+    freeDeliveryEnabled: true, freeDeliveryThreshold: 30000, defaultDeliveryFee: 600 } };
+  let tree = h.render(SettingsForm, props);
+  nodes(tree).find(n => n.type === 'form').props.onSubmit({ preventDefault() {} });
+  await pending;
+  tree = h.render(SettingsForm, props);
+  nodes(tree).find(n => n.type === 'form').props.onSubmit({ preventDefault() {} });
+  await pending;
+  assert.equal(submitted[0].expected_updated_at, props.initialSettings.updatedAt);
+  assert.equal(submitted[1].expected_updated_at, '2026-10-30T11:00:00.123456Z');
+  assert.match(JSON.stringify(h.render(SettingsForm, props)), /Store settings changed/);
 });

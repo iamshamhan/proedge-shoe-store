@@ -1,4 +1,6 @@
 -- Synthetic fixtures are always rolled back, including when run with a migration.
+begin;
+set local role authenticated;
 do $$
 declare c uuid:=gen_random_uuid(); p uuid:=gen_random_uuid(); v uuid:=gen_random_uuid();
   o uuid; result jsonb; n integer; order_total integer; before_count integer;
@@ -66,3 +68,4 @@ begin
     raise exception using errcode='ZX001',message='rollback successful fixtures';
   exception when sqlstate 'ZX001' then null; end;
 end; $$;
+rollback;

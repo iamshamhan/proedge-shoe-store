@@ -1,6 +1,6 @@
 # Database workflow
 
-PROEDGE production project: `ettkbxmmdflpxwjpircs`. Schema changes live in `supabase/migrations`; rollback regression scripts live in `supabase/tests`. Never load seed data into production.
+PROEDGE production project: `ettkbxmmdflpxwjpircs`. Schema changes live in [supabase/migrations](../supabase/migrations); rollback regression scripts live in [supabase/tests](../supabase/tests). Never load seed data into production. The live schema, migration ledger and advisors were checked on 30 October 2026.
 
 ## Create and review migrations
 
@@ -14,18 +14,24 @@ On restricted Windows workstations, `SUPABASE_TELEMETRY_DISABLED=1` avoids the C
 
 ## Existing migration history discrepancy
 
-Production contains migrations 20240101000001 through 20240101000011. Local `20240101000012_whatsapp_inquiry_orders.sql` is absent from its ledger, although the live inquiry workflow was already present before the October repairs. Do not blindly run a bulk `db push` or replay that historical migration. Inspect the deployed definitions and reconcile history first.
+The 30 October inspection found migrations 20240101000001 through 20240101000011 in production but not [20240101000012_whatsapp_inquiry_orders.sql](../supabase/migrations/20240101000012_whatsapp_inquiry_orders.sql), although the live inquiry workflow exists. The ledger also omits [server-only checkout](../supabase/migrations/20261026165353_server_only_checkout.sql) and [store logos](../supabase/migrations/20261028143000_store_logos.sql), despite their functions/tables/columns being present. Inspect the deployed definitions and reconcile history before a bulk `db push` or replay of those migrations.
 
-October repair migrations add transactional order/inventory operations, authoritative checkout prices and retry receipts, function privilege hardening, stale-order revision checks, and atomic product duplication. The current authoritative applied versions and verification limits are recorded in `REVIEW_AND_FIXES.md`.
+Image reordering was actually absent and was applied as `20261030104146`. Admin read models/indexes and the admin INSERT privilege repair were applied as `20261030104305` and `20261030104441`. Local filenames match the versions assigned by the connected migration tool.
+
+October migrations add transactional order/inventory operations, authoritative checkout prices and retry receipts, function privilege hardening, stale-order revision checks, atomic product duplication/image reordering, server-only checkout limits and configurable logos. Compare every local migration with the target ledger; file presence does not establish that it has been applied. See [remaining repair and release checks](REVIEW_AND_FIXES.md).
 
 ## Tests and access
 
 - `order_inventory.sql`: repeat confirmation/cancellation, insufficient stock rollback and fulfilled-history deletion.
 - `order_revisions.sql`: stale save/status/delete rejection.
 - `checkout.sql`: database prices, request identity, WhatsApp, inquiry stock behavior and throttling.
+- `checkout-security.sql`: server-only checkout grants and durable IP/email limits.
 - `rls.sql`: anonymous table and admin-RPC privilege rejection.
 - `catalog.sql`: duplication, size-system preservation and stale stock compare-and-set; transaction rolls back.
+- `admin_read_models.sql`: admin authorization, stock/search pagination across 27 fixture products, revenue, product timestamp conflicts and atomic image reordering.
 
-Admin RPCs use invoker security, require trusted admin claims and retain table RLS. Guest checkout intentionally exposes `place_order` with definer security and explicit input/rate checks. The private request receipt table intentionally has no client policies or grants.
+Admin RPCs use invoker security, require trusted admin claims and retain table RLS. `place_order` and `consume_checkout_limits` are executable only by `service_role`; direct order inserts remain revoked from `anon`. [The admin privilege repair](../supabase/migrations/20261030104441_restore_admin_order_inserts.sql) restores authenticated INSERT with restrictive admin-only policies, so admin RPCs work and signed-in non-admins remain denied. The [server-only writer](../src/lib/checkout-security.ts) verifies Turnstile before using the secret key. The private receipt/limit tables have no client grants.
+
+Prefer an isolated database for SQL regression scripts. Review their fixture scope and rollback behavior first. Inventory and revision tests explicitly switch to the authenticated role as well as setting admin claims; the RLS script tests anonymous and authenticated non-admin denial. Checkout's functional script uses the privileged role, while checkout-security tests its grants and durable limits. All seven passed on 30 October using rollback fixtures in the connected project.
 
 Keep database passwords and access tokens in local/provider secret storage. No credentials belong in migrations, tests or Git.

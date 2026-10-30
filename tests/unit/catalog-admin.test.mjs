@@ -4,6 +4,7 @@ import { loadTs } from './load-ts.mjs';
 
 function setup(responses = [], isAdmin = true, rpcError = null) {
   const calls = [];
+  const tags = [];
   const db = {
     rpc: async (...args) => { calls.push(['rpc', ...args]); return { data: { id: 'copy', slug: 'copy-slug' }, error: rpcError }; },
     storage: { from() { throw new Error('Shared storage objects must not be deleted'); } },
@@ -20,15 +21,54 @@ function setup(responses = [], isAdmin = true, rpcError = null) {
   };
   const actions = loadTs('src/app/admin/actions.ts', {
     'next/navigation': { redirect() { throw new Error('Unexpected redirect'); } },
-    'next/cache': { revalidatePath() {} },
+    'next/cache': { revalidatePath() {}, updateTag(tag) { tags.push(tag); } },
     '@/lib/auth/admin': { getAuthUser: async () => ({ isAdmin }) },
     '@/lib/supabase/server': { getSupabaseServer: async () => db },
     '@/types/order': loadTs('src/types/order.ts'),
     '@/lib/supabase/read-all': loadTs('src/lib/supabase/read-all.ts'),
   });
-  return { ...actions, calls };
+  return { ...actions, calls, tags };
 }
+const revision = '2026-10-30T10:00:00.123456+00:00';
 const ok = data => ({ data, error: null });
+const productInput = { name: 'Shoe', slug: 'shoe', description: '', category_id: 'category', price: 1000,
+  compare_at_price: null, featured: false, is_new_arrival: false, is_on_sale: false, is_active: true };
+
+test('product edits require the loaded revision and reject stale or deleted rows', async () => {
+  const stale = setup([ok({ slug: 'shoe' }), ok(null)]);
+  assert.match((await stale.updateProduct('p', productInput, revision)).error, /Product changed/);
+  assert.ok(stale.calls.some(c => c[0] === 'eq' && c[1] === 'updated_at' && c[2] === revision));
+  assert.deepEqual(stale.tags, []);
+  assert.match((await setup([ok(null)]).updateProduct('p', productInput, revision)).error, /no longer exists/);
+  assert.match((await setup().updateProduct('p', productInput, '')).error, /Reload/);
+  const saved = setup([ok({ slug: 'old-name' }), ok({ id: 'p' })]);
+  assert.deepEqual(await saved.updateProduct('p', productInput, revision), { success: true });
+  assert.ok(saved.tags.includes('catalog'));
+});
+
+test('invalid product prices and malformed fields are rejected before database writes', async () => {
+  for (const price of [NaN, Infinity, -1, 0, 1.5, 2147483648]) {
+    assert.match((await setup().createProduct({ ...productInput, price })).error, /Price must/);
+  }
+  for (const compare_at_price of [NaN, Infinity, 999, 1000, 1000.5]) {
+    assert.match((await setup().updateProduct('p', { ...productInput, compare_at_price }, revision)).error, /Compare-at/);
+  }
+  assert.match((await setup().createProduct({ ...productInput, name: null })).error, /Name/);
+  assert.match((await setup().createProduct({ ...productInput, featured: 'true' })).error, /flags/);
+});
+
+test('settings reject stale saves and return the next revision for subsequent edits', async () => {
+  const input = { expected_updated_at: revision, free_delivery_enabled: true, free_delivery_threshold: 30000, default_delivery_fee: 600 };
+  const stale = setup([ok(null)]);
+  assert.match((await stale.updateStoreSettings(input)).error, /settings changed/);
+  assert.deepEqual(stale.tags, []);
+  const nextRevision = '2026-10-30T11:00:00.654321+00:00';
+  const saved = setup([ok({ updated_at: nextRevision })]);
+  assert.deepEqual(await saved.updateStoreSettings(input), { success: true, updatedAt: nextRevision });
+  assert.ok(saved.calls.some(c => c[0] === 'eq' && c[1] === 'updated_at' && c[2] === revision));
+  assert.ok(saved.tags.includes('store-settings'));
+  assert.match((await setup().updateStoreSettings({ ...input, expected_updated_at: '' })).error, /Reload/);
+});
 test('duplication uses one atomic RPC and propagates a failed copy', async () => {
   const action = setup();
   assert.deepEqual(await action.duplicateProduct('original'), { id: 'copy', slug: 'copy-slug' });
@@ -56,9 +96,9 @@ test('bulk sizes distinguish UK and US for the same colour and size', async () =
 });
 test('settings schema errors cannot silently discard fields and report success', async () => {
   const action = setup([{ data: null, error: { code: 'PGRST204', message: 'Missing field' } }]);
-  const input = { free_delivery_enabled: true, free_delivery_threshold: 30000, default_delivery_fee: 600, brand_name: 'New brand' };
+  const input = { expected_updated_at: revision, free_delivery_enabled: true, free_delivery_threshold: 30000, default_delivery_fee: 600, brand_name: 'New brand' };
   assert.match((await action.updateStoreSettings(input)).error, /schema is out of date/);
-  assert.equal(action.calls.filter(c => c[0] === 'upsert').length, 1);
+  assert.equal(action.calls.filter(c => c[0] === 'update').length, 1);
   assert.match((await setup().updateStoreSettings({ ...input, default_delivery_fee: NaN })).error, /number/);
 });
 
@@ -78,11 +118,11 @@ test('unavailable store settings fail explicitly instead of substituting deliver
 });
 
 test('cleared settings are written without fallback defaults', async () => {
-  const action = setup([ok(null)]);
-  const input = { free_delivery_enabled: true, free_delivery_threshold: 30000, default_delivery_fee: 600,
+  const action = setup([ok({ updated_at: revision })]);
+  const input = { expected_updated_at: revision, free_delivery_enabled: true, free_delivery_threshold: 30000, default_delivery_fee: 600,
     hero_product_slug: '', contact_phone: '', contact_email: '', whatsapp_number: '' };
-  assert.deepEqual(await action.updateStoreSettings(input), { success: true });
-  const payload = action.calls.find(c => c[0] === 'upsert')[1];
+  assert.deepEqual(await action.updateStoreSettings(input), { success: true, updatedAt: revision });
+  const payload = action.calls.find(c => c[0] === 'update')[1];
   for (const key of ['hero_product_slug', 'contact_phone', 'contact_email', 'whatsapp_number']) assert.equal(payload[key], '');
 });
 
@@ -114,4 +154,41 @@ test('reading cleared settings preserves empty values after reload', async () =>
     if (oldUrl === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL; else process.env.NEXT_PUBLIC_SUPABASE_URL = oldUrl;
     if (oldKey === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; else process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = oldKey;
   }
+});
+
+test('logo settings resolve retired built-ins to SVG and preserve uploaded logos', async () => {
+  const oldUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const oldKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.invalid';
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'fixture';
+  const uploaded = 'https://example.invalid/storage/v1/object/public/product-images/branding/custom.png';
+  try {
+    for (const [horizontal, stacked, expectedHorizontal, expectedStacked] of [
+      [null, '', '/images/branding/logo-horizontal.svg', '/images/branding/logo-stacked.svg'],
+      ['/images/branding/logo-horizontal.jpeg', '/images/branding/logo-stacked.jpeg', '/images/branding/logo-horizontal.svg', '/images/branding/logo-stacked.svg'],
+      [uploaded, uploaded, uploaded, uploaded],
+    ]) {
+      const row = { free_delivery_enabled: true, free_delivery_threshold: 30000, default_delivery_fee: 600,
+        logo_horizontal_url: horizontal, logo_stacked_url: stacked };
+      const chain = { select() { return this; }, eq() { return this; }, maybeSingle: async () => ({ data: row }) };
+      const { getStoreSettings } = loadTs('src/lib/settings.ts', { react: { cache: fn => fn }, '@supabase/supabase-js': { createClient: () => ({ from: () => chain }) } });
+      const settings = await getStoreSettings();
+      assert.equal(settings.logoHorizontalUrl, expectedHorizontal);
+      assert.equal(settings.logoStackedUrl, expectedStacked);
+    }
+  } finally {
+    if (oldUrl === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL; else process.env.NEXT_PUBLIC_SUPABASE_URL = oldUrl;
+    if (oldKey === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; else process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = oldKey;
+  }
+});
+
+test('settings accept bundled SVG logos without allowing arbitrary local assets', async () => {
+  const input = { expected_updated_at: revision, free_delivery_enabled: true, free_delivery_threshold: 30000, default_delivery_fee: 600,
+    logo_horizontal_url: '/images/branding/logo-horizontal.svg', logo_stacked_url: '/images/branding/logo-stacked.svg' };
+  const action = setup([ok({ updated_at: revision })]);
+  assert.deepEqual(await action.updateStoreSettings(input), { success: true, updatedAt: revision });
+  const payload = action.calls.find(c => c[0] === 'update')[1];
+  assert.equal(payload.logo_horizontal_url, input.logo_horizontal_url);
+  assert.equal(payload.logo_stacked_url, input.logo_stacked_url);
+  assert.match((await setup().updateStoreSettings({ ...input, logo_horizontal_url: '/unapproved.svg' })).error, /Invalid logo URL/);
 });

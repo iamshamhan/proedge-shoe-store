@@ -19,9 +19,8 @@ import {
 import { getAuthUser } from '@/lib/auth/admin';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { signOut } from './actions';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import { OrderStatusBadge } from '@/components/admin/order-status-badge';
-import { readAllRows } from '@/lib/supabase/read-all';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,6 +61,24 @@ export default async function AdminPage() {
   }
 
   const supabase = await getSupabaseServer();
+  const results = await Promise.all([
+    supabase.from('products').select('id', { count: 'exact', head: true }),
+    supabase.from('products').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    supabase.from('products').select('id, name, slug, price, is_active, categories(name)')
+      .order('created_at', { ascending: false }).limit(5),
+    supabase.from('orders').select('id', { count: 'exact', head: true }),
+    supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('orders').select('id, order_number, customer_name, phone, city, total, status, created_at')
+      .order('created_at', { ascending: false }).limit(5),
+    supabase.rpc('admin_get_revenue_summary'),
+    supabase.from('product_variants')
+      .select('id, product_id, colour, size, size_system, size_value, stock, products!inner(id, name, slug, is_active)', { count: 'exact' })
+      .eq('products.is_active', true).lte('stock', 3)
+      .order('stock', { ascending: true }).limit(8),
+  ]);
+  if (results.some(result => result.error)) {
+    throw new Error('Unable to load dashboard data. Please try again.');
+  }
   const [
     { count: productCount },
     { count: activeCount },
@@ -69,47 +86,18 @@ export default async function AdminPage() {
     { count: orderCount },
     { count: pendingOrderCount },
     { data: recentOrders },
-    confirmedOrders,
-    { data: lowStockVariants },
-  ] = await Promise.all([
-    supabase.from('products').select('id', { count: 'exact', head: true }),
-    supabase.from('products').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase
-      .from('products')
-      .select('id, name, slug, price, is_active, categories(name)')
-      .order('created_at', { ascending: false })
-      .limit(5),
-    supabase.from('orders').select('id', { count: 'exact', head: true }),
-    supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase
-      .from('orders')
-      .select('id, order_number, customer_name, phone, city, total, status, created_at')
-      .order('created_at', { ascending: false })
-      .limit(5),
-    readAllRows((from, to) => supabase
-      .from('orders')
-      .select('total')
-      .in('status', ['confirmed', 'processing', 'ready_to_ship', 'shipped', 'delivered'])
-      .order('id').range(from, to)),
-    supabase
-      .from('product_variants')
-      .select('id, product_id, colour, size, size_system, size_value, stock, products!inner(id, name, slug, is_active)')
-      .eq('products.is_active', true)
-      .lte('stock', 3)
-      .order('stock', { ascending: true })
-      .limit(8),
-  ]);
-
-  const confirmedRevenue = (confirmedOrders ?? []).reduce(
-    (sum, o) => sum + (Number(o.total) || 0),
-    0,
-  );
+    { data: revenue },
+    { data: lowStockVariants, count: lowStockCount },
+  ] = results;
+  if (!revenue || !Number.isFinite(revenue.total) || !Number.isSafeInteger(revenue.count)) {
+    throw new Error('Unable to load sales totals. Please try again.');
+  }
 
   const stats = [
     {
       label: 'Confirmed Sales',
-      value: formatLKR(confirmedRevenue),
-      sub: `${confirmedOrders.length} confirmed orders`,
+      value: formatLKR(revenue.total),
+      sub: `${revenue.count} confirmed orders`,
       icon: Banknote,
       highlight: false,
     },
@@ -129,7 +117,7 @@ export default async function AdminPage() {
     },
     {
       label: 'Low / Out of Stock',
-      value: String((lowStockVariants ?? []).length),
+      value: String(lowStockCount ?? 0),
       sub: 'Variants with ≤ 3 units',
       icon: AlertTriangle,
       highlight: (lowStockVariants ?? []).length > 0,

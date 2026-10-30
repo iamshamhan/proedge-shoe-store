@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ProductGrid } from '@/components/ui/product-grid';
-import { filterProductList } from '@/data/products';
+import { filterProductList } from '@/lib/product-filters';
 import { Product, ProductCategory, SortOption, CategoryItem } from '@/types/product';
 import { PARENT_SPORTS, NavCategory, ALL_CANONICAL_CATEGORIES } from '@/data/categories';
 import {

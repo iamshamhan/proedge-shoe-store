@@ -20,35 +20,15 @@ export default async function EditProductPage({
   const { id } = await params;
 
   const supabase = await getSupabaseServer();
-  const fullRes = await supabase
+  const { data: product, error } = await supabase
     .from('products')
     .select(
-      'id, name, slug, description, category_id, price, compare_at_price, featured, is_new_arrival, is_on_sale, is_active, product_images(id, url, alt_text, sort_order), product_variants(id, colour, size, stock, size_system, size_value)',
+      'id, updated_at, name, slug, description, category_id, price, compare_at_price, featured, is_new_arrival, is_on_sale, is_active, product_images(id, url, alt_text, sort_order), product_variants(id, colour, size, stock, size_system, size_value)',
     )
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
-  let product = fullRes.data;
-
-  if (fullRes.error && fullRes.error.message?.includes('size_system')) {
-    const fallbackRes = await supabase
-      .from('products')
-      .select(
-        'id, name, slug, description, category_id, price, compare_at_price, featured, is_new_arrival, is_on_sale, is_active, product_images(id, url, alt_text, sort_order), product_variants(id, colour, size, stock)',
-      )
-      .eq('id', id)
-      .single();
-    if (fallbackRes.data) {
-      product = {
-        ...fallbackRes.data,
-        product_variants: fallbackRes.data.product_variants.map((v) => ({
-          ...v,
-          size_system: 'EU',
-          size_value: String(v.size),
-        })),
-      };
-    }
-  }
+  if (error) throw new Error('Unable to load this product. Please try again.');
 
   if (!product) notFound();
 

@@ -25,7 +25,7 @@ import {
   duplicateProduct,
 } from '@/app/admin/actions';
 import { ConfirmDialog } from './confirm-dialog';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 
 export type Category = {
   id: string;

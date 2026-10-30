@@ -16,7 +16,7 @@ import {
   Download,
   Plus,
 } from 'lucide-react';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import { OrderStatusSelect } from './order-status-select';
 import { OrderDeleteButton } from './order-delete-button';
 import { OrderCancelButton } from './order-cancel-button';

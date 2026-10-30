@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Trash2, Minus, Plus } from 'lucide-react';
 import { CartItem, useCart } from '@/context/cart-context';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 
 interface CartItemRowProps {
   item: CartItem;

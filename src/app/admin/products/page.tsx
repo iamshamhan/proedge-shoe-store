@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { Plus, Package } from 'lucide-react';
 import { getAuthUser } from '@/lib/auth/admin';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { ProductTable } from '@/components/admin/product-table';
+import { ProductTable, type Product } from '@/components/admin/product-table';
 import { readAllRows } from '@/lib/supabase/read-all';
 
 export const metadata: Metadata = {
@@ -22,38 +22,21 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
   const page = adminPage(params.page);
   const categories = await readAllRows((from, to) => supabase.from('categories')
     .select('id, slug, name, parent_id, sort_order').order('sort_order').order('id').range(from, to));
-  let query = supabase.from('products').select(
-    'id, name, slug, price, is_active, featured, is_new_arrival, is_on_sale, category_id, categories(id, slug, name, parent_id), product_images(url, sort_order), product_variants(id, stock)',
-    { count: 'exact' });
-  const term = searchTerm(params.q);
-  if (term) query = query.or(`name.ilike.%${term}%,slug.ilike.%${term}%`);
+  let categoryIds: string[] | null = null;
   if (params.category && params.category !== 'all') {
     const parent = categories.find(c => c.slug === params.category);
-    const ids = categories.filter(c => c.id === parent?.id || c.parent_id === parent?.id).map(c => c.id);
-    query = query.in('category_id', ids);
+    categoryIds = parent ? categories.filter(c => c.id === parent.id || c.parent_id === parent.id).map(c => c.id) : [];
   }
-  if (params.filter === 'featured') query = query.eq('featured', true);
-  if (params.filter === 'on-sale') query = query.eq('is_on_sale', true);
-  if (params.filter === 'inactive') query = query.eq('is_active', false);
-  let inventoryCount: number | null = null;
-  if (params.filter === 'low-stock' || params.filter === 'out-of-stock') {
-    const inventory = await readAllRows((from, to) => supabase.from('products')
-      .select('id, name, slug, category_id, product_variants(stock)').order('created_at', { ascending: false }).order('id').range(from, to));
-    const parent = categories.find(c => c.slug === params.category);
-    const categoryIds = new Set(categories.filter(c => c.id === parent?.id || c.parent_id === parent?.id).map(c => c.id));
-    const ids = inventory.filter(p => {
-      if (term && !p.name.toLowerCase().includes(term.toLowerCase()) && !p.slug.toLowerCase().includes(term.toLowerCase())) return false;
-      if (params.category && params.category !== 'all' && !categoryIds.has(p.category_id)) return false;
-      const stock = p.product_variants.reduce((total, v) => total + v.stock, 0);
-      return params.filter === 'low-stock' ? stock > 0 && stock <= 5 : stock === 0;
-    }).map(p => p.id);
-    inventoryCount = ids.length;
-    query = query.in('id', ids.slice((page - 1) * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE));
+  const filters = ['all', 'featured', 'on-sale', 'inactive', 'low-stock', 'out-of-stock'];
+  const { data, error } = await supabase.rpc('admin_get_product_page', {
+    p_page: page, p_page_size: ADMIN_PAGE_SIZE, p_query: searchTerm(params.q),
+    p_category_ids: categoryIds, p_filter: filters.includes(params.filter ?? '') ? params.filter : 'all',
+  });
+  if (error || !data || !Array.isArray(data.products) || !Number.isSafeInteger(data.count) || data.count < 0) {
+    throw new Error('Unable to load products. Please try again.');
   }
-  const { data: products, count: queryCount, error } = await query.order('created_at', { ascending: false })
-    .order('id').range(inventoryCount === null ? (page - 1) * ADMIN_PAGE_SIZE : 0, inventoryCount === null ? page * ADMIN_PAGE_SIZE - 1 : ADMIN_PAGE_SIZE - 1);
-  if (error) throw new Error(error.message);
-  const count = inventoryCount ?? queryCount;
+  const products = data.products as Product[];
+  const count = data.count as number;
 
   return (
     <div className="space-y-6">

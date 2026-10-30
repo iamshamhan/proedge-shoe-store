@@ -12,7 +12,7 @@ import {
   Loader2,
   Check,
 } from 'lucide-react';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import {
   confirmOrderSale,
   getOrderItemsWithStock,

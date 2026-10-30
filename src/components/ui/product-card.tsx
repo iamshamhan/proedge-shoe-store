@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Heart, ShoppingBag, Check, PackageX } from 'lucide-react';
 import { resolveProductVariant } from '@/lib/product-variants';
 import { Product } from '@/types/product';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import { useCart } from '@/context/cart-context';
 import { useWishlist } from '@/context/wishlist-context';
 

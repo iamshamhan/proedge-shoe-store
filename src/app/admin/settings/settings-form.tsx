@@ -6,7 +6,7 @@ import React, { useState, useTransition } from 'react';
 import { Save } from 'lucide-react';
 import type { StoreSettings } from '@/lib/settings';
 import type { Product } from '@/types/product';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import { updateStoreSettings } from '../actions';
 import { updateAdminProfile } from '../actions';
 
@@ -16,12 +16,13 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ initialSettings, products = [] }: SettingsFormProps) {
+  const [settingsVersion, setSettingsVersion] = useState(initialSettings.updatedAt ?? '');
   const [activeTab, setActiveTab] = useState<'store' | 'homepage' | 'profile'>('store');
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const [logoHorizontalUrl, setLogoHorizontalUrl] = useState(initialSettings.logoHorizontalUrl || '/images/branding/logo-horizontal.jpeg');
-  const [logoStackedUrl, setLogoStackedUrl] = useState(initialSettings.logoStackedUrl || '/images/branding/logo-stacked.jpeg');
+  const [logoHorizontalUrl, setLogoHorizontalUrl] = useState(initialSettings.logoHorizontalUrl || '/images/branding/logo-horizontal.svg');
+  const [logoStackedUrl, setLogoStackedUrl] = useState(initialSettings.logoStackedUrl || '/images/branding/logo-stacked.svg');
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Store Settings
@@ -61,6 +62,7 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       try {
       // 1. Save general settings
       const res = await updateStoreSettings({
+        expected_updated_at: settingsVersion,
         brand_name: brandName.trim(),
         logo_horizontal_url: logoHorizontalUrl,
         logo_stacked_url: logoStackedUrl,
@@ -87,6 +89,7 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
       }
 
       // 2. Save Profile Settings if changed
+      setSettingsVersion(res.updatedAt);
       let profileRes: { success?: boolean; error?: string } = { success: true };
       if (adminEmail || adminPassword) {
          profileRes = await updateAdminProfile({ 
@@ -155,8 +158,8 @@ export function SettingsForm({ initialSettings, products = [] }: SettingsFormPro
           <div className="rounded-[24px] border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#1d1d1f] p-6 soft-shadow">
             <h2 className="text-sm font-semibold tracking-tight mb-4 border-b border-black/[0.06] dark:border-white/[0.08] pb-2.5">Branding &amp; Contact</h2>
             <div className="mb-6 grid gap-4 sm:grid-cols-2">
-              <LogoPicker label="Horizontal logo — header and navigation" value={logoHorizontalUrl} fallback="/images/branding/logo-horizontal.jpeg" disabled={isPending || uploadingLogo} onChange={setLogoHorizontalUrl} onUploading={setUploadingLogo} />
-              <LogoPicker label="Stacked logo — footer, sign-in and site icon" value={logoStackedUrl} fallback="/images/branding/logo-stacked.jpeg" disabled={isPending || uploadingLogo} onChange={setLogoStackedUrl} onUploading={setUploadingLogo} />
+              <LogoPicker label="Horizontal logo — header and navigation" value={logoHorizontalUrl} fallback="/images/branding/logo-horizontal.svg" disabled={isPending || uploadingLogo} onChange={setLogoHorizontalUrl} onUploading={setUploadingLogo} />
+              <LogoPicker label="Stacked logo — footer, sign-in and site icon" value={logoStackedUrl} fallback="/images/branding/logo-stacked.svg" disabled={isPending || uploadingLogo} onChange={setLogoStackedUrl} onUploading={setUploadingLogo} />
             </div>
             <p className="mb-5 text-xs text-zinc-500">Upload your logos, then select Save All Settings to publish them. The originals remain available using Use original logo.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

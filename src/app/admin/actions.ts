@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth/admin';
 import { readAllRows } from '@/lib/supabase/read-all';
@@ -30,6 +30,7 @@ export async function signOut() {
 
 async function revalidateProductPaths(slug?: string | null, productId?: string | null) {
   try {
+    updateTag('catalog');
     revalidatePath('/', 'page');
     revalidatePath('/shop', 'page');
     revalidatePath('/men', 'page');
@@ -67,16 +68,32 @@ type ProductInput = {
   is_active: boolean;
 };
 
+function validateProduct(data: ProductInput): string | null {
+  if (!data || typeof data.name !== 'string' || !data.name.trim()) return 'Name is required.';
+  if (typeof data.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(data.slug.trim())) return 'Slug must contain lowercase letters, numbers and hyphens.';
+  if (typeof data.category_id !== 'string' || !data.category_id) return 'Category is required.';
+  if (typeof data.description !== 'string') return 'Description must be text.';
+  if (!Number.isInteger(data.price) || data.price <= 0 || data.price > 2147483647) return 'Price must be a whole number greater than zero and no more than 2147483647.';
+  if (data.compare_at_price !== null && (!Number.isInteger(data.compare_at_price)
+    || data.compare_at_price <= data.price || data.compare_at_price > 2147483647)) {
+    return 'Compare-at price must be a whole number higher than the sale price and no more than 2147483647.';
+  }
+  if (['featured', 'is_new_arrival', 'is_on_sale', 'is_active'].some(key => typeof data[key as keyof ProductInput] !== 'boolean')) return 'Product flags must be true or false.';
+  return null;
+}
+
+function validRevision(value: string): boolean {
+  return typeof value === 'string' && value.length > 0 && Number.isFinite(Date.parse(value));
+}
+
 export async function createProduct(
   data: ProductInput,
 ): Promise<{ id: string } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: "Unauthorized." };
 
-  if (!data.name.trim()) return { error: 'Name is required.' };
-  if (!data.slug.trim()) return { error: 'Slug is required.' };
-  if (!data.category_id) return { error: 'Category is required.' };
-  if (!data.price || data.price <= 0) return { error: 'Price must be greater than zero.' };
+  const validationError = validateProduct(data);
+  if (validationError) return { error: validationError };
 
   const supabase = await getSupabaseServer();
   const { data: product, error } = await supabase
@@ -98,7 +115,8 @@ export async function createProduct(
 
   if (error) {
     if (error.code === '23505') return { error: 'A product with this slug already exists.' };
-    return { error: error.message };
+    console.error('Failed to create product:', error);
+    return { error: 'Unable to create this product. Check its category and try again.' };
   }
 
   await revalidateProductPaths(data.slug.trim(), product.id);
@@ -109,25 +127,30 @@ export async function createProduct(
 export async function updateProduct(
   id: string,
   data: ProductInput,
+  expectedUpdatedAt: string,
 ): Promise<{ success: true } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) return { error: "Unauthorized." };
 
-  if (!data.name.trim()) return { error: 'Name is required.' };
-  if (!data.slug.trim()) return { error: 'Slug is required.' };
-  if (!data.category_id) return { error: 'Category is required.' };
-  if (!data.price || data.price <= 0) return { error: 'Price must be greater than zero.' };
+  const validationError = validateProduct(data);
+  if (validationError) return { error: validationError };
+  if (!validRevision(expectedUpdatedAt)) return { error: 'Reload this product before saving.' };
 
   const supabase = await getSupabaseServer();
 
   // Get current slug to invalidate previous URL if slug changed
-  const { data: currentProduct } = await supabase
+  const { data: currentProduct, error: readError } = await supabase
     .from('products')
     .select('slug')
     .eq('id', id)
-    .single();
+    .maybeSingle();
+  if (readError) {
+    console.error('Failed to read product for update:', readError);
+    return { error: 'Unable to load this product. Please try again.' };
+  }
+  if (!currentProduct) return { error: 'This product no longer exists.' };
 
-  const { error } = await supabase
+  const { data: saved, error } = await supabase
     .from('products')
     .update({
       name: data.name.trim(),
@@ -141,13 +164,18 @@ export async function updateProduct(
       is_on_sale: data.is_on_sale,
       is_active: data.is_active,
     })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('updated_at', expectedUpdatedAt)
+    .select('id')
+    .maybeSingle();
 
   if (error) {
     if (error.code === '23505') return { error: 'A product with this slug already exists.' };
-    return { error: error.message };
+    console.error('Failed to update product:', error);
+    return { error: 'Unable to save this product. Check its category and try again.' };
   }
 
+  if (!saved) return { error: 'Product changed or was deleted. Reload before saving to avoid overwriting another edit.' };
   await revalidateProductPaths(data.slug.trim(), id);
   if (currentProduct?.slug && currentProduct.slug !== data.slug.trim()) {
     await revalidateProductPaths(currentProduct.slug, id);
@@ -541,6 +569,7 @@ export async function updateVariantStock(
 // ---------------------------------------------------------------------------
 
 export type UpdateSettingsInput = {
+  expected_updated_at: string;
   free_delivery_enabled: boolean;
   free_delivery_threshold: number;
   default_delivery_fee: number;
@@ -563,17 +592,27 @@ export type UpdateSettingsInput = {
 
 export async function updateStoreSettings(
   input: UpdateSettingsInput,
-): Promise<{ success: true } | { error: string }> {
+): Promise<{ success: true; updatedAt: string } | { error: string }> {
   const user = await getAuthUser();
   if (!user?.isAdmin) {
     return { error: 'Unauthorized: Admin privileges required.' };
   }
 
-  if (!Number.isFinite(input.free_delivery_threshold) || input.free_delivery_threshold < 0) {
+  if (!input || !validRevision(input.expected_updated_at)) return { error: 'Reload store settings before saving.' };
+  if (typeof input.free_delivery_enabled !== 'boolean'
+    || (input.sale_enabled !== undefined && typeof input.sale_enabled !== 'boolean')) {
+    return { error: 'Delivery and sale options must be true or false.' };
+  }
+  for (const key of ['banner_tagline', 'hero_product_slug', 'brand_name', 'contact_address', 'contact_phone',
+    'contact_email', 'whatsapp_number', 'sale_section_title', 'sale_section_subtitle', 'new_arrivals_title', 'new_arrivals_subtitle'] as const) {
+    if (input[key] !== undefined && typeof input[key] !== 'string') return { error: 'Settings text fields must contain text.' };
+  }
+
+  if (!Number.isFinite(input.free_delivery_threshold) || input.free_delivery_threshold < 0 || input.free_delivery_threshold > 2147483647) {
     return { error: 'Free delivery threshold must be a positive number.' };
   }
 
-  if (!Number.isFinite(input.default_delivery_fee) || input.default_delivery_fee < 0) {
+  if (!Number.isFinite(input.default_delivery_fee) || input.default_delivery_fee < 0 || input.default_delivery_fee > 2147483647) {
     return { error: 'Default delivery fee must be a positive number.' };
   }
 
@@ -587,25 +626,23 @@ export async function updateStoreSettings(
   }
 
   const supabase = await getSupabaseServer();
-  const upsertPayload: Record<string, unknown> = {
-    id: 'default',
+  const settingsPayload: Record<string, unknown> = {
     free_delivery_enabled: Boolean(input.free_delivery_enabled),
     free_delivery_threshold: Math.round(input.free_delivery_threshold),
     default_delivery_fee: Math.round(input.default_delivery_fee),
     banner_tagline: input.banner_tagline?.trim() || 'Built for Your Next Step',
-    updated_at: new Date().toISOString(),
   };
 
   if (input.hero_product_slug !== undefined) {
-    upsertPayload.hero_product_slug = input.hero_product_slug.trim();
+    settingsPayload.hero_product_slug = input.hero_product_slug.trim();
   }
 
   if (input.sale_enabled !== undefined) {
-    upsertPayload.sale_enabled = Boolean(input.sale_enabled);
+    settingsPayload.sale_enabled = Boolean(input.sale_enabled);
   }
 
   if (input.sale_discount_percent !== undefined) {
-    upsertPayload.sale_discount_percent = Math.round(input.sale_discount_percent);
+    settingsPayload.sale_discount_percent = Math.round(input.sale_discount_percent);
   }
 
   for (const field of ['logo_horizontal_url', 'logo_stacked_url'] as const) {
@@ -613,7 +650,7 @@ export async function updateStoreSettings(
     if (value === undefined) continue;
     if (typeof value !== 'string' || value.length > 2048) return { error: 'Invalid logo URL.' };
     const logo = value.trim();
-    const local = ['/images/branding/logo-horizontal.jpeg', '/images/branding/logo-stacked.jpeg'];
+    const local = ['/images/branding/logo-horizontal.svg', '/images/branding/logo-stacked.svg'];
     if (logo && !local.includes(logo)) {
       try {
         const parsed = new URL(logo);
@@ -623,42 +660,44 @@ export async function updateStoreSettings(
         }
       } catch { return { error: 'Invalid logo URL.' }; }
     }
-    upsertPayload[field] = logo || null;
+    settingsPayload[field] = logo || null;
   }
 
   if (input.brand_name !== undefined) {
-    upsertPayload.brand_name = input.brand_name.trim() || 'PROEDGE';
+    settingsPayload.brand_name = input.brand_name.trim() || 'PROEDGE';
   }
 
   if (input.contact_address !== undefined) {
-    upsertPayload.contact_address = input.contact_address.trim() || null;
+    settingsPayload.contact_address = input.contact_address.trim() || null;
   }
 
   if (input.contact_phone !== undefined) {
-    upsertPayload.contact_phone = input.contact_phone.trim();
+    settingsPayload.contact_phone = input.contact_phone.trim();
   }
 
-    if (input.contact_email !== undefined) {
-    upsertPayload.contact_email = input.contact_email.trim();
+  if (input.contact_email !== undefined) {
+    settingsPayload.contact_email = input.contact_email.trim();
   }
   if (input.whatsapp_number !== undefined) {
-    upsertPayload.whatsapp_number = input.whatsapp_number.trim();
+    settingsPayload.whatsapp_number = input.whatsapp_number.trim();
   }
   if (input.sale_section_title !== undefined) {
-    upsertPayload.sale_section_title = input.sale_section_title.trim() || null;
+    settingsPayload.sale_section_title = input.sale_section_title.trim() || null;
   }
   if (input.sale_section_subtitle !== undefined) {
-    upsertPayload.sale_section_subtitle = input.sale_section_subtitle.trim() || null;
+    settingsPayload.sale_section_subtitle = input.sale_section_subtitle.trim() || null;
   }
   if (input.new_arrivals_title !== undefined) {
-    upsertPayload.new_arrivals_title = input.new_arrivals_title.trim() || null;
+    settingsPayload.new_arrivals_title = input.new_arrivals_title.trim() || null;
   }
   if (input.new_arrivals_subtitle !== undefined) {
-    upsertPayload.new_arrivals_subtitle = input.new_arrivals_subtitle.trim() || null;
+    settingsPayload.new_arrivals_subtitle = input.new_arrivals_subtitle.trim() || null;
   }
 
 
-  const { error } = await supabase.from('store_settings').upsert(upsertPayload);
+  const { data: saved, error } = await supabase.from('store_settings').update(settingsPayload)
+    .eq('id', 'default').eq('updated_at', input.expected_updated_at)
+    .select('updated_at').maybeSingle();
 
   if (error) {
     if (['42P01', '42703', 'PGRST204'].includes(error.code)) {
@@ -667,9 +706,13 @@ export async function updateStoreSettings(
           'Store settings schema is out of date. Apply the outstanding database migrations before saving.',
       };
     }
-    return { error: error.message };
+    console.error('Failed to save store settings:', error);
+    return { error: 'Unable to save store settings. Please try again.' };
   }
 
+  if (!saved) return { error: 'Store settings changed. Reload before saving to avoid overwriting another edit.' };
+  updateTag('store-settings');
+  updateTag('catalog');
   revalidatePath('/', 'layout');
   revalidatePath('/sale');
   revalidatePath('/cart');
@@ -677,7 +720,7 @@ export async function updateStoreSettings(
   revalidatePath('/policies');
   revalidatePath('/privacy');
   revalidatePath('/admin/settings');
-  return { success: true };
+  return { success: true, updatedAt: saved.updated_at };
 }
 
 // ---------------------------------------------------------------------------
@@ -729,6 +772,7 @@ export async function createCategory(data: {
     return { error: error.message };
   }
 
+  updateTag('catalog');
   revalidatePath('/', 'layout');
   revalidatePath('/shop', 'page');
   revalidatePath('/admin/categories');
@@ -818,6 +862,7 @@ export async function updateCategory(
     return { error: error.message };
   }
 
+  updateTag('catalog');
   revalidatePath('/', 'layout');
   revalidatePath('/shop', 'page');
   revalidatePath('/admin/categories');
@@ -852,6 +897,7 @@ export async function deleteCategory(
   const { error } = await supabase.from('categories').delete().eq('id', id);
   if (error) return { error: error.message };
 
+  updateTag('catalog');
   revalidatePath('/', 'layout');
   revalidatePath('/shop', 'page');
   revalidatePath('/admin/categories');
@@ -902,6 +948,7 @@ export async function moveCategory(
     if (error) return { error: error.message };
   }
 
+  updateTag('catalog');
   revalidatePath('/', 'layout');
   revalidatePath('/shop', 'page');
   revalidatePath('/admin/categories');
@@ -924,6 +971,7 @@ function orderMutationError(message: string): string {
 }
 
 function revalidateOrderViews(orderId?: string) {
+  updateTag('catalog');
   revalidatePath('/', 'layout');
   if (orderId) revalidatePath(`/admin/orders/${orderId}`);
 }

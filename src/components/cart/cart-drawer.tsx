@@ -7,7 +7,7 @@ import { X, ShoppingBag, ArrowRight, Truck, CheckCircle2 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useStoreSettings } from '@/context/settings-context';
 import { CartItemRow } from '@/components/cart/cart-item-row';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 
 export function CartDrawer() {
   const pathname = usePathname();

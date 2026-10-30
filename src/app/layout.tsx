@@ -58,12 +58,13 @@ const baseMetadata: Metadata = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getStoreSettings();
-  const logo = settings.logoStackedUrl || '/images/branding/logo-stacked.jpeg';
+  const logo = settings.logoStackedUrl || '/images/branding/logo-stacked.svg';
+  const previewLogo = logo.endsWith('.svg') ? '/images/branding/Logo Original Stacked.jpeg' : logo;
   return {
     ...baseMetadata,
-    icons: { icon: logo, apple: logo },
-    openGraph: { ...baseMetadata.openGraph, images: [{ url: logo, alt: settings.brandName || SITE_NAME }] },
-    twitter: { ...baseMetadata.twitter, images: [logo] },
+    icons: { icon: logo, apple: previewLogo },
+    openGraph: { ...baseMetadata.openGraph, images: [{ url: previewLogo, alt: settings.brandName || SITE_NAME }] },
+    twitter: { ...baseMetadata.twitter, images: [previewLogo] },
   };
 }
 

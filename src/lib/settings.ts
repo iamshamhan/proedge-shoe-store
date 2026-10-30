@@ -2,6 +2,7 @@ import { cache } from "react";
 import { createClient } from '@supabase/supabase-js';
 
 export interface StoreSettings {
+  updatedAt?: string;
   freeDeliveryEnabled: boolean;
   freeDeliveryThreshold: number;
   defaultDeliveryFee: number;
@@ -31,8 +32,8 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   saleEnabled: true,
   saleDiscountPercent: 30,
   brandName: 'Pro Edge',
-  logoHorizontalUrl: '/images/branding/logo-horizontal.jpeg',
-  logoStackedUrl: '/images/branding/logo-stacked.jpeg',
+  logoHorizontalUrl: '/images/branding/logo-horizontal.svg',
+  logoStackedUrl: '/images/branding/logo-stacked.svg',
   contactAddress: '38 Attidiya Road Kawdana Dehiwala',
   contactPhone: '+94 76 387 1280',
   contactEmail: 'pro_edge@yahoo.com',
@@ -45,6 +46,7 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
 
 type DbSettingsRow = {
   id: string;
+  updated_at: string;
   free_delivery_enabled: boolean;
   free_delivery_threshold: number;
   default_delivery_fee: number;
@@ -64,6 +66,14 @@ type DbSettingsRow = {
   new_arrivals_title?: string | null;
   new_arrivals_subtitle?: string | null;
 };
+
+function resolveLogoUrl(value: string | null | undefined, fallback: string | undefined) {
+  const logo = value?.trim() || fallback;
+  // Existing settings may still point at the retired built-in JPEG filenames.
+  if (logo === '/images/branding/logo-horizontal.jpeg') return '/images/branding/logo-horizontal.svg';
+  if (logo === '/images/branding/logo-stacked.jpeg') return '/images/branding/logo-stacked.svg';
+  return logo;
+}
 
 /**
  * Server-only or static fetch of store settings.
@@ -105,6 +115,7 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
       throw new Error('Invalid delivery settings.');
     }
     return {
+      updatedAt: row.updated_at,
       freeDeliveryEnabled: row.free_delivery_enabled ?? DEFAULT_STORE_SETTINGS.freeDeliveryEnabled,
       freeDeliveryThreshold:
         typeof row.free_delivery_threshold === 'number'
@@ -122,8 +133,8 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
           ? row.sale_discount_percent
           : DEFAULT_STORE_SETTINGS.saleDiscountPercent,
       brandName: row.brand_name?.trim() || DEFAULT_STORE_SETTINGS.brandName,
-      logoHorizontalUrl: row.logo_horizontal_url?.trim() || DEFAULT_STORE_SETTINGS.logoHorizontalUrl,
-      logoStackedUrl: row.logo_stacked_url?.trim() || DEFAULT_STORE_SETTINGS.logoStackedUrl,
+      logoHorizontalUrl: resolveLogoUrl(row.logo_horizontal_url, DEFAULT_STORE_SETTINGS.logoHorizontalUrl),
+      logoStackedUrl: resolveLogoUrl(row.logo_stacked_url, DEFAULT_STORE_SETTINGS.logoStackedUrl),
       contactAddress: row.contact_address?.trim() || DEFAULT_STORE_SETTINGS.contactAddress,
       contactPhone: row.contact_phone?.trim() ?? '',
       contactEmail: row.contact_email?.trim() ?? '',

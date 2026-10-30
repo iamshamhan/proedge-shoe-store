@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useStoreSettings } from '@/context/settings-context';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import { getDeliveryFee } from '@/lib/config';
 import { generateWhatsAppOrderLink } from '@/lib/whatsapp';
 import { useCartAvailability } from '@/components/cart/use-cart-availability';

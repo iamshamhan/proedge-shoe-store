@@ -20,6 +20,7 @@ type ProductFormProps = {
   defaultCategoryId?: string;
   product?: {
     id: string;
+    updated_at: string;
     name: string;
     slug: string;
     description: string | null;
@@ -101,8 +102,8 @@ export function ProductForm({ categories, defaultCategoryId, product }: ProductF
       }
 
       const compareNum = compareAtPrice ? Number(compareAtPrice) : null;
-      if (compareNum !== null && compareNum <= priceNum) {
-        setError('Compare-at price must be higher than the sale price.');
+      if (compareNum !== null && (!Number.isInteger(compareNum) || compareNum <= priceNum)) {
+        setError('Compare-at price must be a whole number higher than the sale price.');
         return;
       }
 
@@ -121,7 +122,7 @@ export function ProductForm({ categories, defaultCategoryId, product }: ProductF
 
       setSaving(true);
       const result = isEdit
-        ? await updateProduct(product.id, data)
+        ? await updateProduct(product.id, data, product.updated_at)
         : await createProduct(data);
       setSaving(false);
 

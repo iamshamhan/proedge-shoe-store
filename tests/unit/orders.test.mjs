@@ -6,7 +6,7 @@ function setup(isAdmin = true, error = null) {
   const calls = [], invalidations = [];
   const actions = loadTs('src/app/admin/actions.ts', {
     'next/navigation': { redirect() { throw new Error('Unexpected redirect'); } },
-    'next/cache': { revalidatePath: (...args) => invalidations.push(args) },
+    'next/cache': { updateTag() {}, revalidatePath: (...args) => invalidations.push(args) },
     '@/lib/auth/admin': { getAuthUser: async () => ({ isAdmin }) },
     '@/lib/supabase/server': { getSupabaseServer: async () => ({
       rpc: async (name, args) => { calls.push({ name, args }); return {

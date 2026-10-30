@@ -12,7 +12,7 @@ import {
   AlertTriangle,
   ShoppingBag,
 } from 'lucide-react';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import {
   createManualOrder,
   getCatalogProductsWithVariants,

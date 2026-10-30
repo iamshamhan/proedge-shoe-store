@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { getAuthUser } from '@/lib/auth/admin';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import { OrderStatusBadge } from '@/components/admin/order-status-badge';
 import { OrderStatusSelect } from '@/components/admin/order-status-select';
 import { OrderDeleteButton } from '@/components/admin/order-delete-button';

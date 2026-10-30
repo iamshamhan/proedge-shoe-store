@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/types/product';
 import { resolveProductVariant } from '@/lib/product-variants';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import { SizeSelector } from '@/components/product/size-selector';
 import { ColorSelector } from '@/components/product/color-selector';
 import { QuantitySelector } from '@/components/product/quantity-selector';

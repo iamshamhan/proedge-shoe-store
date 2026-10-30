@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import type { Product } from '@/types/product';
-import { formatLKR } from '@/data/products';
+import { formatLKR } from '@/lib/currency';
 import { formatWhatsAppChatUrl } from '@/lib/whatsapp';
 
 interface HeroSectionProps {
