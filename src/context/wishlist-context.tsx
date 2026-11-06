@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 
 interface WishlistContextType {
   productIds: string[];
@@ -46,22 +46,33 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     }
   }, [productIds, isLoaded]);
 
-  const isWishlisted = (productId: string) => productIds.includes(productId);
+  const isWishlisted = useCallback(
+    (productId: string) => productIds.includes(productId),
+    [productIds]
+  );
 
-  const toggleWishlist = (productId: string) => {
+  const toggleWishlist = useCallback((productId: string) => {
     setProductIds((prev) =>
       prev.includes(productId)
         ? prev.filter((id) => id !== productId)
         : [...prev, productId],
     );
-  };
+  }, []);
 
-  const clearWishlist = () => setProductIds([]);
+  const clearWishlist = useCallback(() => setProductIds([]), []);
+
+  const contextValue = useMemo(
+    () => ({
+      productIds,
+      isWishlisted,
+      toggleWishlist,
+      clearWishlist,
+    }),
+    [productIds, isWishlisted, toggleWishlist, clearWishlist]
+  );
 
   return (
-    <WishlistContext.Provider
-      value={{ productIds, isWishlisted, toggleWishlist, clearWishlist }}
-    >
+    <WishlistContext.Provider value={contextValue}>
       {children}
     </WishlistContext.Provider>
   );

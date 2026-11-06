@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/types/product';
 import { resolveProductVariant } from '@/lib/product-variants';
@@ -48,8 +48,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
     return product.colors && product.colors.length > 0 ? product.colors : ['Standard'];
   }, [variants, product.colors]);
 
-  const availableSystems = [...new Set(variants.map(v => v.sizeSystem ?? product.sizeSystem ?? 'Custom'))];
-  const [selectedSystem, setSelectedSystem] = useState(product.sizeSystem ?? availableSystems[0] ?? 'Custom');
+  const availableSystems = useMemo(
+    () => [...new Set(variants.map(v => v.sizeSystem ?? product.sizeSystem ?? 'Custom'))],
+    [variants, product.sizeSystem]
+  );
+  const [selectedSystem, setSelectedSystem] = useState(
+    product.sizeSystem ?? availableSystems[0] ?? 'Custom'
+  );
 
   // Derive available sizes from variants list (or fallback to product.sizes)
   const availableSizes = useMemo(() => {
@@ -75,10 +80,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
   }, [variants, product.sizes, product.sizeSystem, selectedSystem]);
 
   // Initial state: Auto-select if there is exactly one size (e.g. "One Size" or "Size 5")
-  const autoSelectSize = availableSizes.length === 1 ? availableSizes[0] : null;
+  const autoSelectSize = useMemo(
+    () => (availableSizes.length === 1 ? availableSizes[0] : null),
+    [availableSizes]
+  );
 
   const [selectedColor, setSelectedColor] = useState<string>(
-    availableColors.length > 0 ? availableColors[0] : 'Standard',
+    availableColors.length > 0 ? availableColors[0] : 'Standard'
   );
   const [selectedSize, setSelectedSize] = useState<number | string | null>(autoSelectSize);
   const [quantity, setQuantity] = useState<number>(1);
@@ -107,24 +115,33 @@ export function ProductInfo({ product }: ProductInfoProps) {
   }, [resolvedVariant, selectedSize, variants.length, product.stock]);
 
   // Derive safe quantity constrained by variant stock
-  const effectiveQuantity = currentStock > 0 ? Math.min(quantity, currentStock) : 1;
+  const effectiveQuantity = useMemo(
+    () => (currentStock > 0 ? Math.min(quantity, currentStock) : 1),
+    [currentStock, quantity]
+  );
 
   // Helper to check if a specific size is out of stock for the currently selected color
-  const checkSizeOutOfStock = (sizeVal: number | string) => {
-    if (variants.length === 0) return false;
-    const sStr = String(sizeVal);
-    const v = resolveProductVariant(variants, selectedColor, selectedSystem, sStr, product.sizeSystem);
-    return !v || v.stock <= 0;
-  };
+  const checkSizeOutOfStock = useCallback(
+    (sizeVal: number | string) => {
+      if (variants.length === 0) return false;
+      const sStr = String(sizeVal);
+      const v = resolveProductVariant(variants, selectedColor, selectedSystem, sStr, product.sizeSystem);
+      return !v || v.stock <= 0;
+    },
+    [variants, selectedColor, selectedSystem, product.sizeSystem]
+  );
 
-  const discountPercent =
-    product.compareAtPrice && product.compareAtPrice > product.price
-      ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
-      : 0;
+  const discountPercent = useMemo(
+    () =>
+      product.compareAtPrice && product.compareAtPrice > product.price
+        ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+        : 0,
+    [product.compareAtPrice, product.price]
+  );
 
   const requiresSizeSelection = availableSizes.length > 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     if (requiresSizeSelection && !selectedSize) {
       setValidationError(true);
       const sizeEl = document.querySelector('[data-testid="size-selector"]');
@@ -155,9 +172,21 @@ export function ProductInfo({ product }: ProductInfoProps) {
     setIsAdded(true);
     setIsCartDrawerOpen(true);
     window.setTimeout(() => setIsAdded(false), 2000);
-  };
+  }, [
+    requiresSizeSelection,
+    selectedSize,
+    currentStock,
+    variants.length,
+    resolvedVariant,
+    availableSizes,
+    product,
+    selectedColor,
+    effectiveQuantity,
+    addItem,
+    setIsCartDrawerOpen,
+  ]);
 
-  const handleBuyNow = () => {
+  const handleBuyNow = useCallback(() => {
     if (requiresSizeSelection && !selectedSize) {
       setValidationError(true);
       const sizeEl = document.querySelector('[data-testid="size-selector"]');
@@ -186,9 +215,21 @@ export function ProductInfo({ product }: ProductInfoProps) {
     });
 
     router.push('/checkout');
-  };
+  }, [
+    requiresSizeSelection,
+    selectedSize,
+    currentStock,
+    variants.length,
+    resolvedVariant,
+    availableSizes,
+    product,
+    selectedColor,
+    effectiveQuantity,
+    addItem,
+    router,
+  ]);
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     if (typeof window === 'undefined') return;
     const shareUrl = window.location.href;
     if (navigator.share) {
@@ -206,7 +247,48 @@ export function ProductInfo({ product }: ProductInfoProps) {
     } catch {
       // Ignore clipboard failure
     }
-  };
+  }, [product.name]);
+
+  const handleColorChange = useCallback(
+    (newColor: string) => {
+      setSelectedColor(newColor);
+      setValidationError(false);
+      if (variants.length > 0 && selectedSize) {
+        const sStr = String(selectedSize);
+        const existsInNewColor = variants.some(
+          (v) =>
+            v.colour === newColor &&
+            (v.sizeValue === sStr || String(v.size) === sStr) &&
+            v.stock > 0
+        );
+        if (!existsInNewColor) {
+          const firstAvailable = variants.find((v) => v.colour === newColor && v.stock > 0);
+          if (firstAvailable) {
+            setSelectedSize(firstAvailable.sizeValue || firstAvailable.size);
+          }
+        }
+      }
+    },
+    [variants, selectedSize]
+  );
+
+  const handleSystemChange = useCallback(
+    (newSystem: string) => {
+      setSelectedSystem(newSystem as typeof selectedSystem);
+      setSelectedSize(null);
+      setValidationError(false);
+    },
+    []
+  );
+
+  const handleSizeChange = useCallback((s: number | string) => {
+    setSelectedSize(s);
+    setValidationError(false);
+  }, []);
+
+  const handleQuantityChange = useCallback((q: number) => {
+    setQuantity(Math.min(q, Math.max(1, currentStock)));
+  }, [currentStock]);
 
   return (
     <div className="space-y-6 lg:space-y-8 pb-20 lg:pb-0">
@@ -298,39 +380,24 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <ColorSelector
           colors={availableColors}
           selectedColor={selectedColor}
-          onSelectColor={(newColor) => {
-            setSelectedColor(newColor);
-            setValidationError(false);
-            if (variants.length > 0 && selectedSize) {
-              const sStr = String(selectedSize);
-              const existsInNewColor = variants.some(
-                (v) =>
-                  v.colour === newColor &&
-                  (v.sizeValue === sStr || String(v.size) === sStr) &&
-                  v.stock > 0,
-              );
-              if (!existsInNewColor) {
-                const firstAvailable = variants.find((v) => v.colour === newColor && v.stock > 0);
-                if (firstAvailable) {
-                  setSelectedSize(firstAvailable.sizeValue || firstAvailable.size);
-                }
-              }
-            }
-          }}
+          onSelectColor={handleColorChange}
         />
       )}
 
       {availableSystems.length > 1 && (
         <div className="space-y-2">
           <label htmlFor="size-system" className="text-sm font-semibold">Size system</label>
-          <select id="size-system" value={selectedSystem}
+          <select
+            id="size-system"
+            value={selectedSystem}
             className="w-full rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900 dark:bg-zinc-900 dark:text-white"
-            onChange={event => {
-              setSelectedSystem(event.target.value as typeof selectedSystem);
-              setSelectedSize(null);
-              setValidationError(false);
-            }}>
-            {availableSystems.map(system => <option key={system} value={system}>{system}</option>)}
+            onChange={(event) => handleSystemChange(event.target.value)}
+          >
+            {availableSystems.map((system) => (
+              <option key={system} value={system}>
+                {system}
+              </option>
+            ))}
           </select>
         </div>
       )}
@@ -340,10 +407,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           sizes={availableSizes}
           selectedSize={selectedSize}
           sizeSystem={selectedSystem}
-          onSelectSize={(s) => {
-            setSelectedSize(s);
-            setValidationError(false);
-          }}
+          onSelectSize={handleSizeChange}
           hasError={validationError}
           isOutOfStock={checkSizeOutOfStock}
         />
@@ -352,7 +416,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {/* Quantity Selector */}
       <QuantitySelector
         quantity={effectiveQuantity}
-        onQuantityChange={(q) => setQuantity(Math.min(q, Math.max(1, currentStock)))}
+        onQuantityChange={handleQuantityChange}
         maxStock={Math.max(1, currentStock)}
       />
 
@@ -402,22 +466,25 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </div>
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
-          <span>7-Day Returns (T&amp;C apply)</span>
+          <span>7-Day Returns (T&C apply)</span>
         </div>
-        {whatsappNumber && <a
-          href={formatWhatsAppChatUrl(
-            whatsappNumber,
-            `Hello PROEDGE team! I have a question about ${product.name} (Rs. ${product.price.toLocaleString()}). Could you assist me?`
-          )}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 col-span-2 pt-1 text-xs text-[#6e6e73] dark:text-[#86868b] hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group cursor-pointer"
-        >
-          <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 group-hover:scale-110 transition-transform" />
-          <span>
-            WhatsApp support: <span className="font-semibold underline decoration-emerald-500/40 group-hover:decoration-emerald-500">{whatsappNumber}</span>
-          </span>
-        </a>}
+        {whatsappNumber && (
+          <a
+            href={formatWhatsAppChatUrl(
+              whatsappNumber,
+              `Hello PROEDGE team! I have a question about ${product.name} (Rs. ${product.price.toLocaleString()}). Could you assist me?`
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 col-span-2 pt-1 text-xs text-[#6e6e73] dark:text-[#86868b] hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group cursor-pointer"
+          >
+            <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 group-hover:scale-110 transition-transform" />
+            <span>
+              WhatsApp support:{' '}
+              <span className="font-semibold underline decoration-emerald-500/40 group-hover:decoration-emerald-500">{whatsappNumber}</span>
+            </span>
+          </a>
+        )}
       </div>
 
       {/* Sticky Mobile Bottom Add-to-Bag Bar */}

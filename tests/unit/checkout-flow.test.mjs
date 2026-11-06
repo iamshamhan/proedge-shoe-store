@@ -14,6 +14,8 @@ function setup(save) {
     useState(initial){const i=cursor++; if(!(i in state))state[i]=initial;
       return [state[i],next=>{state[i]=typeof next==='function'?next(state[i]):next;}];},
     useRef(initial){const i=cursor++;if(!(i in state))state[i]={current:initial};return state[i];},
+    useMemo(fn){return fn();},
+    useCallback(fn){return fn;},
   };
   const item={id:'cart',productId:'product',variantId:'variant',name:'Client name',price:1000,quantity:1,size:'42',color:'Black'};
   const cart=loadTs('src/lib/cart.ts');

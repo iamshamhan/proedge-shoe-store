@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -71,18 +71,25 @@ export function CheckoutPage() {
   const submission = useRef<{ fingerprint: string; id: string } | null>(null);
   const submitting = useRef(false);
 
-  const deliveryFee = getDeliveryFee(subtotal, settings);
-  const total = subtotal + deliveryFee;
+  const deliveryFee = useMemo(
+    () => getDeliveryFee(subtotal, settings),
+    [subtotal, settings]
+  );
+  const total = useMemo(
+    () => subtotal + deliveryFee,
+    [subtotal, deliveryFee]
+  );
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setForm((prev) => ({ ...prev, [name]: value }));
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    },
+    []
+  );
 
-  const validate = (): FormErrors => {
+  const validate = useCallback((): FormErrors => {
     const nextErrors: FormErrors = {};
 
     if (!form.fullName.trim()) nextErrors.fullName = 'Full name is required.';
@@ -101,112 +108,138 @@ export function CheckoutPage() {
     if (!form.city.trim()) nextErrors.city = 'City is required.';
 
     return nextErrors;
-  };
+  }, [form]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!turnstileToken) { setSubmitError('Please complete the security check.'); return; }
-
-    // Prevent duplicate accidental submissions.
-    if (submitting.current || orderData || availability.checking || availability.error) return;
-
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    if (!settings.whatsappNumber?.trim()) { setSubmitError('WhatsApp checkout is currently unavailable. Please contact the store.'); return; }
-    submitting.current = true;
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    // The client sends only identifiers + quantities + delivery details.
-    // Prices, names, subtotals and totals are calculated by the server.
-    try {
-      const checked = await checkCart(items);
-      if (checked.error) { setSubmitError(checked.error); return; }
-      if (!checked.items) return;
-      if (checked.items.some((item, index) => item.price !== items[index].price)) {
-        replaceItems(checked.items);
-        setSubmitError('Prices have changed. Review the updated total, then submit again.');
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!turnstileToken) {
+        setSubmitError('Please complete the security check.');
         return;
       }
-      const fingerprint = cartFingerprint(items);
-      submission.current = checkoutRequest(sessionStorage, fingerprint);
-      const result = await placeOrder(
-        {
-          requestId: submission.current.id,
-          fullName: form.fullName.trim(),
-          phone: form.phone.trim(),
-          whatsapp: form.whatsapp.trim() || undefined,
-          email: form.email.trim() || undefined,
-          address: form.address.trim(),
-          city: form.city.trim(),
-          postalCode: form.postalCode.trim() || undefined,
-          notes: form.notes.trim() || undefined,
-        },
-        items.map((item) => ({
-          productId: item.productId,
-          variantId: item.variantId,
-          size: item.size,
-          sizeSystem: item.sizeSystem,
-          color: item.color,
-          quantity: item.quantity,
-        })),
-        turnstileToken,
-      );
 
-      if (!result.success) {
-        setSubmitError(result.error);
+      // Prevent duplicate accidental submissions.
+      if (submitting.current || orderData || availability.checking || availability.error) return;
+
+      const validationErrors = validate();
+      if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors);
+        return;
+      }
+
+      if (!settings.whatsappNumber?.trim()) {
+        setSubmitError('WhatsApp checkout is currently unavailable. Please contact the store.');
+        return;
+      }
+      submitting.current = true;
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      // The client sends only identifiers + quantities + delivery details.
+      // Prices, names, subtotals and totals are calculated by the server.
+      try {
+        const checked = await checkCart(items);
+        if (checked.error) {
+          setSubmitError(checked.error);
+          return;
+        }
+        if (!checked.items) return;
+        if (checked.items.some((item, index) => item.price !== items[index].price)) {
+          replaceItems(checked.items);
+          setSubmitError('Prices have changed. Review the updated total, then submit again.');
+          return;
+        }
+        const fingerprint = cartFingerprint(items);
+        submission.current = checkoutRequest(sessionStorage, fingerprint);
+        const result = await placeOrder(
+          {
+            requestId: submission.current.id,
+            fullName: form.fullName.trim(),
+            phone: form.phone.trim(),
+            whatsapp: form.whatsapp.trim() || undefined,
+            email: form.email.trim() || undefined,
+            address: form.address.trim(),
+            city: form.city.trim(),
+            postalCode: form.postalCode.trim() || undefined,
+            notes: form.notes.trim() || undefined,
+          },
+          items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId,
+            size: item.size,
+            sizeSystem: item.sizeSystem,
+            color: item.color,
+            quantity: item.quantity,
+          })),
+          turnstileToken,
+        );
+
+        if (!result.success) {
+          setSubmitError(result.error);
+          setIsSubmitting(false);
+          return;
+        }
+
+        const order = result.order;
+
+        // Build the WhatsApp message ONLY from server-validated order data.
+        const url = generateWhatsAppOrderLink({
+          orderNumber: order.order_number,
+          storePhone: settings.whatsappNumber,
+          customer: {
+            fullName: order.customer.fullName,
+            phone: order.customer.phone,
+            whatsapp: order.customer.whatsapp,
+            email: order.customer.email,
+            address: order.customer.address,
+            city: order.customer.city,
+            postalCode: order.customer.postalCode,
+            notes: order.customer.notes,
+          },
+          items: order.items.map((i) => ({
+            name: i.name,
+            size: i.size_value || i.size,
+            sizeSystem: i.size_system,
+            color: i.colour,
+            quantity: i.quantity,
+            price: i.unit_price,
+          })),
+          subtotal: order.subtotal,
+          deliveryFee: order.delivery_fee,
+          total: order.total,
+        });
+
+        window.open(url, '_blank', 'noopener,noreferrer');
+        setOrderUrl(url);
+        setOrderData(order);
+        try {
+          sessionStorage.removeItem(CHECKOUT_REQUEST_KEY);
+        } catch {
+          /* Receipt is already saved. */
+        }
+        submission.current = null;
+        clearCart();
+      } catch {
+        setSubmitError('The connection was interrupted. Try again; the same request will not create a duplicate order.');
+      } finally {
+        setTurnstileToken('');
+        setChallengeVersion((version) => version + 1);
+        submitting.current = false;
         setIsSubmitting(false);
-        return;
       }
-
-      const order = result.order;
-
-      // Build the WhatsApp message ONLY from server-validated order data.
-      const url = generateWhatsAppOrderLink({
-        orderNumber: order.order_number,
-        storePhone: settings.whatsappNumber,
-        customer: {
-          fullName: order.customer.fullName,
-          phone: order.customer.phone,
-          whatsapp: order.customer.whatsapp,
-          email: order.customer.email,
-          address: order.customer.address,
-          city: order.customer.city,
-          postalCode: order.customer.postalCode,
-          notes: order.customer.notes,
-        },
-        items: order.items.map((i) => ({
-          name: i.name,
-          size: i.size_value || i.size,
-          sizeSystem: i.size_system,
-          color: i.colour,
-          quantity: i.quantity,
-          price: i.unit_price,
-        })),
-        subtotal: order.subtotal,
-        deliveryFee: order.delivery_fee,
-        total: order.total,
-      });
-
-      window.open(url, '_blank', 'noopener,noreferrer');
-      setOrderUrl(url);
-      setOrderData(order);
-      try { sessionStorage.removeItem(CHECKOUT_REQUEST_KEY); } catch { /* Receipt is already saved. */ }
-      submission.current = null;
-      clearCart();
-    } catch {
-      setSubmitError('The connection was interrupted. Try again; the same request will not create a duplicate order.');
-    } finally {
-      setTurnstileToken('');
-      setChallengeVersion(version => version + 1);
-      submitting.current = false;
-      setIsSubmitting(false);
-    }
-  };
+    },
+    [
+      turnstileToken,
+      orderData,
+      availability.checking,
+      availability.error,
+      settings.whatsappNumber,
+      validate,
+      items,
+      replaceItems,
+      clearCart,
+    ]
+  );
 
   if (items.length === 0 && !orderUrl) {
     return (
@@ -501,10 +534,12 @@ export function CheckoutPage() {
               </fieldset>
 
               {availability.checking && <p role="status">Checking current availability...</p>}
-              {availability.error && <div role="alert" className="text-sm text-rose-600">
-                {availability.error} <Link href="/cart" className="underline">Edit bag</Link>{' '}
-                <button type="button" onClick={availability.retry} className="underline">Check again</button>
-              </div>}
+              {availability.error && (
+                <div role="alert" className="text-sm text-rose-600">
+                  {availability.error} <Link href="/cart" className="underline">Edit bag</Link>{' '}
+                  <button type="button" onClick={availability.retry} className="underline">Check again</button>
+                </div>
+              )}
               {submitError && (
                 <div
                   role="alert"
@@ -610,5 +645,3 @@ export function CheckoutPage() {
     </div>
   );
 }
-
-

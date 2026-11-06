@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingBag, Check, PackageX } from 'lucide-react';
 import { resolveProductVariant } from '@/lib/product-variants';
-import { Product } from '@/types/product';
+import { Product, ProductVariant } from '@/types/product';
 import { formatLKR } from '@/lib/currency';
 import { useCart } from '@/context/cart-context';
 import { useWishlist } from '@/context/wishlist-context';
@@ -21,25 +21,44 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
 
   const isOutOfStock = product.stock <= 0;
-  const variants = product.variants ?? [];
-  const [selectedVariantId, setSelectedVariantId] = useState(variants.find(v => v.stock > 0)?.id ?? '');
-  const selected = variants.find(v => v.id === selectedVariantId);
-  const targetVariant = selected ? resolveProductVariant(variants, selected.colour,
-    selected.sizeSystem ?? product.sizeSystem ?? 'Custom', String(selected.sizeValue || selected.size), product.sizeSystem) : null;
+  const variants = useMemo(() => product.variants ?? [], [product.variants]);
+  const [selectedVariantId, setSelectedVariantId] = useState(
+    useMemo(() => variants.find(v => v.stock > 0)?.id ?? '', [variants])
+  );
+  const selected = useMemo(
+    () => variants.find(v => v.id === selectedVariantId),
+    [variants, selectedVariantId]
+  );
+  const targetVariant = useMemo(
+    () =>
+      selected
+        ? resolveProductVariant(
+            variants,
+            selected.colour,
+            selected.sizeSystem ?? product.sizeSystem ?? 'Custom',
+            String(selected.sizeValue || selected.size),
+            product.sizeSystem
+          )
+        : null,
+    [selected, variants, product.sizeSystem]
+  );
 
-  const discountPercent =
-    product.compareAtPrice && product.compareAtPrice > product.price
-      ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
-      : 0;
+  const discountPercent = useMemo(
+    () =>
+      product.compareAtPrice && product.compareAtPrice > product.price
+        ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+        : 0,
+    [product.compareAtPrice, product.price]
+  );
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isOutOfStock) return;
-
     if (!targetVariant || targetVariant.stock <= 0) return;
+
     addItem({
       productId: product.id,
-      variantId: targetVariant?.id,
+      variantId: targetVariant.id,
       name: product.name,
       slug: product.slug,
       image: product.images[0],
@@ -161,7 +180,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
               <span className="text-[10px] sm:text-[11px] text-[#6e6e73] dark:text-[#86868b] font-medium mr-0.5 shrink-0 hidden xs:inline-block">
                 Variant:
               </span>
-              {variants.map((variant) => {
+              {variants.map((variant: ProductVariant) => {
                 const size = [variant.sizeSystem ?? product.sizeSystem ?? 'Custom', variant.sizeValue || variant.size, variant.colour].join(' ');
                 const available = variant.stock > 0;
                 const isSelected = selectedVariantId === variant.id;

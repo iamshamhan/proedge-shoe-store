@@ -1,4 +1,4 @@
-# Repair status — 30 October 2026
+# Repair status — 5 November 2026
 
 The historical handover was removed after its source repairs were verified. This short file remains because release verification and configuration work below are still outstanding.
 
@@ -17,13 +17,13 @@ The historical handover was removed after its source repairs were verified. This
 - 63 unit tests pass, including stale saves, invalid input, repeated settings saves, reporting failures and stock-pagination parameters.
 - TypeScript, ESLint and the regular webpack production build pass; all 44 pages generate.
 - All seven [SQL regression scripts](../supabase/tests) pass against the connected database using rollback fixtures. Admin inventory/revision tests now set the authenticated database role, exposing the INSERT regression missed by earlier privileged tests. Guest/non-admin permission checks pass. Fixture catalog rows were confirmed absent afterward.
-- Browser verification will be recorded after the final suite run. Real production Turnstile interaction is separate from mocked checkout tests.
-- No commit, push or Vercel application deployment was performed. The connected production deployment inspected still references `dad39d67acb80cb4482978fe2da1c42fa5b15d1b`; local application repairs need release.
+- Browser suite completed on 5 November: 11 passed, 1 explicitly skipped. The skipped admin cache mutation test requires credentials and a dedicated product fixture. Checkout submissions/challenges are mocked and create no live orders.
+- The repairs were committed during the pause as `ee996f69350e4e223e9bae6d2f7b2ad2e4a79ccd`. Vercel reports that exact commit READY in production. On 5 November, authenticated deployment fetches of the homepage, shop, checkout and settings API returned HTTP 200. The homepage includes both SVG logos, and settings expose the editor revision. No error/fatal runtime-log groups were returned for the checked 30-minute window. This does not establish a real production checkout or authenticated admin browser flow.
 
 ## Remaining release and maintenance work
 
-1. **Release and live checkout:** deploy the reviewed application changes, then verify a genuine Turnstile challenge, inquiry receipt, retry identity and WhatsApp handoff. Production environment variable names are present; this does not validate their values or challenge hostname/action. Supabase and Turnstile variables currently target production only, so preview deployments need separate configuration.
-2. **Historical migration ledger:** the ledger still omits `20240101000012`, `20261026165353` and `20261028143000`, although inquiry behavior, checkout-limit protection and logo columns exist. Reconcile definitions/history before bulk migration push; do not replay old scripts blindly. Today's three repairs have matching local/remote versions. See [database workflow](database.md).
+1. **Live checkout:** verify a genuine Turnstile challenge, inquiry receipt, retry identity and WhatsApp handoff on the deployed repair commit. Production environment variable names are present; this does not validate their values or challenge hostname/action. Rechecked on 5 November: Supabase and Turnstile variables target production only, so preview deployments need separate configuration.
+2. **Historical migration ledger:** the ledger still omits `20240101000012`, `20261026165353` and `20261028143000`, although inquiry behavior, checkout-limit protection and logo columns exist. Reconcile definitions/history before bulk migration push; do not replay old scripts blindly. The three repairs applied on 30 October have matching local/remote versions. See [database workflow](database.md).
 3. **Leaked-password protection:** the live Auth advisor reports it disabled. This organization is on the Free plan; Supabase provides this control on [Pro and above](https://supabase.com/docs/guides/auth/password-security). No paid plan change was made.
 4. **Browser admin lifecycle/cache:** SQL tests cover database behavior. A complete authenticated browser run still needs a dedicated fixture and credentials; the cache mutation test stays opt-in.
 5. **Optional maintenance:** physical storage orphan cleanup needs a shared-reference/retention design. The remaining overlapping read-policy and unused-index advisories are not evidence of a broken workflow; do not delete policies/indexes just to silence them.
